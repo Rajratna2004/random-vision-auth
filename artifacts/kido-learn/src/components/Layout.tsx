@@ -22,10 +22,10 @@ export default function Layout({ children }: LayoutProps) {
   }
 
   const navItems = [
-    { path: "/",        label: "🏠", full: "Home" },
-    { path: "/courses", label: "📚", full: "Courses" },
-    { path: "/games",   label: "🎮", full: "Games" },
-    { path: "/profile", label: "👤", full: "Profile" },
+    { path: "/",        full: "Home" },
+    { path: "/courses", full: "Courses" },
+    { path: "/games",   full: "Games" },
+    { path: "/profile", full: "Profile" },
   ];
 
   return (
@@ -55,14 +55,13 @@ export default function Layout({ children }: LayoutProps) {
                 <button
                   key={item.path}
                   onClick={() => navigate(item.path)}
-                  className={`relative px-3 py-1.5 rounded-xl text-sm font-bold transition-all duration-150 flex items-center gap-1.5 ${
+                  className={`relative px-3.5 py-1.5 rounded-xl text-sm font-bold transition-all duration-150 ${
                     active
                       ? "bg-[#0DA2E7] text-white shadow-sm"
                       : "text-gray-500 hover:bg-[#0DA2E7]/10 hover:text-[#0DA2E7]"
                   }`}
                 >
-                  <span className="text-base leading-none">{item.label}</span>
-                  <span className="hidden sm:inline">{item.full}</span>
+                  {item.full}
                 </button>
               );
             })}

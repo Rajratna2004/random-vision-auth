@@ -155,32 +155,62 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen sky-hero flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Floating items behind card */}
-      <div className="absolute top-8 left-[5%] text-5xl float-item select-none pointer-events-none font-heading font-bold" style={{ color: "#FF6B6B", textShadow: "0 3px 0 rgba(0,0,0,0.15)", animationDelay: "0s" }}>A</div>
-      <div className="absolute top-12 right-[8%] text-4xl float-item select-none pointer-events-none font-heading font-bold" style={{ color: "#4CAF50", textShadow: "0 3px 0 rgba(0,0,0,0.15)", animationDelay: "0.7s" }}>B</div>
-      <div className="absolute bottom-16 left-[10%] text-4xl float-item select-none pointer-events-none font-heading font-bold" style={{ color: "#F7971E", textShadow: "0 3px 0 rgba(0,0,0,0.15)", animationDelay: "0.4s" }}>1</div>
-      <div className="absolute bottom-20 right-[6%] text-4xl float-item select-none pointer-events-none font-heading font-bold" style={{ color: "#9B59B6", textShadow: "0 3px 0 rgba(0,0,0,0.15)", animationDelay: "1s" }}>2</div>
-      <div className="absolute top-1/3 left-[3%] text-3xl float-item-slow select-none pointer-events-none" style={{ animationDelay: "0.3s" }}>⭐</div>
-      <div className="absolute top-1/4 right-[4%] text-3xl float-item-slow select-none pointer-events-none" style={{ animationDelay: "1.2s" }}>🌟</div>
+    <div className="min-h-screen flex" style={{ background: "linear-gradient(135deg, #0DA2E7 0%, #0ebaff 55%, #26d0ce 100%)" }}>
+      {/* Left panel — visible on desktop */}
+      <div className="hidden lg:flex flex-col justify-center px-16 w-[52%] relative overflow-hidden">
+        {/* Dot grid */}
+        <div className="absolute inset-0 pointer-events-none"
+             style={{ backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.13) 1.5px, transparent 1.5px)", backgroundSize: "28px 28px" }} />
+        <div className="absolute -top-24 -left-24 w-72 h-72 rounded-full bg-white/10 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-16 -right-16 w-56 h-56 rounded-full bg-white/10 blur-2xl pointer-events-none" />
 
-      <div className="w-full max-w-md relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-6"
-        >
-          <div className="w-20 h-20 rounded-3xl kid-gradient flex items-center justify-center text-4xl shadow-xl mx-auto mb-3">
-            🦁
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-10">
+            <div className="w-12 h-12 rounded-2xl bg-white/25 backdrop-blur-sm flex items-center justify-center text-2xl shadow-lg border border-white/30">
+              🦁
+            </div>
+            <span className="font-heading text-white text-3xl">KidoLearn</span>
           </div>
-          <h1 className="font-heading text-5xl text-white drop-shadow-lg" style={{ textShadow: "0 4px 12px rgba(0,0,0,0.2)" }}>
-            KidoLearn
-          </h1>
-          <p className="text-white/90 font-bold mt-1">✨ Learn, Play &amp; Grow! ✨</p>
-        </motion.div>
+          <h2 className="font-heading text-5xl text-white leading-tight mb-5"
+              style={{ textShadow: "0 2px 8px rgba(0,0,0,0.12)" }}>
+            Learn.<br />Play.<br />Grow.
+          </h2>
+          <p className="text-white/80 text-lg leading-relaxed max-w-xs">
+            An interactive learning platform with AI-powered quizzes, hand-tracking games, and structured courses for students.
+          </p>
+          <div className="mt-10 grid grid-cols-3 gap-4">
+            {[
+              { icon: "📚", label: "Structured Courses" },
+              { icon: "🤖", label: "AI Quizzes" },
+              { icon: "🎮", label: "Hand Tracking" },
+            ].map((f) => (
+              <div key={f.label} className="bg-white/15 backdrop-blur-sm rounded-2xl p-3 border border-white/20 text-center">
+                <div className="text-2xl mb-1">{f.icon}</div>
+                <div className="text-white/80 text-xs font-semibold leading-tight">{f.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Right panel — login card */}
+      <div className="flex-1 flex items-center justify-center p-6 lg:p-10 lg:bg-white/5 lg:backdrop-blur-sm">
+        <div className="w-full max-w-sm">
+          {/* Mobile logo */}
+          <motion.div
+            initial={{ opacity: 0, y: -16 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center mb-8 lg:hidden"
+          >
+            <div className="w-16 h-16 rounded-2xl kid-gradient flex items-center justify-center text-3xl shadow-xl mx-auto mb-3">
+              🦁
+            </div>
+            <h1 className="font-heading text-4xl text-white">KidoLearn</h1>
+            <p className="text-white/80 text-sm mt-1">Learn. Play. Grow.</p>
+          </motion.div>
 
         <Card className="shadow-2xl border-0 overflow-hidden rounded-3xl"
-              style={{ boxShadow: "0 24px 64px rgba(13,162,231,0.18), 0 8px 20px rgba(0,0,0,0.12)" }}>
+              style={{ boxShadow: "0 24px 64px rgba(0,0,0,0.18), 0 8px 24px rgba(0,0,0,0.10)" }}>
           <div className="kid-gradient px-5 pt-5 pb-4">
             <div className="flex gap-2 justify-center">
               {(["login", "register"] as Mode[]).map((m) => (
@@ -308,6 +338,7 @@ export default function AuthPage() {
             </AnimatePresence>
           </CardContent>
         </Card>
+        </div>
       </div>
     </div>
   );
