@@ -262,6 +262,10 @@
     radial-gradient(circle at 50% 80%, rgba(252, 211, 77, 0.08) 0%, transparent 50%);
 }
 
+.mirror {
+  transform: scaleX(-1);
+}
+
 .animate-float {
   animation: float 3s ease-in-out infinite;
 }
