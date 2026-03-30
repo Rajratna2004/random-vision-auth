@@ -207,16 +207,103 @@ function WordMatchExperiment({ onComplete }: { onComplete: () => void }) {
   );
 }
 
-/* ─────────────── PATTERN COMPLETE ─────────────── */
+/* ─────────────── NUMBER PATTERN (MATH-SPECIFIC) ─────────────── */
+function MathPatternExperiment({ onComplete }: { onComplete: () => void }) {
+  const sequences = [
+    { seq: [2, 4, 6, 8], next: 10, rule: "counting by 2s", distractors: [9, 11, 12] },
+    { seq: [5, 10, 15, 20], next: 25, rule: "counting by 5s", distractors: [22, 24, 30] },
+    { seq: [1, 3, 5, 7], next: 9, rule: "odd numbers", distractors: [8, 10, 11] },
+    { seq: [10, 20, 30, 40], next: 50, rule: "counting by 10s", distractors: [45, 55, 60] },
+    { seq: [3, 6, 9, 12], next: 15, rule: "multiples of 3", distractors: [13, 14, 16] },
+    { seq: [1, 4, 9, 16], next: 25, rule: "perfect squares", distractors: [20, 22, 30] },
+    { seq: [20, 18, 16, 14], next: 12, rule: "counting down by 2", distractors: [10, 11, 13] },
+    { seq: [100, 90, 80, 70], next: 60, rule: "counting down by 10", distractors: [55, 65, 75] },
+    { seq: [2, 4, 8, 16], next: 32, rule: "doubling", distractors: [20, 24, 30] },
+    { seq: [1, 2, 4, 7], next: 11, rule: "adding 1, 2, 3…", distractors: [9, 10, 12] },
+    { seq: [50, 45, 40, 35], next: 30, rule: "counting down by 5", distractors: [28, 32, 25] },
+    { seq: [4, 8, 12, 16], next: 20, rule: "multiples of 4", distractors: [18, 19, 22] },
+  ];
+
+  const [seq] = useState(() => sequences[Math.floor(Math.random() * sequences.length)]);
+  const [options] = useState(() =>
+    [seq.next, ...seq.distractors].sort(() => Math.random() - 0.5)
+  );
+  const [selected, setSelected] = useState<number | null>(null);
+  const [done, setDone] = useState(false);
+  const [wrongPick, setWrongPick] = useState<number | null>(null);
+
+  function handleSelect(opt: number) {
+    if (done) return;
+    setSelected(opt);
+    if (opt === seq.next) {
+      setDone(true);
+      fireConfetti();
+      setTimeout(onComplete, 1500);
+    } else {
+      setWrongPick(opt);
+      setTimeout(() => { setSelected(null); setWrongPick(null); }, 800);
+    }
+  }
+
+  return (
+    <div className="text-center space-y-6">
+      <div className="text-2xl font-bold">What number comes next?</div>
+      <div className="flex items-center justify-center gap-3 flex-wrap">
+        {seq.seq.map((num, i) => (
+          <motion.div
+            key={i}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: i * 0.15, type: "spring" }}
+            className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-cyan-500 text-white text-2xl font-extrabold flex items-center justify-center shadow-md"
+          >
+            {num}
+          </motion.div>
+        ))}
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: seq.seq.length * 0.15 }}
+          className="w-14 h-14 rounded-xl border-2 border-dashed border-primary text-primary text-2xl font-extrabold flex items-center justify-center"
+        >
+          ?
+        </motion.div>
+      </div>
+      <p className="text-sm text-muted-foreground">Hint: {seq.rule}</p>
+      <div className="flex gap-4 justify-center flex-wrap">
+        {options.map((opt) => (
+          <button
+            key={opt}
+            onClick={() => handleSelect(opt)}
+            disabled={done}
+            className={`w-16 h-16 text-2xl font-bold rounded-xl transition-all border-2 ${
+              done && opt === seq.next
+                ? "bg-green-100 ring-4 ring-green-400 scale-110 border-green-400 text-green-700"
+                : wrongPick === opt
+                ? "bg-red-100 scale-90 border-red-400 text-red-600"
+                : "border-border hover:bg-secondary hover:scale-105"
+            }`}
+          >
+            {opt}
+          </button>
+        ))}
+      </div>
+      {done && <div className="text-green-600 font-bold text-xl">🎉 Correct! Pattern complete!</div>}
+      {wrongPick && <div className="text-red-500 font-semibold text-sm">❌ Not quite — look at the rule: {seq.rule}! 🔍</div>}
+    </div>
+  );
+}
+
+/* ─────────────── PATTERN COMPLETE (Emoji — for non-math subjects) ─────────────── */
 function PatternCompleteExperiment({ onComplete }: { onComplete: () => void }) {
   const patterns = [
     { seq: ["🌟", "🌙", "🌟", "🌙"], next: "🌟", distractors: ["🌙", "⭐", "☀️"] },
     { seq: ["🍎", "🍊", "🍎", "🍊"], next: "🍎", distractors: ["🍊", "🍋", "🍇"] },
-    { seq: ["🔴", "🔵", "🔴", "🔵"], next: "🔴", distractors: ["🔵", "🟡", "🟢"] },
     { seq: ["🐱", "🐶", "🐱", "🐶"], next: "🐱", distractors: ["🐶", "🐭", "🐸"] },
-    { seq: ["⬜", "⬛", "⬜", "⬛"], next: "⬜", distractors: ["⬛", "🟥", "🟦"] },
     { seq: ["🌈", "⭐", "🌈", "⭐"], next: "🌈", distractors: ["⭐", "🌙", "🔥"] },
     { seq: ["🎵", "🎶", "🎵", "🎶"], next: "🎵", distractors: ["🎶", "🎸", "🎺"] },
+    { seq: ["🦋", "🌸", "🦋", "🌸"], next: "🦋", distractors: ["🌸", "🌺", "🌻"] },
+    { seq: ["🐠", "🐙", "🐠", "🐙"], next: "🐠", distractors: ["🐙", "🦈", "🐬"] },
   ];
   const [pattern] = useState(() => patterns[Math.floor(Math.random() * patterns.length)]);
   const [options] = useState(() => [pattern.next, ...pattern.distractors].sort(() => Math.random() - 0.5));
@@ -972,11 +1059,10 @@ function FingerCountingExperiment({ onComplete }: { onComplete: () => void }) {
 const EXPERIMENTS_BY_SUBJECT: Record<string, (() => Experiment)[]> = {
   math: [
     () => ({ id: "number-line", title: "Math Challenge", component: NumberLineExperiment }),
-    () => ({ id: "counting", title: "Counting Fun", component: CountingExperiment }),
-    () => ({ id: "pattern", title: "Number Patterns", component: PatternCompleteExperiment }),
-    () => ({ id: "memory", title: "Quick Memory", component: QuickMemoryExperiment }),
-    () => ({ id: "finger-count", title: "Finger Counting", component: FingerCountingExperiment }),
-    () => ({ id: "color", title: "Color Finder", component: WebcamColorExperiment }),
+    () => ({ id: "counting", title: "Counting Stars", component: CountingExperiment }),
+    () => ({ id: "math-pattern", title: "Number Patterns", component: MathPatternExperiment }),
+    () => ({ id: "memory", title: "Number Memory", component: QuickMemoryExperiment }),
+    () => ({ id: "number-line2", title: "Math Blaster", component: NumberLineExperiment }),
   ],
   science: [
     () => ({ id: "sorting", title: "Science Sorting", component: SortingExperiment }),
@@ -984,7 +1070,6 @@ const EXPERIMENTS_BY_SUBJECT: Record<string, (() => Experiment)[]> = {
     () => ({ id: "memory", title: "Science Memory", component: QuickMemoryExperiment }),
     () => ({ id: "counting", title: "Count the Elements", component: CountingExperiment }),
     () => ({ id: "color", title: "Color Finder", component: WebcamColorExperiment }),
-    () => ({ id: "finger-count", title: "Finger Counting", component: FingerCountingExperiment }),
   ],
   english: [
     () => ({ id: "anagram", title: "Word Scramble", component: AnagramExperiment }),

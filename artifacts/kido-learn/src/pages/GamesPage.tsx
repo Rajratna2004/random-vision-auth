@@ -664,13 +664,512 @@ function SpellItGame({ onBack }: { onBack: () => void }) {
   );
 }
 
+/* ─────────── CAMERA HELPER HOOK ─────────── */
+function useCamera() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const [ready, setReady] = useState(false);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 } })
+      .then(stream => {
+        streamRef.current = stream;
+        if (videoRef.current) videoRef.current.srcObject = stream;
+        setReady(true);
+      })
+      .catch(() => setError(true));
+    return () => streamRef.current?.getTracks().forEach(t => t.stop());
+  }, []);
+
+  return { videoRef, ready, error };
+}
+
+/* ─────────── FINGER COUNTING CAMERA GAME ─────────── */
+function FingerCountingCameraGame({ onBack }: { onBack: () => void }) {
+  const { videoRef, ready, error } = useCamera();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const handsRef = useRef<any>(null);
+  const [mpLoaded, setMpLoaded] = useState(false);
+  const [round, setRound] = useState(0);
+  const [score, setScore] = useState(0);
+  const [target, setTarget] = useState(() => 1 + Math.floor(Math.random() * 5));
+  const [detected, setDetected] = useState<number | null>(null);
+  const [scanning, setScanning] = useState(false);
+  const [feedback, setFeedback] = useState<"correct" | "wrong" | null>(null);
+  const [done, setDone] = useState(false);
+  const ROUNDS = 5;
+  const fingerEmojis = ["", "☝️", "✌️", "🤟", "🖖", "🖐️"];
+
+  useEffect(() => {
+    if ((window as any).Hands) { setMpLoaded(true); return; }
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.min.js";
+    s.crossOrigin = "anonymous";
+    s.onload = () => setMpLoaded(true);
+    document.head.appendChild(s);
+  }, []);
+
+  function countFingers(landmarks: any[]): number {
+    const fingers = [[8, 6], [12, 10], [16, 14], [20, 18]];
+    const thumbUp = landmarks[4].y < landmarks[3].y || Math.abs(landmarks[4].x - landmarks[3].x) > 0.04;
+    let count = thumbUp ? 1 : 0;
+    for (const [tip, pip] of fingers) if (landmarks[tip].y < landmarks[pip].y) count++;
+    return count;
+  }
+
+  async function scanFingers() {
+    if (!videoRef.current || scanning || done) return;
+    setScanning(true);
+    setFeedback(null);
+    setDetected(null);
+
+    if (mpLoaded && (window as any).Hands) {
+      try {
+        if (!handsRef.current) {
+          const Hands = (window as any).Hands;
+          handsRef.current = new Hands({ locateFile: (f: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/${f}` });
+          handsRef.current.setOptions({ maxNumHands: 1, modelComplexity: 0, minDetectionConfidence: 0.7 });
+          handsRef.current.onResults(() => {});
+        }
+        let resolved = false;
+        handsRef.current.onResults((results: any) => {
+          if (resolved) return;
+          resolved = true;
+          setScanning(false);
+          const count = results.multiHandLandmarks?.[0]
+            ? countFingers(results.multiHandLandmarks[0]) : -1;
+          setDetected(count);
+          const isCorrect = count === target;
+          setFeedback(isCorrect ? "correct" : "wrong");
+          if (isCorrect) {
+            setScore(s => s + 1);
+            setTimeout(nextRound, 1200);
+          }
+        });
+        await handsRef.current.send({ image: videoRef.current });
+        return;
+      } catch { /* fall through */ }
+    }
+    setTimeout(() => { setScanning(false); setDetected(-1); setFeedback("wrong"); }, 600);
+  }
+
+  function nextRound() {
+    const next = round + 1;
+    if (next >= ROUNDS) { setDone(true); if (score + 1 >= 4) fireConfetti(); return; }
+    setRound(next);
+    setTarget(1 + Math.floor(Math.random() * 5));
+    setDetected(null);
+    setFeedback(null);
+  }
+
+  if (error) return (
+    <div className="text-center space-y-4 py-6">
+      <div className="text-5xl">📷</div>
+      <p className="text-muted-foreground">Camera not available in this browser.</p>
+      <Button variant="outline" onClick={onBack}>← Back to Games</Button>
+    </div>
+  );
+
+  if (done) return (
+    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-8 space-y-4">
+      <div className="text-6xl">{score >= 4 ? "🏆" : score >= 2 ? "🌟" : "💪"}</div>
+      <h3 className="text-2xl font-bold">Game Over!</h3>
+      <p className="text-4xl font-extrabold text-primary">{score}/{ROUNDS}</p>
+      <p className="text-muted-foreground">{score >= 4 ? "Finger counting master!" : score >= 2 ? "Great effort!" : "Keep practicing!"}</p>
+      <div className="flex gap-3 justify-center">
+        <Button onClick={() => { setRound(0); setScore(0); setTarget(1 + Math.floor(Math.random() * 5)); setDone(false); setFeedback(null); setDetected(null); }} className="kid-gradient text-white font-bold">
+          Play Again!
+        </Button>
+        <Button variant="outline" onClick={onBack}>← Back</Button>
+      </div>
+    </motion.div>
+  );
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <Button variant="ghost" size="sm" onClick={onBack}>← Back</Button>
+        <h2 className="text-xl font-extrabold">✋ Finger Counting</h2>
+        <Badge className="bg-purple-100 text-purple-700">{score}/{ROUNDS}</Badge>
+      </div>
+
+      <div className="w-full bg-secondary rounded-full h-2">
+        <div className="kid-gradient h-2 rounded-full transition-all" style={{ width: `${(round / ROUNDS) * 100}%` }} />
+      </div>
+
+      <div className="text-center space-y-1">
+        <p className="text-muted-foreground text-sm">Round {round + 1} of {ROUNDS}</p>
+        <p className="text-xl font-bold">Hold up <span className="text-primary font-extrabold text-4xl">{target}</span> finger{target !== 1 ? "s" : ""}!</p>
+        <div className="text-5xl">{fingerEmojis[target]}</div>
+      </div>
+
+      <div className="relative rounded-xl overflow-hidden bg-black aspect-video max-w-xs mx-auto">
+        <video ref={videoRef} autoPlay muted playsInline className="w-full h-full object-cover mirror" />
+        <canvas ref={canvasRef} className="hidden" />
+        {scanning && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+            <p className="text-white font-bold animate-pulse">Counting fingers...</p>
+          </div>
+        )}
+        {!ready && <div className="absolute inset-0 flex items-center justify-center bg-black/60 text-white text-sm">Starting camera...</div>}
+      </div>
+
+      {feedback && (
+        <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className={`text-center font-bold text-lg ${feedback === "correct" ? "text-green-600" : "text-red-500"}`}>
+          {feedback === "correct"
+            ? `✅ ${detected} finger${detected !== 1 ? "s" : ""}! Correct! 🎉`
+            : detected === -1 ? "🤔 No hand seen — try again!" : `❌ I see ${detected} finger${detected !== 1 ? "s" : ""} — need ${target}!`}
+        </motion.div>
+      )}
+
+      <div className="flex gap-2 justify-center">
+        <Button onClick={scanFingers} disabled={!ready || scanning} className="kid-gradient text-white font-bold px-8">
+          {scanning ? "🔍 Counting..." : "✋ Scan My Hand!"}
+        </Button>
+        {feedback === "wrong" && (
+          <Button variant="outline" size="sm" onClick={nextRound}>Skip →</Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ─────────── COLOR HUNT CAMERA GAME ─────────── */
+function ColorHuntCameraGame({ onBack }: { onBack: () => void }) {
+  const { videoRef, ready, error } = useCamera();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  const colorTargets = [
+    { name: "Red", hex: "#ef4444", emoji: "🔴", hRange: [0, 20], hRange2: [340, 360], sMin: 70, vMin: 70 },
+    { name: "Blue", hex: "#3b82f6", emoji: "🔵", hRange: [200, 255], sMin: 55, vMin: 55 },
+    { name: "Green", hex: "#22c55e", emoji: "🟢", hRange: [85, 155], sMin: 55, vMin: 55 },
+    { name: "Yellow", hex: "#eab308", emoji: "🟡", hRange: [42, 72], sMin: 65, vMin: 75 },
+    { name: "Orange", hex: "#f97316", emoji: "🟠", hRange: [20, 42], sMin: 65, vMin: 75 },
+    { name: "Purple", hex: "#a855f7", emoji: "🟣", hRange: [255, 300], sMin: 40, vMin: 40 },
+  ];
+
+  const [round, setRound] = useState(0);
+  const [score, setScore] = useState(0);
+  const [order] = useState(() => [...colorTargets].sort(() => Math.random() - 0.5));
+  const [scanning, setScanning] = useState(false);
+  const [detected, setDetected] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<"correct" | "wrong" | null>(null);
+  const [done, setDone] = useState(false);
+  const ROUNDS = 5;
+  const target = order[round % order.length];
+
+  function rgbToHsv(r: number, g: number, b: number) {
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+    let h = 0, s = max === 0 ? 0 : (d / max) * 100, v = max * 100;
+    if (d !== 0) {
+      if (max === r) h = ((g - b) / d) % 6;
+      else if (max === g) h = (b - r) / d + 2;
+      else h = (r - g) / d + 4;
+      h = h * 60; if (h < 0) h += 360;
+    }
+    return { h, s, v };
+  }
+
+  function detectColor() {
+    if (!videoRef.current || !canvasRef.current) return null;
+    const ctx = canvasRef.current.getContext("2d")!;
+    ctx.drawImage(videoRef.current, 0, 0, 80, 60);
+    const data = ctx.getImageData(25, 15, 30, 30).data;
+    const counts: Record<string, number> = {};
+    for (let i = 0; i < data.length; i += 4) {
+      const { h, s, v } = rgbToHsv(data[i], data[i + 1], data[i + 2]);
+      for (const col of colorTargets) {
+        const inRange = (col.hRange2
+          ? (h >= col.hRange[0] && h <= col.hRange[1]) || (h >= col.hRange2[0] && h <= col.hRange2[1])
+          : h >= col.hRange[0] && h <= col.hRange[1]);
+        if (inRange && s >= col.sMin && v >= col.vMin) {
+          counts[col.name] = (counts[col.name] ?? 0) + 1;
+        }
+      }
+    }
+    const best = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+    return best && best[1] > 4 ? best[0] : null;
+  }
+
+  function scan() {
+    if (scanning || done) return;
+    setScanning(true);
+    setFeedback(null);
+    setTimeout(() => {
+      const result = detectColor();
+      setDetected(result);
+      setScanning(false);
+      const isCorrect = result === target.name;
+      setFeedback(isCorrect ? "correct" : "wrong");
+      if (isCorrect) {
+        setScore(s => s + 1);
+        setTimeout(() => {
+          if (round + 1 >= ROUNDS) { setDone(true); fireConfetti(); }
+          else { setRound(r => r + 1); setDetected(null); setFeedback(null); }
+        }, 1200);
+      }
+    }, 800);
+  }
+
+  if (error) return (
+    <div className="text-center space-y-4 py-6">
+      <div className="text-5xl">📷</div>
+      <p className="text-muted-foreground">Camera not available.</p>
+      <Button variant="outline" onClick={onBack}>← Back</Button>
+    </div>
+  );
+
+  if (done) return (
+    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-8 space-y-4">
+      <div className="text-6xl">{score >= 4 ? "🏆" : "🌟"}</div>
+      <h3 className="text-2xl font-bold">Color Hunt Complete!</h3>
+      <p className="text-4xl font-extrabold text-primary">{score}/{ROUNDS}</p>
+      <div className="flex gap-3 justify-center">
+        <Button onClick={() => { setRound(0); setScore(0); setDone(false); setFeedback(null); setDetected(null); }} className="kid-gradient text-white font-bold">Play Again!</Button>
+        <Button variant="outline" onClick={onBack}>← Back</Button>
+      </div>
+    </motion.div>
+  );
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <Button variant="ghost" size="sm" onClick={onBack}>← Back</Button>
+        <h2 className="text-xl font-extrabold">🎨 Color Hunt</h2>
+        <Badge className="bg-pink-100 text-pink-700">{score}/{ROUNDS}</Badge>
+      </div>
+
+      <div className="w-full bg-secondary rounded-full h-2">
+        <div className="kid-gradient h-2 rounded-full transition-all" style={{ width: `${(round / ROUNDS) * 100}%` }} />
+      </div>
+
+      <div className="text-center space-y-1">
+        <p className="text-sm text-muted-foreground">Round {round + 1} of {ROUNDS} — Find something this color:</p>
+        <div className="flex items-center justify-center gap-3 mt-2">
+          <div className="w-14 h-14 rounded-full shadow-lg border-4 border-white" style={{ background: target.hex }} />
+          <span className="text-3xl font-extrabold" style={{ color: target.hex }}>{target.name}</span>
+          <span className="text-4xl">{target.emoji}</span>
+        </div>
+        <p className="text-xs text-muted-foreground">Hold a {target.name.toLowerCase()} object inside the white box!</p>
+      </div>
+
+      <div className="relative rounded-xl overflow-hidden bg-black aspect-video max-w-xs mx-auto">
+        <video ref={videoRef} autoPlay muted playsInline className="w-full h-full object-cover" />
+        <canvas ref={canvasRef} width={80} height={60} className="hidden" />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className={`w-20 h-20 border-4 rounded-xl transition-all ${
+            scanning ? "border-yellow-400 animate-pulse"
+            : feedback === "correct" ? "border-green-400"
+            : feedback === "wrong" ? "border-red-400"
+            : "border-white/70"}`} />
+        </div>
+        {!ready && <div className="absolute inset-0 flex items-center justify-center bg-black/60 text-white text-sm">Starting camera...</div>}
+      </div>
+
+      {feedback && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={`text-center font-bold text-lg ${feedback === "correct" ? "text-green-600" : "text-red-500"}`}>
+          {feedback === "correct"
+            ? `✅ ${detected}! That's correct! 🎉`
+            : `❌ I see ${detected ?? "no color"} — show me ${target.name}!`}
+        </motion.div>
+      )}
+
+      <div className="flex gap-2 justify-center">
+        <Button onClick={scan} disabled={!ready || scanning} className="kid-gradient text-white font-bold px-8">
+          {scanning ? "🔍 Detecting..." : "📷 Scan Color!"}
+        </Button>
+        {feedback === "wrong" && (
+          <Button variant="outline" size="sm" onClick={() => { if (round + 1 >= ROUNDS) { setDone(true); } else { setRound(r => r + 1); setFeedback(null); setDetected(null); } }}>Skip →</Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ─────────── THUMBS QUIZ CAMERA GAME ─────────── */
+function ThumbsQuizGame({ onBack }: { onBack: () => void }) {
+  const { videoRef, ready, error } = useCamera();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const handsRef = useRef<any>(null);
+  const [mpLoaded, setMpLoaded] = useState(false);
+
+  const questions = [
+    { q: "The Sun is a star.", ans: true },
+    { q: "Fish can breathe on land.", ans: false },
+    { q: "2 + 2 = 4", ans: true },
+    { q: "The Moon is bigger than the Earth.", ans: false },
+    { q: "Dogs are mammals.", ans: true },
+    { q: "Penguins can fly.", ans: false },
+    { q: "Ice is frozen water.", ans: true },
+    { q: "Spiders have 6 legs.", ans: false },
+    { q: "Plants make food from sunlight.", ans: true },
+    { q: "Elephants are the smallest mammals.", ans: false },
+    { q: "The alphabet has 26 letters.", ans: true },
+    { q: "Sharks are a type of bird.", ans: false },
+  ];
+
+  const [round, setRound] = useState(0);
+  const [score, setScore] = useState(0);
+  const [order] = useState(() => [...questions].sort(() => Math.random() - 0.5).slice(0, 6));
+  const [scanning, setScanning] = useState(false);
+  const [feedback, setFeedback] = useState<{ gesture: string; correct: boolean } | null>(null);
+  const [done, setDone] = useState(false);
+  const q = order[round];
+
+  useEffect(() => {
+    if ((window as any).Hands) { setMpLoaded(true); return; }
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.min.js";
+    s.crossOrigin = "anonymous";
+    s.onload = () => setMpLoaded(true);
+    document.head.appendChild(s);
+  }, []);
+
+  function detectThumb(landmarks: any[]): "up" | "down" | "unknown" {
+    const thumbTip = landmarks[4];
+    const thumbBase = landmarks[2];
+    const wrist = landmarks[0];
+    const diff = thumbTip.y - thumbBase.y;
+    if (diff < -0.05) return "up";
+    if (diff > 0.05) return "down";
+    return "unknown";
+  }
+
+  async function scan() {
+    if (scanning || done) return;
+    setScanning(true);
+    setFeedback(null);
+
+    if (mpLoaded && (window as any).Hands) {
+      try {
+        if (!handsRef.current) {
+          const Hands = (window as any).Hands;
+          handsRef.current = new Hands({ locateFile: (f: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/${f}` });
+          handsRef.current.setOptions({ maxNumHands: 1, modelComplexity: 0, minDetectionConfidence: 0.6 });
+          handsRef.current.onResults(() => {});
+        }
+        let resolved = false;
+        handsRef.current.onResults((results: any) => {
+          if (resolved) return;
+          resolved = true;
+          setScanning(false);
+          const lm = results.multiHandLandmarks?.[0];
+          if (!lm) { setFeedback({ gesture: "no hand", correct: false }); return; }
+          const gesture = detectThumb(lm);
+          if (gesture === "unknown") { setFeedback({ gesture: "unclear", correct: false }); return; }
+          const answer = gesture === "up";
+          const correct = answer === q.ans;
+          setFeedback({ gesture: gesture === "up" ? "👍 Thumbs Up!" : "👎 Thumbs Down!", correct });
+          if (correct) setScore(s => s + 1);
+          setTimeout(() => {
+            if (round + 1 >= order.length) { setDone(true); if (score + (correct ? 1 : 0) >= 4) fireConfetti(); }
+            else { setRound(r => r + 1); setFeedback(null); }
+          }, 1200);
+        });
+        await handsRef.current.send({ image: videoRef.current });
+        return;
+      } catch { /* fall through */ }
+    }
+    setTimeout(() => { setScanning(false); setFeedback({ gesture: "no hand", correct: false }); }, 600);
+  }
+
+  if (error) return (
+    <div className="text-center space-y-4 py-6">
+      <div className="text-5xl">📷</div>
+      <p className="text-muted-foreground">Camera not available.</p>
+      <Button variant="outline" onClick={onBack}>← Back</Button>
+    </div>
+  );
+
+  if (done) return (
+    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-8 space-y-4">
+      <div className="text-6xl">{score >= 5 ? "🏆" : score >= 3 ? "🌟" : "💪"}</div>
+      <h3 className="text-2xl font-bold">Quiz Done!</h3>
+      <p className="text-4xl font-extrabold text-primary">{score}/{order.length}</p>
+      <p className="text-muted-foreground">{score >= 5 ? "Genius! Perfect score!" : score >= 3 ? "Well done!" : "Keep learning!"}</p>
+      <div className="flex gap-3 justify-center">
+        <Button onClick={() => { setRound(0); setScore(0); setDone(false); setFeedback(null); }} className="kid-gradient text-white font-bold">Play Again!</Button>
+        <Button variant="outline" onClick={onBack}>← Back</Button>
+      </div>
+    </motion.div>
+  );
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <Button variant="ghost" size="sm" onClick={onBack}>← Back</Button>
+        <h2 className="text-xl font-extrabold">👍 Thumbs Quiz</h2>
+        <Badge className="bg-green-100 text-green-700">{score}/{order.length}</Badge>
+      </div>
+
+      <div className="w-full bg-secondary rounded-full h-2">
+        <div className="kid-gradient h-2 rounded-full transition-all" style={{ width: `${(round / order.length) * 100}%` }} />
+      </div>
+
+      <motion.div
+        key={round}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="p-5 rounded-2xl border-2 border-border bg-card text-center"
+      >
+        <p className="text-sm text-muted-foreground mb-2">True or False?</p>
+        <p className="text-xl font-bold">{q.q}</p>
+        <div className="flex justify-center gap-8 mt-4">
+          <div className="text-center">
+            <div className="text-5xl">👍</div>
+            <p className="text-sm font-semibold text-green-600">Thumbs Up = TRUE</p>
+          </div>
+          <div className="text-center">
+            <div className="text-5xl">👎</div>
+            <p className="text-sm font-semibold text-red-500">Thumbs Down = FALSE</p>
+          </div>
+        </div>
+      </motion.div>
+
+      <div className="relative rounded-xl overflow-hidden bg-black aspect-video max-w-xs mx-auto">
+        <video ref={videoRef} autoPlay muted playsInline className="w-full h-full object-cover mirror" />
+        <canvas ref={canvasRef} className="hidden" />
+        {scanning && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+            <p className="text-white font-bold animate-pulse">Reading gesture...</p>
+          </div>
+        )}
+        {!ready && <div className="absolute inset-0 flex items-center justify-center bg-black/60 text-white text-sm">Starting camera...</div>}
+      </div>
+
+      {feedback && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={`text-center font-bold text-lg ${feedback.correct ? "text-green-600" : "text-red-500"}`}>
+          {feedback.gesture === "no hand" ? "🤔 No hand detected — try again!"
+           : feedback.gesture === "unclear" ? "🤚 Hold thumb clearly up or down!"
+           : feedback.correct ? `✅ ${feedback.gesture} — Correct! 🎉`
+           : `❌ ${feedback.gesture} — Wrong! Answer was ${q.ans ? "TRUE 👍" : "FALSE 👎"}`}
+        </motion.div>
+      )}
+
+      <div className="flex justify-center">
+        <Button onClick={scan} disabled={!ready || scanning} className="kid-gradient text-white font-bold px-8">
+          {scanning ? "🔍 Reading..." : "📷 Show My Answer!"}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 /* ─────────── GAMES HUB ─────────── */
-const GAMES = [
-  { id: "math-speed", title: "⚡ Math Speed Round", desc: "Answer math questions as fast as you can!", color: "from-blue-400 to-blue-600", badge: "Math" },
-  { id: "memory-match", title: "🃏 Memory Match", desc: "Flip cards and find matching pairs!", color: "from-purple-400 to-purple-600", badge: "Memory" },
-  { id: "quiz-race", title: "🏁 Quiz Race", desc: "Race against time on fun trivia questions!", color: "from-green-400 to-green-600", badge: "Trivia" },
-  { id: "word-builder", title: "📝 Word Builder", desc: "Rearrange letters to build real words!", color: "from-orange-400 to-orange-600", badge: "English" },
-  { id: "spell-it", title: "🔤 Spell It Right", desc: "Fill in the missing letters to spell words!", color: "from-pink-400 to-pink-600", badge: "Spelling" },
+const BRAIN_GAMES = [
+  { id: "math-speed",    title: "⚡ Math Speed Round",  desc: "Answer math questions as fast as you can!",   color: "from-blue-400 to-blue-600",   badge: "Math" },
+  { id: "memory-match",  title: "🃏 Memory Match",       desc: "Flip cards and find matching pairs!",          color: "from-purple-400 to-purple-600", badge: "Memory" },
+  { id: "quiz-race",     title: "🏁 Quiz Race",          desc: "Race against time on fun trivia questions!",   color: "from-green-400 to-green-600",  badge: "Trivia" },
+  { id: "word-builder",  title: "📝 Word Builder",       desc: "Rearrange letters to build real words!",       color: "from-orange-400 to-orange-600", badge: "English" },
+  { id: "spell-it",      title: "🔤 Spell It Right",     desc: "Fill in the missing letters to spell words!", color: "from-pink-400 to-pink-600",    badge: "Spelling" },
+];
+
+const CAMERA_GAMES = [
+  { id: "finger-counting-cam", title: "✋ Finger Counting",  desc: "Hold up the right number of fingers — camera checks!", color: "from-indigo-400 to-violet-600", badge: "📷 Camera" },
+  { id: "color-hunt-cam",      title: "🎨 Color Hunt",       desc: "Find objects matching the shown color in real life!",   color: "from-rose-400 to-orange-500",  badge: "📷 Camera" },
+  { id: "thumbs-quiz-cam",     title: "👍 Thumbs Quiz",      desc: "Answer true/false questions with thumbs up or down!",  color: "from-teal-400 to-cyan-500",    badge: "📷 Camera" },
 ];
 
 export default function GamesPage() {
@@ -682,38 +1181,58 @@ export default function GamesPage() {
     <Layout>
       <div className="max-w-3xl mx-auto">
         {!activeGame && (
-          <div className="space-y-6">
+          <div className="space-y-8">
             <div className="text-center">
               <h1 className="text-4xl font-extrabold mb-1">🎮 Learning Games</h1>
               <p className="text-muted-foreground">Play games and learn at the same time!</p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {GAMES.map((game, i) => (
-                <motion.div
-                  key={game.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.08 }}
-                >
-                  <Card
-                    className="cursor-pointer hover:shadow-xl transition-all hover:-translate-y-1 overflow-hidden"
-                    onClick={() => setActiveGame(game.id)}
-                  >
-                    <div className={`h-2 bg-gradient-to-r ${game.color}`} />
-                    <CardContent className="p-5">
-                      <div className="flex items-start justify-between mb-2">
-                        <h3 className="font-bold text-lg">{game.title}</h3>
-                        <Badge className="shrink-0 ml-2 bg-secondary text-secondary-foreground">{game.badge}</Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground">{game.desc}</p>
-                      <div className="mt-3">
-                        <span className="text-sm text-primary font-medium">Play now →</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
+            {/* Brain Games */}
+            <div className="space-y-3">
+              <h2 className="text-xl font-bold flex items-center gap-2">🧠 Brain Games</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {BRAIN_GAMES.map((game, i) => (
+                  <motion.div key={game.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}>
+                    <Card className="cursor-pointer hover:shadow-xl transition-all hover:-translate-y-1 overflow-hidden" onClick={() => setActiveGame(game.id)}>
+                      <div className={`h-2 bg-gradient-to-r ${game.color}`} />
+                      <CardContent className="p-5">
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="font-bold text-lg">{game.title}</h3>
+                          <Badge className="shrink-0 ml-2 bg-secondary text-secondary-foreground">{game.badge}</Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{game.desc}</p>
+                        <p className="text-sm text-primary font-medium mt-3">Play now →</p>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            {/* Camera Games */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-bold">📷 Camera Games</h2>
+                <Badge className="bg-violet-100 text-violet-700">Needs Camera</Badge>
+              </div>
+              <p className="text-sm text-muted-foreground">Use your camera to play! Allow camera access when asked.</p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {CAMERA_GAMES.map((game, i) => (
+                  <motion.div key={game.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 + i * 0.1 }}>
+                    <Card className="cursor-pointer hover:shadow-xl transition-all hover:-translate-y-1 overflow-hidden" onClick={() => setActiveGame(game.id)}>
+                      <div className={`h-2 bg-gradient-to-r ${game.color}`} />
+                      <CardContent className="p-5">
+                        <h3 className="font-bold text-base mb-1">{game.title}</h3>
+                        <p className="text-xs text-muted-foreground">{game.desc}</p>
+                        <div className="flex items-center justify-between mt-3">
+                          <span className="text-sm text-primary font-medium">Play now →</span>
+                          <span className="text-xs bg-violet-100 text-violet-600 px-1.5 py-0.5 rounded-full">{game.badge}</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
             </div>
           </div>
         )}
@@ -722,17 +1241,15 @@ export default function GamesPage() {
           <Card className="overflow-hidden">
             <CardContent className="p-5">
               <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeGame}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                >
-                  {activeGame === "math-speed" && <MathSpeedGame onBack={goBack} />}
-                  {activeGame === "memory-match" && <MemoryMatchGame onBack={goBack} />}
-                  {activeGame === "quiz-race" && <QuizRaceGame onBack={goBack} />}
-                  {activeGame === "word-builder" && <WordBuilderGame onBack={goBack} />}
-                  {activeGame === "spell-it" && <SpellItGame onBack={goBack} />}
+                <motion.div key={activeGame} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                  {activeGame === "math-speed"          && <MathSpeedGame onBack={goBack} />}
+                  {activeGame === "memory-match"        && <MemoryMatchGame onBack={goBack} />}
+                  {activeGame === "quiz-race"           && <QuizRaceGame onBack={goBack} />}
+                  {activeGame === "word-builder"        && <WordBuilderGame onBack={goBack} />}
+                  {activeGame === "spell-it"            && <SpellItGame onBack={goBack} />}
+                  {activeGame === "finger-counting-cam" && <FingerCountingCameraGame onBack={goBack} />}
+                  {activeGame === "color-hunt-cam"      && <ColorHuntCameraGame onBack={goBack} />}
+                  {activeGame === "thumbs-quiz-cam"     && <ThumbsQuizGame onBack={goBack} />}
                 </motion.div>
               </AnimatePresence>
             </CardContent>
