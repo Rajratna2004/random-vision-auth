@@ -685,12 +685,33 @@ function useCamera() {
   return { videoRef, ready, error };
 }
 
+async function detectHandViaFlask(video: HTMLVideoElement): Promise<{
+  gesture: string;
+  landmarks: Array<{ x: number; y: number; z: number }> | null;
+  handDetected: boolean;
+}> {
+  const cv = document.createElement("canvas");
+  cv.width = 320; cv.height = 240;
+  const ctx = cv.getContext("2d")!;
+  ctx.drawImage(video, 0, 0, 320, 240);
+  const frame = cv.toDataURL("image/jpeg", 0.7);
+  try {
+    const res = await fetch("/api/hands/detect", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ image: frame }),
+      signal: AbortSignal.timeout(4000),
+    });
+    return res.json();
+  } catch {
+    return { gesture: "idle", landmarks: null, handDetected: false };
+  }
+}
+
 /* ─────────── FINGER COUNTING CAMERA GAME ─────────── */
 function FingerCountingCameraGame({ onBack }: { onBack: () => void }) {
   const { videoRef, ready, error } = useCamera();
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const handsRef = useRef<any>(null);
-  const [mpLoaded, setMpLoaded] = useState(false);
   const [round, setRound] = useState(0);
   const [score, setScore] = useState(0);
   const [target, setTarget] = useState(() => 1 + Math.floor(Math.random() * 5));
@@ -701,16 +722,7 @@ function FingerCountingCameraGame({ onBack }: { onBack: () => void }) {
   const ROUNDS = 5;
   const fingerEmojis = ["", "☝️", "✌️", "🤟", "🖖", "🖐️"];
 
-  useEffect(() => {
-    if ((window as any).Hands) { setMpLoaded(true); return; }
-    const s = document.createElement("script");
-    s.src = "https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.min.js";
-    s.crossOrigin = "anonymous";
-    s.onload = () => setMpLoaded(true);
-    document.head.appendChild(s);
-  }, []);
-
-  function countFingers(landmarks: any[]): number {
+  function countFingers(landmarks: Array<{ x: number; y: number }>): number {
     const fingers = [[8, 6], [12, 10], [16, 14], [20, 18]];
     const thumbUp = landmarks[4].y < landmarks[3].y || Math.abs(landmarks[4].x - landmarks[3].x) > 0.04;
     let count = thumbUp ? 1 : 0;
@@ -724,34 +736,16 @@ function FingerCountingCameraGame({ onBack }: { onBack: () => void }) {
     setFeedback(null);
     setDetected(null);
 
-    if (mpLoaded && (window as any).Hands) {
-      try {
-        if (!handsRef.current) {
-          const Hands = (window as any).Hands;
-          handsRef.current = new Hands({ locateFile: (f: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/${f}` });
-          handsRef.current.setOptions({ maxNumHands: 1, modelComplexity: 0, minDetectionConfidence: 0.7 });
-          handsRef.current.onResults(() => {});
-        }
-        let resolved = false;
-        handsRef.current.onResults((results: any) => {
-          if (resolved) return;
-          resolved = true;
-          setScanning(false);
-          const count = results.multiHandLandmarks?.[0]
-            ? countFingers(results.multiHandLandmarks[0]) : -1;
-          setDetected(count);
-          const isCorrect = count === target;
-          setFeedback(isCorrect ? "correct" : "wrong");
-          if (isCorrect) {
-            setScore(s => s + 1);
-            setTimeout(nextRound, 1200);
-          }
-        });
-        await handsRef.current.send({ image: videoRef.current });
-        return;
-      } catch { /* fall through */ }
+    const result = await detectHandViaFlask(videoRef.current);
+    setScanning(false);
+    const count = result.landmarks ? countFingers(result.landmarks) : -1;
+    setDetected(count);
+    const isCorrect = count === target;
+    setFeedback(isCorrect ? "correct" : "wrong");
+    if (isCorrect) {
+      setScore(s => s + 1);
+      setTimeout(nextRound, 1200);
     }
-    setTimeout(() => { setScanning(false); setDetected(-1); setFeedback("wrong"); }, 600);
   }
 
   function nextRound() {
@@ -992,8 +986,6 @@ function ColorHuntCameraGame({ onBack }: { onBack: () => void }) {
 function ThumbsQuizGame({ onBack }: { onBack: () => void }) {
   const { videoRef, ready, error } = useCamera();
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const handsRef = useRef<any>(null);
-  const [mpLoaded, setMpLoaded] = useState(false);
 
   const questions = [
     { q: "The Sun is a star.", ans: true },
@@ -1018,61 +1010,31 @@ function ThumbsQuizGame({ onBack }: { onBack: () => void }) {
   const [done, setDone] = useState(false);
   const q = order[round];
 
-  useEffect(() => {
-    if ((window as any).Hands) { setMpLoaded(true); return; }
-    const s = document.createElement("script");
-    s.src = "https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.min.js";
-    s.crossOrigin = "anonymous";
-    s.onload = () => setMpLoaded(true);
-    document.head.appendChild(s);
-  }, []);
-
-  function detectThumb(landmarks: any[]): "up" | "down" | "unknown" {
-    const thumbTip = landmarks[4];
-    const thumbBase = landmarks[2];
-    const wrist = landmarks[0];
-    const diff = thumbTip.y - thumbBase.y;
+  function detectThumb(landmarks: Array<{ x: number; y: number }>): "up" | "down" | "unknown" {
+    const diff = landmarks[4].y - landmarks[2].y;
     if (diff < -0.05) return "up";
     if (diff > 0.05) return "down";
     return "unknown";
   }
 
   async function scan() {
-    if (scanning || done) return;
+    if (!videoRef.current || scanning || done) return;
     setScanning(true);
     setFeedback(null);
 
-    if (mpLoaded && (window as any).Hands) {
-      try {
-        if (!handsRef.current) {
-          const Hands = (window as any).Hands;
-          handsRef.current = new Hands({ locateFile: (f: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/${f}` });
-          handsRef.current.setOptions({ maxNumHands: 1, modelComplexity: 0, minDetectionConfidence: 0.6 });
-          handsRef.current.onResults(() => {});
-        }
-        let resolved = false;
-        handsRef.current.onResults((results: any) => {
-          if (resolved) return;
-          resolved = true;
-          setScanning(false);
-          const lm = results.multiHandLandmarks?.[0];
-          if (!lm) { setFeedback({ gesture: "no hand", correct: false }); return; }
-          const gesture = detectThumb(lm);
-          if (gesture === "unknown") { setFeedback({ gesture: "unclear", correct: false }); return; }
-          const answer = gesture === "up";
-          const correct = answer === q.ans;
-          setFeedback({ gesture: gesture === "up" ? "👍 Thumbs Up!" : "👎 Thumbs Down!", correct });
-          if (correct) setScore(s => s + 1);
-          setTimeout(() => {
-            if (round + 1 >= order.length) { setDone(true); if (score + (correct ? 1 : 0) >= 4) fireConfetti(); }
-            else { setRound(r => r + 1); setFeedback(null); }
-          }, 1200);
-        });
-        await handsRef.current.send({ image: videoRef.current });
-        return;
-      } catch { /* fall through */ }
-    }
-    setTimeout(() => { setScanning(false); setFeedback({ gesture: "no hand", correct: false }); }, 600);
+    const result = await detectHandViaFlask(videoRef.current);
+    setScanning(false);
+    if (!result.landmarks) { setFeedback({ gesture: "no hand", correct: false }); return; }
+    const gesture = detectThumb(result.landmarks);
+    if (gesture === "unknown") { setFeedback({ gesture: "unclear", correct: false }); return; }
+    const answer = gesture === "up";
+    const correct = answer === q.ans;
+    setFeedback({ gesture: gesture === "up" ? "👍 Thumbs Up!" : "👎 Thumbs Down!", correct });
+    if (correct) setScore(s => s + 1);
+    setTimeout(() => {
+      if (round + 1 >= order.length) { setDone(true); if (score + (correct ? 1 : 0) >= 4) fireConfetti(); }
+      else { setRound(r => r + 1); setFeedback(null); }
+    }, 1200);
   }
 
   if (error) return (
@@ -1171,13 +1133,12 @@ function AirDrawGame({ onBack }: { onBack: () => void }) {
   const videoRef     = useRef<HTMLVideoElement>(null);
   const drawRef      = useRef<HTMLCanvasElement>(null);
   const streamRef    = useRef<MediaStream | null>(null);
-  const handsRef     = useRef<any>(null);
-  const rafRef       = useRef<number>(0);
   const lastPt       = useRef<{ x: number; y: number } | null>(null);
   const sizeRef      = useRef(8);
   const colorIdxRef  = useRef(0);
   const lastColorRef = useRef(0);
   const lastClearRef = useRef(0);
+  const isFetchRef   = useRef(false);
 
   const [showGuide, setShowGuide] = useState(true);
   const [colorIdx,  setColorIdx]  = useState(0);
@@ -1188,12 +1149,6 @@ function AirDrawGame({ onBack }: { onBack: () => void }) {
 
   useEffect(() => {
     if (showGuide) return;
-    if (!(window as any).Hands) {
-      const s = document.createElement("script");
-      s.src = "https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.min.js";
-      s.crossOrigin = "anonymous";
-      document.head.appendChild(s);
-    }
     let mounted = true;
     navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } })
       .then(stream => {
@@ -1205,37 +1160,47 @@ function AirDrawGame({ onBack }: { onBack: () => void }) {
       .catch(() => setCamError(true));
     return () => {
       mounted = false;
-      cancelAnimationFrame(rafRef.current);
       streamRef.current?.getTracks().forEach(t => t.stop());
     };
   }, [showGuide]);
 
   useEffect(() => {
     if (!camReady) return;
+    const captureCanvas = document.createElement("canvas");
+    captureCanvas.width = 320; captureCanvas.height = 240;
+    const captureCtx = captureCanvas.getContext("2d")!;
     let active = true;
-    function tryStart() {
-      const Hands = (window as any).Hands;
-      if (!Hands) { if (active) setTimeout(tryStart, 300); return; }
-      if (handsRef.current) return;
-      handsRef.current = new Hands({ locateFile: (f: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/${f}` });
-      handsRef.current.setOptions({ maxNumHands: 1, modelComplexity: 0, minDetectionConfidence: 0.75, minTrackingConfidence: 0.5 });
-      handsRef.current.onResults((r: any) => {
+
+    const interval = setInterval(async () => {
+      if (!active || isFetchRef.current || !videoRef.current) return;
+      const vid = videoRef.current;
+      if (vid.readyState < 2) return;
+      captureCtx.drawImage(vid, 0, 0, 320, 240);
+      const frame = captureCanvas.toDataURL("image/jpeg", 0.7);
+      isFetchRef.current = true;
+      try {
+        const res = await fetch("/api/hands/detect", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image: frame }),
+          signal: AbortSignal.timeout(2500),
+        });
+        const data = await res.json();
         if (!active) return;
         const canvas = drawRef.current;
         if (!canvas) return;
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
-        const lms = r.multiHandLandmarks?.[0];
-        setHandOk(!!lms);
-        if (!lms) { lastPt.current = null; return; }
+        setHandOk(!!data.handDetected);
+        if (!data.handDetected || !data.landmarks) { lastPt.current = null; setMode("idle"); return; }
 
-        const gesture = detectDrawGesture(lms);
-        setMode(gesture);
-
-        const tip = lms[8];
-        const cx  = (1 - tip.x) * canvas.width;
-        const cy  = tip.y * canvas.height;
+        const lms   = data.landmarks;
+        const tip   = lms[8];
+        const cx    = (1 - tip.x) * canvas.width;
+        const cy    = tip.y * canvas.height;
         const curColor = AIR_DRAW_PALETTE[colorIdxRef.current];
+        const gesture  = detectDrawGesture(lms);
+        setMode(gesture);
 
         if (gesture === "draw") {
           if (lastPt.current) {
@@ -1244,8 +1209,7 @@ function AirDrawGame({ onBack }: { onBack: () => void }) {
             ctx.lineTo(cx, cy);
             ctx.strokeStyle = curColor;
             ctx.lineWidth   = sizeRef.current;
-            ctx.lineCap     = "round";
-            ctx.lineJoin    = "round";
+            ctx.lineCap = "round"; ctx.lineJoin = "round";
             ctx.globalCompositeOperation = "source-over";
             ctx.stroke();
           }
@@ -1269,16 +1233,11 @@ function AirDrawGame({ onBack }: { onBack: () => void }) {
         } else {
           lastPt.current = null;
         }
-      });
-      const loop = async () => {
-        if (!active) return;
-        if (videoRef.current) try { await handsRef.current.send({ image: videoRef.current }); } catch {}
-        if (active) rafRef.current = requestAnimationFrame(loop);
-      };
-      loop();
-    }
-    tryStart();
-    return () => { active = false; cancelAnimationFrame(rafRef.current); };
+      } catch { /* ignore network errors */ }
+      finally { isFetchRef.current = false; }
+    }, 60);
+
+    return () => { active = false; clearInterval(interval); };
   }, [camReady]);
 
   const MODE_LABELS: Record<string, string> = {
@@ -1453,12 +1412,11 @@ function ColorFillGame({ onBack }: { onBack: () => void }) {
   const drawRef    = useRef<HTMLCanvasElement>(null);
   const uiRef      = useRef<HTMLCanvasElement>(null);
   const streamRef  = useRef<MediaStream | null>(null);
-  const handsRef   = useRef<any>(null);
-  const rafRef     = useRef<number>(0);
   const lastPt     = useRef<{ x: number; y: number } | null>(null);
   const lastColorRef = useRef<number>(0);
   const lastClearRef = useRef<number>(0);
   const colorIdxRef  = useRef<number>(0);
+  const isFetchRef   = useRef(false);
 
   const [camReady, setCamReady] = useState(false);
   const [camError, setCamError] = useState(false);
@@ -1467,12 +1425,6 @@ function ColorFillGame({ onBack }: { onBack: () => void }) {
   const [handOk,   setHandOk]   = useState(false);
 
   useEffect(() => {
-    if (!(window as any).Hands) {
-      const s = document.createElement("script");
-      s.src = "https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.min.js";
-      s.crossOrigin = "anonymous";
-      document.head.appendChild(s);
-    }
     let mounted = true;
     navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } })
       .then(stream => {
@@ -1484,21 +1436,32 @@ function ColorFillGame({ onBack }: { onBack: () => void }) {
       .catch(() => setCamError(true));
     return () => {
       mounted = false;
-      cancelAnimationFrame(rafRef.current);
       streamRef.current?.getTracks().forEach(t => t.stop());
     };
   }, []);
 
   useEffect(() => {
     if (!camReady) return;
+    const captureCanvas = document.createElement("canvas");
+    captureCanvas.width = 320; captureCanvas.height = 240;
+    const captureCtx = captureCanvas.getContext("2d")!;
     let active = true;
-    function tryStart() {
-      const Hands = (window as any).Hands;
-      if (!Hands) { if (active) setTimeout(tryStart, 300); return; }
-      if (handsRef.current) return;
-      handsRef.current = new Hands({ locateFile: (f: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/${f}` });
-      handsRef.current.setOptions({ maxNumHands: 1, modelComplexity: 0, minDetectionConfidence: 0.75, minTrackingConfidence: 0.5 });
-      handsRef.current.onResults((r: any) => {
+
+    const interval = setInterval(async () => {
+      if (!active || isFetchRef.current || !videoRef.current) return;
+      const vid = videoRef.current;
+      if (vid.readyState < 2) return;
+      captureCtx.drawImage(vid, 0, 0, 320, 240);
+      const frame = captureCanvas.toDataURL("image/jpeg", 0.7);
+      isFetchRef.current = true;
+      try {
+        const res = await fetch("/api/hands/detect", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image: frame }),
+          signal: AbortSignal.timeout(2500),
+        });
+        const data = await res.json();
         if (!active) return;
         const ui   = uiRef.current;
         const draw = drawRef.current;
@@ -1507,13 +1470,12 @@ function ColorFillGame({ onBack }: { onBack: () => void }) {
         const drawCtx = draw.getContext("2d");
         if (!uiCtx || !drawCtx) return;
         uiCtx.clearRect(0, 0, ui.width, ui.height);
-        const lms = r.multiHandLandmarks?.[0];
-        setHandOk(!!lms);
-        if (!lms) { lastPt.current = null; return; }
+        setHandOk(!!data.handDetected);
+        if (!data.handDetected || !data.landmarks) { lastPt.current = null; setMode("idle"); return; }
 
+        const lms = data.landmarks;
         const gesture = detectDrawGesture(lms);
         setMode(gesture);
-
         const tip = lms[8];
         const cx  = (1 - tip.x) * ui.width;
         const cy  = tip.y * ui.height;
@@ -1524,9 +1486,7 @@ function ColorFillGame({ onBack }: { onBack: () => void }) {
         } else if (gesture === "eraser") {
           drawCtx.save();
           drawCtx.globalCompositeOperation = "destination-out";
-          drawCtx.beginPath();
-          drawCtx.arc(cx, cy, 32, 0, Math.PI * 2);
-          drawCtx.fill();
+          drawCtx.beginPath(); drawCtx.arc(cx, cy, 32, 0, Math.PI * 2); drawCtx.fill();
           drawCtx.restore();
           lastPt.current = { x: cx, y: cy };
         } else if (gesture === "clear") {
@@ -1541,8 +1501,7 @@ function ColorFillGame({ onBack }: { onBack: () => void }) {
           if (now - lastColorRef.current > 900) {
             lastColorRef.current = now;
             const next = (colorIdxRef.current + 1) % HP_PALETTE.length;
-            colorIdxRef.current = next;
-            setColorIdx(next);
+            colorIdxRef.current = next; setColorIdx(next);
           }
           lastPt.current = null;
         } else if (gesture === "draw") {
@@ -1550,10 +1509,8 @@ function ColorFillGame({ onBack }: { onBack: () => void }) {
             drawCtx.beginPath();
             drawCtx.moveTo(lastPt.current.x, lastPt.current.y);
             drawCtx.lineTo(cx, cy);
-            drawCtx.strokeStyle = curColor;
-            drawCtx.lineWidth   = 10;
-            drawCtx.lineCap     = "round";
-            drawCtx.lineJoin    = "round";
+            drawCtx.strokeStyle = curColor; drawCtx.lineWidth = 10;
+            drawCtx.lineCap = "round"; drawCtx.lineJoin = "round";
             drawCtx.globalCompositeOperation = "source-over";
             drawCtx.stroke();
           }
@@ -1563,16 +1520,12 @@ function ColorFillGame({ onBack }: { onBack: () => void }) {
         }
 
         const CURSOR_COLOR: Record<string, string> = {
-          draw:        curColor,
-          eraser:      "rgba(200,200,200,0.85)",
-          penup:       "#ffa500",
-          "color-next":"#ffd700",
-          clear:       "#ff4757",
-          idle:        "rgba(255,255,255,0.5)",
+          draw: curColor, eraser: "rgba(200,200,200,0.85)", penup: "#ffa500",
+          "color-next": "#ffd700", clear: "#ff4757", idle: "rgba(255,255,255,0.5)",
         };
         const CURSOR_R: Record<string, number> = { eraser: 32, draw: 9, penup: 9, "color-next": 12, clear: 14, idle: 7 };
-        const cr    = CURSOR_R[gesture] ?? 7;
-        const cc    = CURSOR_COLOR[gesture] ?? "rgba(255,255,255,0.5)";
+        const cr = CURSOR_R[gesture] ?? 7;
+        const cc = CURSOR_COLOR[gesture] ?? "rgba(255,255,255,0.5)";
         uiCtx.beginPath(); uiCtx.arc(cx, cy, cr + 5, 0, Math.PI * 2);
         uiCtx.fillStyle = "rgba(255,255,255,0.18)"; uiCtx.fill();
         uiCtx.beginPath(); uiCtx.arc(cx, cy, cr, 0, Math.PI * 2);
@@ -1580,16 +1533,11 @@ function ColorFillGame({ onBack }: { onBack: () => void }) {
         uiCtx.strokeStyle = "rgba(255,255,255,0.75)"; uiCtx.lineWidth = 2; uiCtx.stroke();
         uiCtx.beginPath(); uiCtx.arc(cx, cy, 3, 0, Math.PI * 2);
         uiCtx.fillStyle = "#fff"; uiCtx.fill();
-      });
-      const loop = async () => {
-        if (!active) return;
-        if (videoRef.current) try { await handsRef.current.send({ image: videoRef.current }); } catch {}
-        if (active) rafRef.current = requestAnimationFrame(loop);
-      };
-      loop();
-    }
-    tryStart();
-    return () => { active = false; cancelAnimationFrame(rafRef.current); };
+      } catch { /* ignore */ }
+      finally { isFetchRef.current = false; }
+    }, 60);
+
+    return () => { active = false; clearInterval(interval); };
   }, [camReady]);
 
   const MODE_LABELS: Record<string, string> = {
@@ -1715,13 +1663,11 @@ function classifyGesture(lms: any[]): GestureId | null {
 
 function GestureMatchGame({ onBack }: { onBack: () => void }) {
   const { videoRef, ready, error } = useCamera();
-  const handsRef = useRef<any>(null);
-  const rafRef   = useRef<number>(0);
   const dwellRef = useRef<{ gesture: GestureId; startTime: number } | null>(null);
   const roundRef = useRef(0);
   const scoreRef = useRef(0);
+  const isFetchRef = useRef(false);
 
-  const [mpLoaded, setMpLoaded] = useState(false);
   const ROUNDS = 6;
   const [round,     setRound]     = useState(0);
   const [score,     setScore]     = useState(0);
@@ -1742,50 +1688,52 @@ function GestureMatchGame({ onBack }: { onBack: () => void }) {
   useEffect(() => { scoreRef.current = score; }, [score]);
 
   useEffect(() => {
-    if ((window as any).Hands) { setMpLoaded(true); return; }
-    const s = document.createElement("script");
-    s.src = "https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.min.js";
-    s.crossOrigin = "anonymous";
-    s.onload = () => setMpLoaded(true);
-    document.head.appendChild(s);
-  }, []);
-
-  useEffect(() => {
-    if (!mpLoaded || !ready) return;
+    if (!ready) return;
+    const captureCanvas = document.createElement("canvas");
+    captureCanvas.width = 320; captureCanvas.height = 240;
+    const captureCtx = captureCanvas.getContext("2d")!;
     let active = true;
-    const Hands = (window as any).Hands;
-    if (!Hands || handsRef.current) return;
-    handsRef.current = new Hands({ locateFile: (f: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/${f}` });
-    handsRef.current.setOptions({ maxNumHands: 1, modelComplexity: 0, minDetectionConfidence: 0.7, minTrackingConfidence: 0.5 });
-    handsRef.current.onResults((r: any) => {
-      if (!active) return;
-      const lms = r.multiHandLandmarks?.[0];
-      if (!lms) { setDetected(null); dwellRef.current = null; setDwellPct(0); return; }
-      const gesture = classifyGesture(lms);
-      setDetected(gesture);
-      const cur = targets[roundRef.current] ?? targets[0];
-      if (gesture === cur) {
-        if (!dwellRef.current || dwellRef.current.gesture !== gesture) dwellRef.current = { gesture, startTime: Date.now() };
-        const pct = Math.min((Date.now() - dwellRef.current.startTime) / 1500 * 100, 100);
-        setDwellPct(pct);
-        if (pct >= 100) {
-          dwellRef.current = null;
-          setDwellPct(0);
-          const nr = roundRef.current + 1;
-          const ns = scoreRef.current + 1;
-          if (nr >= ROUNDS) { setScore(ns); setRound(nr); setDone(true); if (ns >= ROUNDS - 1) fireConfetti(); }
-          else              { setScore(ns); setRound(nr); }
+
+    const interval = setInterval(async () => {
+      if (!active || isFetchRef.current || !videoRef.current) return;
+      const vid = videoRef.current;
+      if (vid.readyState < 2) return;
+      captureCtx.drawImage(vid, 0, 0, 320, 240);
+      const frame = captureCanvas.toDataURL("image/jpeg", 0.7);
+      isFetchRef.current = true;
+      try {
+        const res = await fetch("/api/hands/detect", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image: frame }),
+          signal: AbortSignal.timeout(2500),
+        });
+        const data = await res.json();
+        if (!active) return;
+        if (!data.handDetected || !data.landmarks) {
+          setDetected(null); dwellRef.current = null; setDwellPct(0); return;
         }
-      } else { dwellRef.current = null; setDwellPct(0); }
-    });
-    const loop = async () => {
-      if (!active) return;
-      if (videoRef.current) try { await handsRef.current.send({ image: videoRef.current }); } catch {}
-      if (active) rafRef.current = requestAnimationFrame(loop);
-    };
-    loop();
-    return () => { active = false; cancelAnimationFrame(rafRef.current); };
-  }, [mpLoaded, ready]);
+        const gesture = classifyGesture(data.landmarks);
+        setDetected(gesture);
+        const cur = targets[roundRef.current] ?? targets[0];
+        if (gesture === cur) {
+          if (!dwellRef.current || dwellRef.current.gesture !== gesture) dwellRef.current = { gesture, startTime: Date.now() };
+          const pct = Math.min((Date.now() - dwellRef.current.startTime) / 1500 * 100, 100);
+          setDwellPct(pct);
+          if (pct >= 100) {
+            dwellRef.current = null; setDwellPct(0);
+            const nr = roundRef.current + 1;
+            const ns = scoreRef.current + 1;
+            if (nr >= ROUNDS) { setScore(ns); setRound(nr); setDone(true); if (ns >= ROUNDS - 1) fireConfetti(); }
+            else              { setScore(ns); setRound(nr); }
+          }
+        } else { dwellRef.current = null; setDwellPct(0); }
+      } catch { /* ignore */ }
+      finally { isFetchRef.current = false; }
+    }, 80);
+
+    return () => { active = false; clearInterval(interval); };
+  }, [ready]);
 
   if (error) return (
     <div className="text-center space-y-4 py-8">

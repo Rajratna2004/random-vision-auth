@@ -10,6 +10,7 @@ A fully-featured kids' educational learning platform with JWT authentication, fa
 artifacts/
   api-server/     - Express REST API server (port 8080)
   kido-learn/     - React + Vite frontend (port 20858, preview at /)
+  flask-hands/    - Python Flask + MediaPipe hand detection backend (port 5000)
 lib/
   api-spec/       - OpenAPI spec + Orval codegen
   db/             - Drizzle ORM + PostgreSQL schema
@@ -26,6 +27,15 @@ lib/
 - canvas-confetti for celebration effects
 - shadcn/ui components
 - Tailwind CSS with custom kid-friendly theme
+- All camera games use Flask (HTTP interval polling) — no MediaPipe JS CDN
+
+**Hand Detection Backend (artifacts/flask-hands)**
+- Python Flask + Flask-CORS (port 5000)
+- MediaPipe Tasks API v0.10 with `hand_landmarker.task` model
+- POST `/detect` — base64 JPEG → `{ gesture, landmarks, handDetected }`
+- GET `/health` — liveness check
+- Express proxies `/api/hands/*` → Flask (`artifacts/api-server/src/routes/hands.ts`)
+- Requires `mesa` Nix system dependency for libGLESv2
 
 **Backend (artifacts/api-server)**
 - Express.js + TypeScript
