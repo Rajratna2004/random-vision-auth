@@ -1762,12 +1762,12 @@ export default function GamesPage() {
 
             {/* Camera Games */}
             <div className="space-y-3">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
                 <h2 className="font-heading text-2xl text-gray-600">📷 Camera Games</h2>
-                <span className="text-xs bg-violet-100 text-violet-700 font-bold px-3 py-1 rounded-full">Needs Camera</span>
+                <span className="text-xs bg-[#0DA2E7]/10 text-[#0DA2E7] font-bold px-3 py-1 rounded-full border border-[#0DA2E7]/20">🤖 AI Hand Tracking</span>
               </div>
-              <p className="text-sm text-gray-400 font-bold">Use your camera to play! Allow camera access when asked.</p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <p className="text-sm text-gray-400 font-semibold">Your camera + AI hand tracking powers these games — allow camera access when asked.</p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {CAMERA_GAMES.map((game, i) => (
                   <motion.div
                     key={game.id}

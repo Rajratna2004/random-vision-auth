@@ -34,17 +34,8 @@ export default function AuthPage() {
   }
 
   useEffect(() => {
-    loadFaceModels();
     return () => stopCamera();
   }, []);
-
-  useEffect(() => {
-    if (mode === "face") {
-      startCamera();
-    } else {
-      stopCamera();
-    }
-  }, [mode]);
 
   async function loadFaceModels() {
     try {
@@ -191,17 +182,17 @@ export default function AuthPage() {
         <Card className="shadow-2xl border-0 overflow-hidden rounded-3xl">
           <div className="kid-gradient px-4 pt-4 pb-4">
             <div className="flex gap-2 justify-center">
-              {(["login", "register", "face"] as Mode[]).map((m) => (
+              {(["login", "register"] as Mode[]).map((m) => (
                 <button
                   key={m}
                   onClick={() => setMode(m)}
-                  className={`px-4 py-2 rounded-2xl text-sm font-bold transition-all ${
+                  className={`px-5 py-2.5 rounded-2xl text-sm font-bold transition-all ${
                     mode === m
                       ? "bg-white text-[#0DA2E7] shadow-md"
                       : "text-white hover:bg-white/20"
                   }`}
                 >
-                  {m === "login" ? "🔑 Login" : m === "register" ? "✨ Sign Up" : "😊 Face Login"}
+                  {m === "login" ? "🔑 Login" : "✨ Sign Up"}
                 </button>
               ))}
             </div>

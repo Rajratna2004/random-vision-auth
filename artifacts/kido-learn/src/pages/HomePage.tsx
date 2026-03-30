@@ -217,7 +217,7 @@ export default function HomePage() {
               { label: "All Courses", emoji: "📚", grad: "from-[#0DA2E7] to-[#26d0ce]", path: "/courses" },
               { label: "Play Games",  emoji: "🎮", grad: "from-[#FF6B6B] to-[#FF8E53]", path: "/games" },
               { label: "My Profile",  emoji: "👤", grad: "from-[#9B59B6] to-[#8E44AD]", path: "/profile" },
-              { label: "Face Login",  emoji: "🤳", grad: "from-[#F7971E] to-[#FFD200]", path: "/profile" },
+              { label: "My Progress", emoji: "📊", grad: "from-[#F7971E] to-[#FFD200]", path: "/profile" },
             ].map((item) => (
               <motion.div
                 key={item.label}
