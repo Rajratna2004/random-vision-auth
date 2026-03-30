@@ -13,7 +13,7 @@ interface ExperimentProps {
 interface Experiment {
   id: string;
   title: string;
-  component: React.FC<{ onComplete: () => void }>;
+  component: React.FC<{ onComplete: () => void; lessonTitle?: string }>;
 }
 
 function fireConfetti() {
@@ -21,16 +21,37 @@ function fireConfetti() {
 }
 
 /* ─────────────── NUMBER LINE / MATH ─────────────── */
-function NumberLineExperiment({ onComplete }: { onComplete: () => void }) {
-  const problems = [
-    { a: 3, b: 5, op: "+" as const }, { a: 8, b: 4, op: "-" as const },
-    { a: 6, b: 7, op: "+" as const }, { a: 12, b: 5, op: "-" as const },
-    { a: 4, b: 9, op: "+" as const }, { a: 15, b: 7, op: "-" as const },
-    { a: 2, b: 11, op: "+" as const }, { a: 20, b: 8, op: "-" as const },
-    { a: 9, b: 6, op: "+" as const }, { a: 14, b: 6, op: "-" as const },
+function NumberLineExperiment({ onComplete, lessonTitle = "" }: { onComplete: () => void; lessonTitle?: string }) {
+  const allProblems = [
+    // Addition
+    { a: 3,  b: 5,  op: "+" as const }, { a: 6,  b: 7,  op: "+" as const },
+    { a: 4,  b: 9,  op: "+" as const }, { a: 2,  b: 11, op: "+" as const },
+    { a: 9,  b: 6,  op: "+" as const }, { a: 5,  b: 8,  op: "+" as const },
+    { a: 7,  b: 7,  op: "+" as const }, { a: 13, b: 4,  op: "+" as const },
+    // Subtraction
+    { a: 8,  b: 4,  op: "-" as const }, { a: 12, b: 5,  op: "-" as const },
+    { a: 15, b: 7,  op: "-" as const }, { a: 20, b: 8,  op: "-" as const },
+    { a: 14, b: 6,  op: "-" as const }, { a: 18, b: 9,  op: "-" as const },
+    { a: 11, b: 4,  op: "-" as const }, { a: 16, b: 7,  op: "-" as const },
+    // Multiplication
+    { a: 3,  b: 4,  op: "×" as const }, { a: 5,  b: 3,  op: "×" as const },
+    { a: 6,  b: 2,  op: "×" as const }, { a: 4,  b: 4,  op: "×" as const },
+    { a: 7,  b: 3,  op: "×" as const }, { a: 8,  b: 2,  op: "×" as const },
   ];
+
+  const lc = lessonTitle.toLowerCase();
+  const problems = lc.includes("addition") || lc.includes("adding") || lc.includes("add ")
+    ? allProblems.filter(p => p.op === "+")
+    : lc.includes("subtraction") || lc.includes("subtract") || lc.includes("minus") || lc.includes("taking away")
+    ? allProblems.filter(p => p.op === "-")
+    : lc.includes("multipli") || lc.includes("times table") || lc.includes("multiply")
+    ? allProblems.filter(p => p.op === "×")
+    : allProblems;
+
   const [problem] = useState(() => problems[Math.floor(Math.random() * problems.length)]);
-  const answer = problem.op === "+" ? problem.a + problem.b : problem.a - problem.b;
+  const answer = problem.op === "+" ? problem.a + problem.b
+    : problem.op === "-" ? problem.a - problem.b
+    : problem.a * problem.b;
   const [selected, setSelected] = useState<number | null>(null);
   const [done, setDone] = useState(false);
   const [shake, setShake] = useState(false);
@@ -1155,7 +1176,7 @@ export default function LessonExperiment({ subject, lessonTitle, lessonOrder }: 
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
           >
-            <ExperimentComponent key={key} onComplete={handleComplete} />
+            <ExperimentComponent key={key} onComplete={handleComplete} lessonTitle={lessonTitle} />
           </motion.div>
         </AnimatePresence>
 
