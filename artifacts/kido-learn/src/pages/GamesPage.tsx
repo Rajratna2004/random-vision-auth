@@ -1160,30 +1160,34 @@ function ThumbsQuizGame({ onBack }: { onBack: () => void }) {
 /* ─────────── AIR DRAW GAME ─────────── */
 const AIR_DRAW_PALETTE = ["#FF6B6B","#FF8E53","#FFD200","#4CAF50","#0DA2E7","#9B59B6","#FF4E91","#1B1B1B"];
 
+const AD_GESTURES = [
+  { emoji: "☝️", name: "Point",      desc: "Draw in the air",  bg: "bg-blue-50",   text: "text-blue-600"  },
+  { emoji: "✌️", name: "Peace",      desc: "Change color",     bg: "bg-purple-50", text: "text-purple-600" },
+  { emoji: "🖐️", name: "Open Palm",  desc: "Clear canvas",     bg: "bg-red-50",    text: "text-red-600"   },
+  { emoji: "✊", name: "Fist",       desc: "Pause drawing",    bg: "bg-green-50",  text: "text-green-600" },
+];
+
 function AirDrawGame({ onBack }: { onBack: () => void }) {
-  const videoRef  = useRef<HTMLVideoElement>(null);
-  const drawRef   = useRef<HTMLCanvasElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const handsRef  = useRef<any>(null);
-  const rafRef    = useRef<number>(0);
-  const lastPt    = useRef<{ x: number; y: number } | null>(null);
-  const colorRef  = useRef("#FF6B6B");
-  const sizeRef   = useRef(8);
-  const eraserRef = useRef(false);
+  const videoRef     = useRef<HTMLVideoElement>(null);
+  const drawRef      = useRef<HTMLCanvasElement>(null);
+  const streamRef    = useRef<MediaStream | null>(null);
+  const handsRef     = useRef<any>(null);
+  const rafRef       = useRef<number>(0);
+  const lastPt       = useRef<{ x: number; y: number } | null>(null);
+  const sizeRef      = useRef(8);
+  const colorIdxRef  = useRef(0);
+  const lastColorRef = useRef(0);
+  const lastClearRef = useRef(0);
 
-  const [color,    _setColor]    = useState("#FF6B6B");
-  const [size,     _setSize]     = useState(8);
-  const [eraser,   _setEraser]   = useState(false);
-  const [handOk,   setHandOk]    = useState(false);
-  const [penUp,    setPenUp]     = useState(false);
-  const [camReady, setCamReady]  = useState(false);
-  const [camError, setCamError]  = useState(false);
-
-  function pickColor(c: string) { colorRef.current = c; _setColor(c); eraserRef.current = false; _setEraser(false); }
-  function pickSize(s: number)  { sizeRef.current = s; _setSize(s); }
-  function pickEraser()         { const e = !eraserRef.current; eraserRef.current = e; _setEraser(e); }
+  const [showGuide, setShowGuide] = useState(true);
+  const [colorIdx,  setColorIdx]  = useState(0);
+  const [mode,      setMode]      = useState<string>("idle");
+  const [handOk,    setHandOk]    = useState(false);
+  const [camReady,  setCamReady]  = useState(false);
+  const [camError,  setCamError]  = useState(false);
 
   useEffect(() => {
+    if (showGuide) return;
     if (!(window as any).Hands) {
       const s = document.createElement("script");
       s.src = "https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.min.js";
@@ -1204,7 +1208,7 @@ function AirDrawGame({ onBack }: { onBack: () => void }) {
       cancelAnimationFrame(rafRef.current);
       streamRef.current?.getTracks().forEach(t => t.stop());
     };
-  }, []);
+  }, [showGuide]);
 
   useEffect(() => {
     if (!camReady) return;
@@ -1223,30 +1227,48 @@ function AirDrawGame({ onBack }: { onBack: () => void }) {
         if (!ctx) return;
         const lms = r.multiHandLandmarks?.[0];
         setHandOk(!!lms);
-        if (!lms) { lastPt.current = null; setPenUp(false); return; }
-        const tip = lms[8], thumb = lms[4];
-        const pinch = Math.hypot(tip.x - thumb.x, tip.y - thumb.y) < 0.065;
-        setPenUp(pinch);
-        const cx = (1 - tip.x) * canvas.width;
-        const cy = tip.y * canvas.height;
-        if (!pinch && lastPt.current) {
-          ctx.beginPath();
-          ctx.moveTo(lastPt.current.x, lastPt.current.y);
-          ctx.lineTo(cx, cy);
-          ctx.lineCap = "round"; ctx.lineJoin = "round";
-          if (eraserRef.current) {
-            ctx.globalCompositeOperation = "destination-out";
-            ctx.strokeStyle = "rgba(0,0,0,1)";
-            ctx.lineWidth = sizeRef.current * 3;
-          } else {
+        if (!lms) { lastPt.current = null; return; }
+
+        const gesture = detectDrawGesture(lms);
+        setMode(gesture);
+
+        const tip = lms[8];
+        const cx  = (1 - tip.x) * canvas.width;
+        const cy  = tip.y * canvas.height;
+        const curColor = AIR_DRAW_PALETTE[colorIdxRef.current];
+
+        if (gesture === "draw") {
+          if (lastPt.current) {
+            ctx.beginPath();
+            ctx.moveTo(lastPt.current.x, lastPt.current.y);
+            ctx.lineTo(cx, cy);
+            ctx.strokeStyle = curColor;
+            ctx.lineWidth   = sizeRef.current;
+            ctx.lineCap     = "round";
+            ctx.lineJoin    = "round";
             ctx.globalCompositeOperation = "source-over";
-            ctx.strokeStyle = colorRef.current;
-            ctx.lineWidth = sizeRef.current;
+            ctx.stroke();
           }
-          ctx.stroke();
-          ctx.globalCompositeOperation = "source-over";
+          lastPt.current = { x: cx, y: cy };
+        } else if (gesture === "color-next") {
+          const now = Date.now();
+          if (now - lastColorRef.current > 900) {
+            lastColorRef.current = now;
+            const next = (colorIdxRef.current + 1) % AIR_DRAW_PALETTE.length;
+            colorIdxRef.current = next;
+            setColorIdx(next);
+          }
+          lastPt.current = null;
+        } else if (gesture === "clear") {
+          const now = Date.now();
+          if (now - lastClearRef.current > 1800) {
+            lastClearRef.current = now;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+          }
+          lastPt.current = null;
+        } else {
+          lastPt.current = null;
         }
-        lastPt.current = pinch ? null : { x: cx, y: cy };
       });
       const loop = async () => {
         if (!active) return;
@@ -1259,61 +1281,135 @@ function AirDrawGame({ onBack }: { onBack: () => void }) {
     return () => { active = false; cancelAnimationFrame(rafRef.current); };
   }, [camReady]);
 
-  function clearDraw() { const c = drawRef.current; if (c) c.getContext("2d")?.clearRect(0, 0, c.width, c.height); }
+  const MODE_LABELS: Record<string, string> = {
+    draw: "✏️ Drawing", "color-next": "🎨 Changing Color…",
+    clear: "🗑️ Clearing…", eraser: "⏸️ Paused", penup: "⏸️ Paused",
+  };
+  const MODE_BG: Record<string, string> = {
+    draw: AIR_DRAW_PALETTE[colorIdx], "color-next": "#9B59B6",
+    clear: "#ff4757", eraser: "#888", penup: "#ffa500",
+  };
 
-  if (camError) return (
-    <div className="text-center space-y-4 py-8">
-      <div className="text-5xl">📷</div>
-      <p className="text-muted-foreground">Camera not available. Please allow camera access.</p>
-      <Button variant="outline" onClick={onBack}>← Back to Games</Button>
+  /* ── Gesture Guide Popup ── */
+  if (showGuide) return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <Button variant="ghost" size="sm" onClick={onBack}>← Back</Button>
+        <h2 className="text-xl font-extrabold">✍️ Air Draw</h2>
+        <div className="w-16" />
+      </div>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.92 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="relative bg-white rounded-3xl shadow-xl p-6 mx-auto max-w-sm"
+        style={{ boxShadow: "0 12px 40px rgba(0,0,0,0.12)" }}
+      >
+        <button
+          onClick={() => setShowGuide(false)}
+          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 text-sm font-bold transition-colors"
+        >
+          ×
+        </button>
+        <div className="text-center mb-5">
+          <div className="text-4xl mb-2">✋</div>
+          <h3 className="font-heading text-2xl font-bold text-gray-800">Hand Gestures</h3>
+          <p className="text-muted-foreground text-sm mt-1">Use these hand signs to control the game!</p>
+        </div>
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          {AD_GESTURES.map((g) => (
+            <div key={g.name} className={`${g.bg} rounded-2xl p-4 flex flex-col items-center text-center gap-1`}>
+              <div className="text-4xl mb-1">{g.emoji}</div>
+              <div className={`font-bold text-sm ${g.text}`}>{g.name}</div>
+              <div className="text-xs text-gray-500">{g.desc}</div>
+            </div>
+          ))}
+        </div>
+        <button
+          onClick={() => setShowGuide(false)}
+          className="w-full kid-gradient text-white font-bold py-3.5 rounded-2xl text-base hover:opacity-90 transition-all shadow-md"
+        >
+          Got it! Let's go! 🚀
+        </button>
+      </motion.div>
     </div>
   );
 
+  if (camError) return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <Button variant="ghost" size="sm" onClick={onBack}>← Back</Button>
+        <h2 className="text-xl font-extrabold">✍️ Air Draw</h2>
+        <div className="w-16" />
+      </div>
+      <div className="text-center space-y-4 py-12">
+        <div className="text-5xl">📷</div>
+        <p className="text-muted-foreground">Camera not available. Please allow camera access and try again.</p>
+        <Button variant="outline" onClick={() => { setCamError(false); setShowGuide(true); }}>← Back to Guide</Button>
+      </div>
+    </div>
+  );
+
+  /* ── Main Game ── */
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <Button variant="ghost" size="sm" onClick={onBack}>← Back</Button>
         <h2 className="text-xl font-extrabold">✍️ Air Draw</h2>
-        <span className={`text-xs px-2 py-1 rounded-full font-bold ${!handOk ? "bg-gray-100 text-gray-400" : penUp ? "bg-orange-100 text-orange-600" : "bg-green-100 text-green-700"}`}>
-          {!handOk ? "🖐️ Show hand" : penUp ? "✋ Pen Up" : "✏️ Drawing"}
-        </span>
+        <button
+          onClick={() => setShowGuide(true)}
+          className="text-xs px-3 py-1.5 rounded-full bg-[#0DA2E7]/10 text-[#0DA2E7] font-bold hover:bg-[#0DA2E7]/20 transition-colors"
+        >
+          ? Guide
+        </button>
       </div>
-      <p className="text-xs text-center text-muted-foreground">
-        <strong>Index finger</strong> draws · <strong>Pinch</strong> (thumb + index tip) lifts the pen
-      </p>
-      <div className="relative rounded-2xl overflow-hidden bg-black mx-auto" style={{ maxWidth: 520, aspectRatio: "4/3" }}>
+
+      <div className="flex justify-center min-h-[26px]">
+        {mode !== "idle" && (
+          <motion.span key={mode} initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}
+            className="text-xs font-bold px-4 py-1 rounded-full text-white shadow-sm"
+            style={{ background: MODE_BG[mode] ?? "#888" }}>
+            {MODE_LABELS[mode] ?? ""}
+          </motion.span>
+        )}
+      </div>
+
+      <div className="relative rounded-2xl overflow-hidden bg-black mx-auto shadow-xl"
+           style={{ maxWidth: 540, aspectRatio: "4/3" }}>
         <video ref={videoRef} autoPlay muted playsInline className="w-full h-full object-cover mirror" />
         <canvas ref={drawRef} width={640} height={480} className="absolute inset-0 w-full h-full pointer-events-none" />
-        {!camReady && <div className="absolute inset-0 flex items-center justify-center bg-black/70 text-white text-sm">Starting camera…</div>}
+        {!camReady && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white gap-2">
+            <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            <span className="text-sm">Starting camera…</span>
+          </div>
+        )}
         {camReady && !handOk && (
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 text-white text-xs px-3 py-1.5 rounded-full whitespace-nowrap">
+          <div className="absolute bottom-14 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-sm text-white text-xs px-4 py-2 rounded-full font-medium">
             ✋ Show your hand to start drawing
           </div>
         )}
-        {penUp && handOk && (
-          <div className="absolute top-2 right-2 bg-orange-400/90 text-white text-xs px-2 py-1 rounded-full font-bold">✋ Pen lifted</div>
-        )}
+        <div className="gesture-hud">
+          {AD_GESTURES.map((g, i) => {
+            const keys = ["draw", "color-next", "clear", "eraser"];
+            return (
+              <div key={g.name} className={`gesture-hud-item ${mode === keys[i] ? "active-gesture" : ""}`}>
+                <span>{g.emoji}</span>
+                <span>{g.name}</span>
+              </div>
+            );
+          })}
+        </div>
       </div>
-      <div className="flex flex-wrap gap-2 justify-center items-center">
-        {AIR_DRAW_PALETTE.map(c => (
-          <button key={c} onClick={() => pickColor(c)} className="rounded-full transition-all focus:outline-none flex-shrink-0"
-            style={{ width: 30, height: 30, background: c,
-              outline: color === c && !eraser ? "3px solid #1f2937" : c === "#1B1B1B" ? "1px solid #6b7280" : "none",
-              transform: color === c && !eraser ? "scale(1.25)" : "scale(1)" }} />
-        ))}
-        <button onClick={pickEraser}
-          className={`w-8 h-8 rounded-full bg-white shadow text-sm flex items-center justify-center transition-all focus:outline-none border ${eraser ? "border-gray-800 scale-125 ring-2 ring-gray-500" : "border-gray-200"}`}>
-          🧹
-        </button>
-        <Button variant="outline" size="sm" onClick={clearDraw} className="rounded-full h-8 text-xs">🗑️ Clear</Button>
-      </div>
-      <div className="flex gap-3 justify-center items-center">
-        <span className="text-xs text-muted-foreground font-medium">Brush size:</span>
-        {[3, 7, 13, 22].map(s => (
-          <button key={s} onClick={() => pickSize(s)} className="rounded-full transition-all focus:outline-none flex-shrink-0"
-            style={{ width: Math.max(s + 2, 14), height: Math.max(s + 2, 14),
-              background: eraser ? "#9ca3af" : color,
-              border: size === s ? "2.5px solid #1f2937" : "2px solid transparent" }} />
+
+      <div className="flex items-center justify-center gap-2 flex-wrap pt-1">
+        <span className="text-[11px] text-muted-foreground font-semibold mr-1">✌️ Cycle color:</span>
+        {AIR_DRAW_PALETTE.map((c, i) => (
+          <button key={c}
+            className={`rounded-full border-2 transition-all duration-150 ${i === colorIdx ? "scale-125 border-white shadow-md" : "border-transparent opacity-60 hover:opacity-100 hover:scale-110"}`}
+            style={{ width: 26, height: 26, background: c, outline: c === "#1B1B1B" && i !== colorIdx ? "1px solid #d1d5db" : "none" }}
+            onClick={() => { colorIdxRef.current = i; setColorIdx(i); }}
+            title={`Color ${i + 1}`}
+          />
         ))}
       </div>
     </div>
@@ -1553,7 +1649,7 @@ function ColorFillGame({ onBack }: { onBack: () => void }) {
 
         {!camReady && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white gap-2">
-            <div className="w-8 h-8 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             <span className="text-sm">Starting camera…</span>
           </div>
         )}
