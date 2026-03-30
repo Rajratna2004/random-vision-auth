@@ -152,14 +152,14 @@
   --app-font-serif: Georgia, serif;
   --app-font-mono: Menlo, monospace;
   --radius: 1rem; /* 16px */
-  --shadow-2xs: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00); /*replace with H S L */
-  --shadow-xs: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00); /*replace with H S L */
-  --shadow-sm: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00), 0px 1px 2px -1px hsl(202.8169 89.1213% 53.1373% / 0.00);
-  --shadow: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00), 0px 1px 2px -1px hsl(202.8169 89.1213% 53.1373% / 0.00);
-  --shadow-md: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00), 0px 2px 4px -1px hsl(202.8169 89.1213% 53.1373% / 0.00);
-  --shadow-lg: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00), 0px 4px 6px -1px hsl(202.8169 89.1213% 53.1373% / 0.00);
-  --shadow-xl: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00), 0px 8px 10px -1px hsl(202.8169 89.1213% 53.1373% / 0.00);
-  --shadow-2xl: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00);
+  --shadow-2xs: 0px 1px 2px 0px rgba(0,0,0,0.06);
+  --shadow-xs:  0px 1px 3px 0px rgba(0,0,0,0.08), 0px 1px 2px -1px rgba(0,0,0,0.06);
+  --shadow-sm:  0px 1px 4px 0px rgba(0,0,0,0.09), 0px 1px 2px -1px rgba(0,0,0,0.07);
+  --shadow:     0px 2px 8px 0px rgba(0,0,0,0.10), 0px 1px 3px -1px rgba(0,0,0,0.07);
+  --shadow-md:  0px 4px 14px 0px rgba(0,0,0,0.11), 0px 2px 5px -1px rgba(0,0,0,0.07);
+  --shadow-lg:  0px 8px 24px 0px rgba(0,0,0,0.12), 0px 4px 8px -2px rgba(0,0,0,0.07);
+  --shadow-xl:  0px 12px 32px 0px rgba(0,0,0,0.13), 0px 8px 12px -4px rgba(0,0,0,0.07);
+  --shadow-2xl: 0px 20px 48px -8px rgba(0,0,0,0.18), 0px 8px 16px -4px rgba(0,0,0,0.08);
   --tracking-normal: 0em;
   --spacing: 0.25rem;
 
@@ -239,14 +239,14 @@
   --chart-4: 38 92% 55%;
   --chart-5: 0 72% 51%;
 
-  --shadow-2xs: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00);
-  --shadow-xs: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00);
-  --shadow-sm: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00), 0px 1px 2px -1px hsl(202.8169 89.1213% 53.1373% / 0.00);
-  --shadow: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00), 0px 1px 2px -1px hsl(202.8169 89.1213% 53.1373% / 0.00);
-  --shadow-md: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00), 0px 2px 4px -1px hsl(202.8169 89.1213% 53.1373% / 0.00);
-  --shadow-lg: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00), 0px 4px 6px -1px hsl(202.8169 89.1213% 53.1373% / 0.00);
-  --shadow-xl: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00), 0px 8px 10px -1px hsl(202.8169 89.1213% 53.1373% / 0.00);
-  --shadow-2xl: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00);
+  --shadow-2xs: 0px 1px 2px 0px rgba(0,0,0,0.20);
+  --shadow-xs:  0px 1px 3px 0px rgba(0,0,0,0.25), 0px 1px 2px -1px rgba(0,0,0,0.20);
+  --shadow-sm:  0px 1px 4px 0px rgba(0,0,0,0.28), 0px 1px 2px -1px rgba(0,0,0,0.22);
+  --shadow:     0px 2px 8px 0px rgba(0,0,0,0.30), 0px 1px 3px -1px rgba(0,0,0,0.22);
+  --shadow-md:  0px 4px 14px 0px rgba(0,0,0,0.32), 0px 2px 5px -1px rgba(0,0,0,0.22);
+  --shadow-lg:  0px 8px 24px 0px rgba(0,0,0,0.35), 0px 4px 8px -2px rgba(0,0,0,0.22);
+  --shadow-xl:  0px 12px 32px 0px rgba(0,0,0,0.38), 0px 8px 12px -4px rgba(0,0,0,0.22);
+  --shadow-2xl: 0px 20px 48px -8px rgba(0,0,0,0.45), 0px 8px 16px -4px rgba(0,0,0,0.25);
 
 }
 
@@ -454,4 +454,177 @@ body {
   .border.hover-elevate:not(.no-hover-interaction-elevate)::after {
     inset: -1px;
   }
+}
+
+/* ─── PROFESSIONAL GLOBAL POLISH ─── */
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Smooth transitions on interactive elements */
+button, a, input, select, textarea, [role="button"] {
+  transition: color 0.15s ease, background-color 0.15s ease,
+              border-color 0.15s ease, box-shadow 0.15s ease,
+              transform 0.15s ease, opacity 0.15s ease;
+}
+
+/* Professional focus rings */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.20), 0 1px 3px rgba(0,0,0,0.08);
+}
+
+/* Slightly lift cards on hover for depth */
+.card-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Bounce animation for icons */
+@keyframes bounceIn {
+  0%   { transform: scale(0.7); opacity: 0; }
+  60%  { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); }
+}
+.bounce-in {
+  animation: bounceIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Pulse ring for active elements */
+@keyframes pulseRing {
+  0%   { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.35); }
+  70%  { box-shadow: 0 0 0 10px hsl(var(--primary) / 0); }
+  100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0); }
+}
+.pulse-ring {
+  animation: pulseRing 1.8s ease infinite;
+}
+
+/* Shimmer loading skeleton */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--muted-foreground) / 0.08) 50%, hsl(var(--muted)) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease infinite;
+  border-radius: var(--radius-sm);
+}
+
+/* Progress bar animation */
+@keyframes progressFill {
+  from { width: 0%; }
+}
+.progress-animate {
+  animation: progressFill 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Star confetti burst */
+@keyframes confettiBurst {
+  0%   { transform: scale(0) rotate(0deg); opacity: 1; }
+  100% { transform: scale(1.5) rotate(180deg); opacity: 0; }
+}
+
+/* Text gradient utility */
+.text-gradient {
+  background: linear-gradient(135deg, #0DA2E7 0%, #7b5ea7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glass morphism card */
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+.dark .glass-card {
+  background: rgba(30, 30, 50, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ─── AUTH PAGE POLISH ─── */
+.auth-input {
+  background: hsl(var(--background));
+  border: 1.5px solid hsl(var(--border));
+  border-radius: var(--radius-md);
+  padding: 0.65rem 1rem;
+  font-size: 0.95rem;
+  width: 100%;
+  color: hsl(var(--foreground));
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.auth-input:focus {
+  outline: none;
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.18);
+}
+.auth-input::placeholder {
+  color: hsl(var(--muted-foreground));
+}
+
+/* ─── NAV ACTIVE STATE INDICATOR ─── */
+.nav-active-indicator {
+  position: absolute;
+  bottom: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 0 6px rgba(255,255,255,0.8);
+}
+
+/* Smooth page transitions */
+.page-enter {
+  animation: pageEnter 0.25s ease forwards;
+}
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── GESTURE HUD ─── */
+.gesture-hud {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  background: rgba(0,0,0,0.62);
+  backdrop-filter: blur(8px);
+  border-radius: 999px;
+  padding: 6px 14px;
+  pointer-events: none;
+}
+.gesture-hud-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 10px;
+  color: rgba(255,255,255,0.75);
+  min-width: 40px;
+}
+.gesture-hud-item span:first-child {
+  font-size: 18px;
+  line-height: 1;
+}
+.gesture-hud-item.active-gesture {
+  color: #fff;
+  font-weight: 700;
+}
+.gesture-hud-item.active-gesture span:first-child {
+  filter: drop-shadow(0 0 4px rgba(255,255,255,0.8));
 }

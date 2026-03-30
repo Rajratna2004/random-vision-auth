@@ -179,17 +179,18 @@ export default function AuthPage() {
           <p className="text-white/90 font-bold mt-1">✨ Learn, Play &amp; Grow! ✨</p>
         </motion.div>
 
-        <Card className="shadow-2xl border-0 overflow-hidden rounded-3xl">
-          <div className="kid-gradient px-4 pt-4 pb-4">
+        <Card className="shadow-2xl border-0 overflow-hidden rounded-3xl"
+              style={{ boxShadow: "0 24px 64px rgba(13,162,231,0.18), 0 8px 20px rgba(0,0,0,0.12)" }}>
+          <div className="kid-gradient px-5 pt-5 pb-4">
             <div className="flex gap-2 justify-center">
               {(["login", "register"] as Mode[]).map((m) => (
                 <button
                   key={m}
                   onClick={() => setMode(m)}
-                  className={`px-5 py-2.5 rounded-2xl text-sm font-bold transition-all ${
+                  className={`px-6 py-2.5 rounded-2xl text-sm font-bold transition-all duration-150 ${
                     mode === m
                       ? "bg-white text-[#0DA2E7] shadow-md"
-                      : "text-white hover:bg-white/20"
+                      : "text-white/85 hover:bg-white/20 hover:text-white"
                   }`}
                 >
                   {m === "login" ? "🔑 Login" : "✨ Sign Up"}
@@ -198,7 +199,7 @@ export default function AuthPage() {
             </div>
           </div>
 
-          <CardContent className="p-6">
+          <CardContent className="p-6 pt-5">
             <AnimatePresence mode="wait">
               {mode === "login" && (
                 <motion.form

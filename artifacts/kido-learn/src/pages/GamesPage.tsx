@@ -1331,20 +1331,44 @@ const CF_SHAPES_LIST = [
 ];
 const CF_DWELL_MS = 1800;
 
+const HP_PALETTE = ["#FF4757","#FF7F50","#FFD700","#2ECC71","#0DA2E7","#7B5EA7","#FF69B4","#1a1a2e","#ffffff"];
+const HP_PALETTE_NAMES = ["Red","Orange","Yellow","Green","Blue","Purple","Pink","Black","White"];
+
+function detectDrawGesture(lms: any[]): "draw"|"eraser"|"penup"|"color-next"|"clear"|"idle" {
+  const up = [
+    lms[8].y  < lms[6].y,
+    lms[12].y < lms[10].y,
+    lms[16].y < lms[14].y,
+    lms[20].y < lms[18].y,
+  ];
+  const thumbUp = lms[4].y < lms[2].y;
+  const pinch   = Math.hypot(lms[8].x - lms[4].x, lms[8].y - lms[4].y) < 0.065;
+  const upCount = up.filter(Boolean).length;
+  if (pinch)                                                         return "penup";
+  if (upCount === 0 && !thumbUp)                                     return "eraser";
+  if (upCount >= 4)                                                  return "clear";
+  if (up[0] && up[1] && !up[2] && !up[3] && !thumbUp)               return "color-next";
+  if (up[0] && !up[1] && !up[2] && !up[3] && !thumbUp)              return "draw";
+  return "idle";
+}
+
 function ColorFillGame({ onBack }: { onBack: () => void }) {
   const videoRef   = useRef<HTMLVideoElement>(null);
-  const overlayRef = useRef<HTMLCanvasElement>(null);
+  const drawRef    = useRef<HTMLCanvasElement>(null);
+  const uiRef      = useRef<HTMLCanvasElement>(null);
   const streamRef  = useRef<MediaStream | null>(null);
   const handsRef   = useRef<any>(null);
   const rafRef     = useRef<number>(0);
-  const filledRef  = useRef<Set<number>>(new Set());
-  const dwellRef   = useRef<{ id: number; startTime: number } | null>(null);
+  const lastPt     = useRef<{ x: number; y: number } | null>(null);
+  const lastColorRef = useRef<number>(0);
+  const lastClearRef = useRef<number>(0);
+  const colorIdxRef  = useRef<number>(0);
 
+  const [camReady, setCamReady] = useState(false);
+  const [camError, setCamError] = useState(false);
+  const [colorIdx, setColorIdx] = useState(0);
+  const [mode,     setMode]     = useState<string>("idle");
   const [handOk,   setHandOk]   = useState(false);
-  const [filledIds, setFilledIds] = useState<number[]>([]);
-  const [done,     setDone]      = useState(false);
-  const [camReady, setCamReady]  = useState(false);
-  const [camError, setCamError]  = useState(false);
 
   useEffect(() => {
     if (!(window as any).Hands) {
@@ -1380,79 +1404,86 @@ function ColorFillGame({ onBack }: { onBack: () => void }) {
       handsRef.current.setOptions({ maxNumHands: 1, modelComplexity: 0, minDetectionConfidence: 0.75, minTrackingConfidence: 0.5 });
       handsRef.current.onResults((r: any) => {
         if (!active) return;
-        const canvas = overlayRef.current;
-        if (!canvas) return;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const ui   = uiRef.current;
+        const draw = drawRef.current;
+        if (!ui || !draw) return;
+        const uiCtx   = ui.getContext("2d");
+        const drawCtx = draw.getContext("2d");
+        if (!uiCtx || !drawCtx) return;
+        uiCtx.clearRect(0, 0, ui.width, ui.height);
         const lms = r.multiHandLandmarks?.[0];
         setHandOk(!!lms);
+        if (!lms) { lastPt.current = null; return; }
 
-        for (const shape of CF_SHAPES_LIST) {
-          ctx.beginPath();
-          ctx.arc(shape.cx, shape.cy, shape.r, 0, Math.PI * 2);
-          if (filledRef.current.has(shape.id)) {
-            ctx.fillStyle = shape.color;
-            ctx.fill();
-            ctx.strokeStyle = "rgba(255,255,255,0.6)";
-            ctx.lineWidth = 4;
-            ctx.stroke();
-          } else {
-            ctx.fillStyle = shape.color + "28";
-            ctx.fill();
-            ctx.strokeStyle = shape.color;
-            ctx.lineWidth = 5;
-            ctx.stroke();
-          }
-          ctx.font = filledRef.current.has(shape.id) ? "bold 38px serif" : "28px serif";
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-          ctx.fillText(shape.emoji, shape.cx, shape.cy);
-        }
+        const gesture = detectDrawGesture(lms);
+        setMode(gesture);
 
-        if (!lms) return;
         const tip = lms[8];
-        const fx = (1 - tip.x) * canvas.width;
-        const fy = tip.y * canvas.height;
+        const cx  = (1 - tip.x) * ui.width;
+        const cy  = tip.y * ui.height;
+        const curColor = HP_PALETTE[colorIdxRef.current];
 
-        const hovered = CF_SHAPES_LIST.find(s => Math.hypot(fx - s.cx, fy - s.cy) < s.r && !filledRef.current.has(s.id));
-        if (hovered) {
-          if (!dwellRef.current || dwellRef.current.id !== hovered.id) dwellRef.current = { id: hovered.id, startTime: Date.now() };
-          const prog = Math.min((Date.now() - dwellRef.current.startTime) / CF_DWELL_MS, 1);
-          ctx.beginPath();
-          ctx.arc(hovered.cx, hovered.cy, hovered.r + 14, -Math.PI / 2, -Math.PI / 2 + prog * Math.PI * 2);
-          ctx.strokeStyle = "#ffffff";
-          ctx.lineWidth = 8;
-          ctx.lineCap = "round";
-          ctx.stroke();
-          ctx.beginPath();
-          ctx.arc(hovered.cx, hovered.cy, hovered.r + 14, -Math.PI / 2, -Math.PI / 2 + prog * Math.PI * 2);
-          ctx.strokeStyle = hovered.color;
-          ctx.lineWidth = 4;
-          ctx.lineCap = "round";
-          ctx.stroke();
-          if (prog >= 1) {
-            filledRef.current.add(hovered.id);
-            dwellRef.current = null;
-            const next = [...filledRef.current];
-            setFilledIds(next);
-            if (next.length >= CF_SHAPES_LIST.length) { fireConfetti(); setDone(true); }
+        if (gesture === "penup") {
+          lastPt.current = null;
+        } else if (gesture === "eraser") {
+          drawCtx.save();
+          drawCtx.globalCompositeOperation = "destination-out";
+          drawCtx.beginPath();
+          drawCtx.arc(cx, cy, 32, 0, Math.PI * 2);
+          drawCtx.fill();
+          drawCtx.restore();
+          lastPt.current = { x: cx, y: cy };
+        } else if (gesture === "clear") {
+          const now = Date.now();
+          if (now - lastClearRef.current > 1800) {
+            lastClearRef.current = now;
+            drawCtx.clearRect(0, 0, draw.width, draw.height);
           }
+          lastPt.current = null;
+        } else if (gesture === "color-next") {
+          const now = Date.now();
+          if (now - lastColorRef.current > 900) {
+            lastColorRef.current = now;
+            const next = (colorIdxRef.current + 1) % HP_PALETTE.length;
+            colorIdxRef.current = next;
+            setColorIdx(next);
+          }
+          lastPt.current = null;
+        } else if (gesture === "draw") {
+          if (lastPt.current) {
+            drawCtx.beginPath();
+            drawCtx.moveTo(lastPt.current.x, lastPt.current.y);
+            drawCtx.lineTo(cx, cy);
+            drawCtx.strokeStyle = curColor;
+            drawCtx.lineWidth   = 10;
+            drawCtx.lineCap     = "round";
+            drawCtx.lineJoin    = "round";
+            drawCtx.globalCompositeOperation = "source-over";
+            drawCtx.stroke();
+          }
+          lastPt.current = { x: cx, y: cy };
         } else {
-          dwellRef.current = null;
+          lastPt.current = null;
         }
 
-        ctx.beginPath();
-        ctx.arc(fx, fy, 14, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(255,255,255,0.85)";
-        ctx.fill();
-        ctx.strokeStyle = "#0DA2E7";
-        ctx.lineWidth = 3;
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(fx, fy, 4, 0, Math.PI * 2);
-        ctx.fillStyle = "#0DA2E7";
-        ctx.fill();
+        const CURSOR_COLOR: Record<string, string> = {
+          draw:        curColor,
+          eraser:      "rgba(200,200,200,0.85)",
+          penup:       "#ffa500",
+          "color-next":"#ffd700",
+          clear:       "#ff4757",
+          idle:        "rgba(255,255,255,0.5)",
+        };
+        const CURSOR_R: Record<string, number> = { eraser: 32, draw: 9, penup: 9, "color-next": 12, clear: 14, idle: 7 };
+        const cr    = CURSOR_R[gesture] ?? 7;
+        const cc    = CURSOR_COLOR[gesture] ?? "rgba(255,255,255,0.5)";
+        uiCtx.beginPath(); uiCtx.arc(cx, cy, cr + 5, 0, Math.PI * 2);
+        uiCtx.fillStyle = "rgba(255,255,255,0.18)"; uiCtx.fill();
+        uiCtx.beginPath(); uiCtx.arc(cx, cy, cr, 0, Math.PI * 2);
+        uiCtx.fillStyle = cc; uiCtx.fill();
+        uiCtx.strokeStyle = "rgba(255,255,255,0.75)"; uiCtx.lineWidth = 2; uiCtx.stroke();
+        uiCtx.beginPath(); uiCtx.arc(cx, cy, 3, 0, Math.PI * 2);
+        uiCtx.fillStyle = "#fff"; uiCtx.fill();
       });
       const loop = async () => {
         if (!active) return;
@@ -1465,7 +1496,22 @@ function ColorFillGame({ onBack }: { onBack: () => void }) {
     return () => { active = false; cancelAnimationFrame(rafRef.current); };
   }, [camReady]);
 
-  function resetGame() { filledRef.current = new Set(); setFilledIds([]); dwellRef.current = null; setDone(false); }
+  const MODE_LABELS: Record<string, string> = {
+    draw: "✏️ Drawing", eraser: "🧹 Erasing", clear: "🗑️ Clearing…",
+    penup: "✋ Pen Up", "color-next": "🎨 Changing Color…",
+  };
+  const MODE_BG: Record<string, string> = {
+    draw: HP_PALETTE[colorIdx], eraser: "#888", clear: "#ff4757",
+    penup: "#ffa500", "color-next": "#f59e0b",
+  };
+
+  const HUD_ITEMS = [
+    { emoji: "☝️", label: "Draw",    key: "draw" },
+    { emoji: "✌️", label: "Color",   key: "color-next" },
+    { emoji: "🖐️", label: "Clear",   key: "clear" },
+    { emoji: "🤏", label: "Pen Up",  key: "penup" },
+    { emoji: "✊", label: "Erase",   key: "eraser" },
+  ];
 
   if (camError) return (
     <div className="text-center space-y-4 py-8">
@@ -1475,44 +1521,67 @@ function ColorFillGame({ onBack }: { onBack: () => void }) {
     </div>
   );
 
-  if (done) return (
-    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-8 space-y-4">
-      <div className="text-6xl">🎨</div>
-      <h3 className="text-2xl font-bold">Masterpiece Complete!</h3>
-      <p className="text-muted-foreground">You filled all {CF_SHAPES_LIST.length} shapes with color!</p>
-      <div className="flex gap-3 justify-center">
-        <Button onClick={resetGame} className="kid-gradient text-white font-bold">Paint Again!</Button>
-        <Button variant="outline" onClick={onBack}>← Back</Button>
-      </div>
-    </motion.div>
-  );
-
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <Button variant="ghost" size="sm" onClick={onBack}>← Back</Button>
-        <h2 className="text-xl font-extrabold">🎨 Color Fill</h2>
-        <Badge className="bg-[#0DA2E7]/10 text-[#0DA2E7] font-bold">{filledIds.length}/{CF_SHAPES_LIST.length} filled</Badge>
+        <h2 className="text-xl font-extrabold">🎨 Hand Painter</h2>
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-5 rounded-full border-2 border-white shadow ring-2 ring-[#0DA2E7]/30 transition-all duration-200"
+               style={{ background: HP_PALETTE[colorIdx] }} />
+          <span className="text-xs font-bold text-muted-foreground">{HP_PALETTE_NAMES[colorIdx]}</span>
+        </div>
       </div>
-      <p className="text-xs text-center text-muted-foreground">
-        Point your <strong>index finger</strong> at a circle and hold steady to fill it with color!
-      </p>
-      <div className="relative rounded-2xl overflow-hidden bg-black mx-auto" style={{ maxWidth: 520, aspectRatio: "4/3" }}>
-        <video ref={videoRef} autoPlay muted playsInline className="w-full h-full object-cover mirror" />
-        <canvas ref={overlayRef} width={640} height={480} className="absolute inset-0 w-full h-full pointer-events-none" />
-        {!camReady && <div className="absolute inset-0 flex items-center justify-center bg-black/70 text-white text-sm">Starting camera…</div>}
-        {camReady && !handOk && (
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 text-white text-xs px-3 py-1.5 rounded-full whitespace-nowrap">
-            ☝️ Show your index finger to play
-          </div>
+
+      <div className="flex justify-center min-h-[28px]">
+        {mode !== "idle" && (
+          <motion.span key={mode} initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}
+            className="text-xs font-bold px-4 py-1 rounded-full text-white shadow-sm"
+            style={{ background: MODE_BG[mode] ?? "#888" }}>
+            {MODE_LABELS[mode] ?? ""}
+          </motion.span>
         )}
       </div>
-      <div className="flex gap-2 justify-center flex-wrap">
-        {CF_SHAPES_LIST.map(s => (
-          <div key={s.id} className={`w-9 h-9 rounded-full flex items-center justify-center text-lg border-2 transition-all ${filledIds.includes(s.id) ? "scale-110 shadow-md" : "opacity-50"}`}
-            style={{ background: filledIds.includes(s.id) ? s.color : "transparent", borderColor: s.color }}>
-            {filledIds.includes(s.id) ? s.emoji : ""}
+
+      <div className="relative rounded-2xl overflow-hidden bg-black mx-auto shadow-xl"
+           style={{ maxWidth: 540, aspectRatio: "4/3" }}>
+        <video ref={videoRef} autoPlay muted playsInline className="w-full h-full object-cover mirror" />
+        <canvas ref={drawRef} width={640} height={480}
+                className="absolute inset-0 w-full h-full pointer-events-none" />
+        <canvas ref={uiRef}   width={640} height={480}
+                className="absolute inset-0 w-full h-full pointer-events-none" />
+
+        {!camReady && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white gap-2">
+            <div className="w-8 h-8 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+            <span className="text-sm">Starting camera…</span>
           </div>
+        )}
+        {camReady && !handOk && (
+          <div className="absolute bottom-14 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-sm text-white text-xs px-4 py-2 rounded-full whitespace-nowrap font-medium">
+            ✋ Show your hand to start painting
+          </div>
+        )}
+
+        <div className="gesture-hud">
+          {HUD_ITEMS.map(g => (
+            <div key={g.key} className={`gesture-hud-item ${mode === g.key ? "active-gesture" : ""}`}>
+              <span>{g.emoji}</span>
+              <span>{g.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex items-center justify-center gap-2 flex-wrap pt-1">
+        <span className="text-[11px] text-muted-foreground font-semibold mr-1">Tap or ✌️ to change:</span>
+        {HP_PALETTE.map((c, i) => (
+          <button key={c}
+            className={`w-7 h-7 rounded-full border-2 transition-all duration-150 focus-visible:ring-2 focus-visible:ring-offset-1 ${i === colorIdx ? "scale-125 border-white shadow-md" : "border-transparent opacity-60 hover:opacity-90 hover:scale-110"}`}
+            style={{ background: c }}
+            onClick={() => { colorIdxRef.current = i; setColorIdx(i); }}
+            title={HP_PALETTE_NAMES[i]}
+          />
         ))}
       </div>
     </div>
@@ -1715,7 +1784,7 @@ const CAMERA_GAMES = [
   { id: "color-hunt-cam",      title: "Color Hunt",      emoji: "🎨", desc: "Find objects matching the shown color!",             color: "from-[#FF4E91] to-[#FF8E53]",   badge: "📷 Camera" },
   { id: "thumbs-quiz-cam",     title: "Thumbs Quiz",     emoji: "👍", desc: "Answer questions with thumbs up/down!",              color: "from-[#0DA2E7] to-[#26d0ce]",   badge: "📷 Camera" },
   { id: "air-draw",            title: "Air Draw",        emoji: "✍️", desc: "Draw with your finger in the air! Pinch to lift pen.", color: "from-[#FF6B6B] to-[#FF8E53]", badge: "📷 Camera" },
-  { id: "color-fill",          title: "Color Fill",      emoji: "🎨", desc: "Point at shapes and hold to fill them with color!",  color: "from-[#4CAF50] to-[#0DA2E7]",   badge: "📷 Camera" },
+  { id: "color-fill",          title: "Hand Painter",    emoji: "🎨", desc: "Use hand gestures to draw, erase, and change colors!", color: "from-[#4CAF50] to-[#0DA2E7]",   badge: "📷 Camera" },
   { id: "gesture-match",       title: "Gesture Match",   emoji: "🖐️", desc: "Match the hand gesture on screen — hold to score!", color: "from-[#9B59B6] to-[#8E44AD]",   badge: "📷 Camera" },
 ];
 
