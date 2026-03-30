@@ -1,15 +1,22 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Kido Learn Platform API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication operations
+  - name: face
+    description: Face detection and registration
+  - name: courses
+    description: Course and learning content
+  - name: ai
+    description: AI-powered features
 paths:
   /healthz:
     get:
@@ -24,6 +31,281 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/register:
+    post:
+      operationId: register
+      tags: [auth]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: User registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login with credentials
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Logged in successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout current user
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /face/register:
+    post:
+      operationId: registerFace
+      tags: [face]
+      summary: Register face descriptor for user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FaceRegisterRequest"
+      responses:
+        "200":
+          description: Face registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /face/verify:
+    post:
+      operationId: verifyFace
+      tags: [face]
+      summary: Verify face matches registered user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FaceVerifyRequest"
+      responses:
+        "200":
+          description: Face verification result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FaceVerifyResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /courses:
+    get:
+      operationId: getCourses
+      tags: [courses]
+      summary: Get all courses
+      responses:
+        "200":
+          description: List of courses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Course"
+
+  /courses/{id}:
+    get:
+      operationId: getCourse
+      tags: [courses]
+      summary: Get a specific course
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Course details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourseDetail"
+        "404":
+          description: Course not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /progress:
+    get:
+      operationId: getUserProgress
+      tags: [courses]
+      summary: Get user learning progress
+      responses:
+        "200":
+          description: User progress
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Progress"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /progress/{courseId}:
+    post:
+      operationId: updateProgress
+      tags: [courses]
+      summary: Update progress for a course
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProgressRequest"
+      responses:
+        "200":
+          description: Progress updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Progress"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /ai/quiz:
+    post:
+      operationId: generateQuiz
+      tags: [ai]
+      summary: AI-generate a quiz for a topic
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuizRequest"
+      responses:
+        "200":
+          description: Generated quiz
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuizResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /ai/recommend:
+    get:
+      operationId: getRecommendations
+      tags: [ai]
+      summary: Get AI-powered course recommendations
+      responses:
+        "200":
+          description: Recommended courses
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecommendationResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +316,299 @@ components:
       required:
         - status
 
+    RegisterRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+        firstName:
+          type: string
+        lastName:
+          type: string
+        role:
+          type: string
+          enum: [student, teacher]
+          default: student
+      required:
+        - username
+        - email
+        - password
+        - firstName
+        - lastName
+
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - email
+        - password
+
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        token:
+          type: string
+        message:
+          type: string
+      required:
+        - user
+        - token
+        - message
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        role:
+          type: string
+        hasFace:
+          type: boolean
+        createdAt:
+          type: string
+      required:
+        - id
+        - username
+        - email
+        - firstName
+        - lastName
+        - role
+        - hasFace
+        - createdAt
+
+    FaceRegisterRequest:
+      type: object
+      properties:
+        descriptor:
+          type: array
+          items:
+            type: number
+          description: 128-dimensional face descriptor from face-api.js
+      required:
+        - descriptor
+
+    FaceVerifyRequest:
+      type: object
+      properties:
+        descriptor:
+          type: array
+          items:
+            type: number
+          description: 128-dimensional face descriptor to verify
+      required:
+        - descriptor
+
+    FaceVerifyResponse:
+      type: object
+      properties:
+        match:
+          type: boolean
+        distance:
+          type: number
+        message:
+          type: string
+      required:
+        - match
+        - distance
+        - message
+
+    Course:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        subject:
+          type: string
+        gradeLevel:
+          type: string
+        thumbnail:
+          type: string
+        totalLessons:
+          type: integer
+        durationMinutes:
+          type: integer
+        difficulty:
+          type: string
+          enum: [beginner, intermediate, advanced]
+        createdAt:
+          type: string
+      required:
+        - id
+        - title
+        - description
+        - subject
+        - gradeLevel
+        - totalLessons
+        - durationMinutes
+        - difficulty
+        - createdAt
+
+    Lesson:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        order:
+          type: integer
+        durationMinutes:
+          type: integer
+        videoUrl:
+          type: string
+      required:
+        - id
+        - title
+        - content
+        - order
+        - durationMinutes
+
+    CourseDetail:
+      allOf:
+        - $ref: "#/components/schemas/Course"
+        - type: object
+          properties:
+            lessons:
+              type: array
+              items:
+                $ref: "#/components/schemas/Lesson"
+          required:
+            - lessons
+
+    Progress:
+      type: object
+      properties:
+        courseId:
+          type: string
+        courseTitle:
+          type: string
+        completedLessons:
+          type: integer
+        totalLessons:
+          type: integer
+        percentComplete:
+          type: number
+        lastAccessedAt:
+          type: string
+      required:
+        - courseId
+        - courseTitle
+        - completedLessons
+        - totalLessons
+        - percentComplete
+
+    UpdateProgressRequest:
+      type: object
+      properties:
+        lessonId:
+          type: string
+        completed:
+          type: boolean
+      required:
+        - lessonId
+        - completed
+
+    QuizRequest:
+      type: object
+      properties:
+        topic:
+          type: string
+        numQuestions:
+          type: integer
+          default: 5
+        difficulty:
+          type: string
+          enum: [easy, medium, hard]
+          default: medium
+      required:
+        - topic
+
+    QuizQuestion:
+      type: object
+      properties:
+        question:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+        correctIndex:
+          type: integer
+        explanation:
+          type: string
+      required:
+        - question
+        - options
+        - correctIndex
+        - explanation
+
+    QuizResponse:
+      type: object
+      properties:
+        topic:
+          type: string
+        questions:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuizQuestion"
+      required:
+        - topic
+        - questions
+
+    RecommendationResponse:
+      type: object
+      properties:
+        recommendations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Course"
+        reason:
+          type: string
+      required:
+        - recommendations
+        - reason
+
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required:
+        - error
+        - message

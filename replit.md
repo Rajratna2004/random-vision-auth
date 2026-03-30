@@ -1,96 +1,95 @@
-# Workspace
+# KidoLearn Platform
 
-## Overview
+A fully-featured kids' educational learning platform with JWT authentication, facial recognition login, interactive experiments, AI-powered quizzes, and course progress tracking.
 
-pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
+## Architecture
 
-## Stack
+### Monorepo Structure
 
-- **Monorepo tool**: pnpm workspaces
-- **Node.js version**: 24
-- **Package manager**: pnpm
-- **TypeScript version**: 5.9
-- **API framework**: Express 5
-- **Database**: PostgreSQL + Drizzle ORM
-- **Validation**: Zod (`zod/v4`), `drizzle-zod`
-- **API codegen**: Orval (from OpenAPI spec)
-- **Build**: esbuild (CJS bundle)
-
-## Structure
-
-```text
-artifacts-monorepo/
-├── artifacts/              # Deployable applications
-│   └── api-server/         # Express API server
-├── lib/                    # Shared libraries
-│   ├── api-spec/           # OpenAPI spec + Orval codegen config
-│   ├── api-client-react/   # Generated React Query hooks
-│   ├── api-zod/            # Generated Zod schemas from OpenAPI
-│   └── db/                 # Drizzle ORM schema + DB connection
-├── scripts/                # Utility scripts (single workspace package)
-│   └── src/                # Individual .ts scripts, run via `pnpm --filter @workspace/scripts run <script>`
-├── pnpm-workspace.yaml     # pnpm workspace (artifacts/*, lib/*, lib/integrations/*, scripts)
-├── tsconfig.base.json      # Shared TS options (composite, bundler resolution, es2022)
-├── tsconfig.json           # Root TS project references
-└── package.json            # Root package with hoisted devDeps
+```
+artifacts/
+  api-server/     - Express REST API server (port 8080)
+  kido-learn/     - React + Vite frontend (port 20858, preview at /)
+lib/
+  api-spec/       - OpenAPI spec + Orval codegen
+  db/             - Drizzle ORM + PostgreSQL schema
 ```
 
-## TypeScript & Composite Projects
+### Tech Stack
 
-Every package extends `tsconfig.base.json` which sets `composite: true`. The root `tsconfig.json` lists all packages as project references. This means:
+**Frontend (artifacts/kido-learn)**
+- React + Vite + TypeScript
+- wouter for routing
+- @tanstack/react-query for data fetching
+- framer-motion for animations
+- face-api.js for facial recognition
+- canvas-confetti for celebration effects
+- shadcn/ui components
+- Tailwind CSS with custom kid-friendly theme
 
-- **Always typecheck from the root** — run `pnpm run typecheck` (which runs `tsc --build --emitDeclarationOnly`). This builds the full dependency graph so that cross-package imports resolve correctly. Running `tsc` inside a single package will fail if its dependencies haven't been built yet.
-- **`emitDeclarationOnly`** — we only emit `.d.ts` files during typecheck; actual JS bundling is handled by esbuild/tsx/vite...etc, not `tsc`.
-- **Project references** — when package A depends on package B, A's `tsconfig.json` must list B in its `references` array. `tsc --build` uses this to determine build order and skip up-to-date packages.
+**Backend (artifacts/api-server)**
+- Express.js + TypeScript
+- JWT authentication (jsonwebtoken + bcryptjs)
+- Drizzle ORM with PostgreSQL
+- OpenAI API for AI-powered quizzes and recommendations
+- Built with esbuild
 
-## Root Scripts
+**Database**
+- PostgreSQL via Replit's built-in DB
+- Tables: users, courses, lessons, user_progress, sessions
 
-- `pnpm run build` — runs `typecheck` first, then recursively runs `build` in all packages that define it
-- `pnpm run typecheck` — runs `tsc --build --emitDeclarationOnly` using project references
+### Key Features
 
-## Packages
+1. **Authentication**: Username/password login + JWT tokens
+2. **Face Login**: face-api.js (TinyFaceDetector + FaceLandmark68Tiny + FaceRecognitionNet)
+   - Face models stored at `artifacts/kido-learn/public/models/`
+3. **Random Experiments**: Every lesson visit shows a randomly-selected interactive experiment from a pool of 7 types (number line, patterns, memory, counting, word match, anagram, sorting)
+4. **AI Quizzes**: OpenAI gpt-4o-mini generates age-appropriate multiple choice quizzes per topic
+5. **Progress Tracking**: Lesson completion stored per user per course
 
-### `artifacts/api-server` (`@workspace/api-server`)
+### Environment Variables
 
-Express 5 API server. Routes live in `src/routes/` and use `@workspace/api-zod` for request and response validation and `@workspace/db` for persistence.
+- `DATABASE_URL` - PostgreSQL connection string
+- `SESSION_SECRET` - JWT signing secret
+- `AI_INTEGRATIONS_OPENAI_API_KEY` - Replit AI Integrations key (auto-set)
+- `AI_INTEGRATIONS_OPENAI_BASE_URL` - Replit AI Integrations base URL (auto-set)
+- `PORT` - Server port (auto-set)
 
-- Entry: `src/index.ts` — reads `PORT`, starts Express
-- App setup: `src/app.ts` — mounts CORS, JSON/urlencoded parsing, routes at `/api`
-- Routes: `src/routes/index.ts` mounts sub-routers; `src/routes/health.ts` exposes `GET /health` (full path: `/api/health`)
-- Depends on: `@workspace/db`, `@workspace/api-zod`
-- `pnpm --filter @workspace/api-server run dev` — run the dev server
-- `pnpm --filter @workspace/api-server run build` — production esbuild bundle (`dist/index.cjs`)
-- Build bundles an allowlist of deps (express, cors, pg, drizzle-orm, zod, etc.) and externalizes the rest
+### API Routes
 
-### `lib/db` (`@workspace/db`)
+- `POST /api/auth/register` - Register user
+- `POST /api/auth/login` - Login with email/password
+- `GET /api/auth/me` - Get current user (authenticated)
+- `POST /api/face/register` - Register face descriptor (authenticated)
+- `POST /api/face/verify` - Verify face (returns matched user)
+- `GET /api/courses` - List all courses
+- `GET /api/courses/:id` - Get course with lessons
+- `GET /api/progress` - Get user progress (authenticated)
+- `POST /api/progress/:courseId` - Update lesson progress (authenticated)
+- `POST /api/ai/quiz` - Generate AI quiz (authenticated)
+- `GET /api/ai/recommend` - Get AI course recommendations (authenticated)
 
-Database layer using Drizzle ORM with PostgreSQL. Exports a Drizzle client instance and schema models.
+### Database Schema
 
-- `src/index.ts` — creates a `Pool` + Drizzle instance, exports schema
-- `src/schema/index.ts` — barrel re-export of all models
-- `src/schema/<modelname>.ts` — table definitions with `drizzle-zod` insert schemas (no models definitions exist right now)
-- `drizzle.config.ts` — Drizzle Kit config (requires `DATABASE_URL`, automatically provided by Replit)
-- Exports: `.` (pool, db, schema), `./schema` (schema only)
+- **users**: id, username, email, password_hash, first_name, last_name, role, face_descriptor (jsonb), has_face
+- **courses**: id, title, description, subject, grade_level, thumbnail, total_lessons, duration_minutes, difficulty
+- **lessons**: id, course_id, title, content, order, duration_minutes, video_url
+- **user_progress**: id, user_id, course_id, lesson_id, completed, completed_at
 
-Production migrations are handled by Replit when publishing. In development, we just use `pnpm --filter @workspace/db run push`, and we fallback to `pnpm --filter @workspace/db run push-force`.
+### Frontend Pages
 
-### `lib/api-spec` (`@workspace/api-spec`)
+- `/auth` - Login / Register / Face Login
+- `/` - Home dashboard with progress overview
+- `/courses` - Course browser with search and filter
+- `/courses/:id` - Course detail with lesson list
+- `/courses/:courseId/lessons/:lessonId` - Lesson page with experiment + AI quiz
+- `/profile` - User stats + face login setup
 
-Owns the OpenAPI 3.1 spec (`openapi.yaml`) and the Orval config (`orval.config.ts`). Running codegen produces output into two sibling packages:
+### Seeded Courses
 
-1. `lib/api-client-react/src/generated/` — React Query hooks + fetch client
-2. `lib/api-zod/src/generated/` — Zod schemas
-
-Run codegen: `pnpm --filter @workspace/api-spec run codegen`
-
-### `lib/api-zod` (`@workspace/api-zod`)
-
-Generated Zod schemas from the OpenAPI spec (e.g. `HealthCheckResponse`). Used by `api-server` for response validation.
-
-### `lib/api-client-react` (`@workspace/api-client-react`)
-
-Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHealthCheck`, `healthCheck`).
-
-### `scripts` (`@workspace/scripts`)
-
-Utility scripts package. Each script is a `.ts` file in `src/` with a corresponding npm script in `package.json`. Run scripts via `pnpm --filter @workspace/scripts run <script>`. Scripts can import any workspace package (e.g., `@workspace/db`) by adding it as a dependency in `scripts/package.json`.
+1. Math Adventures (Grade 3-5, beginner)
+2. Science Explorer (Grade 4-6, intermediate)
+3. Reading & Writing Stars (Grade 2-4, beginner)
+4. World Geography Quest (Grade 5-7, intermediate)
+5. Coding for Kids (Grade 4-7, beginner)
+6. Art & Creativity (Grade 1-5, beginner)

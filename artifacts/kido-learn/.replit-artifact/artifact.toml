@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "KidoLearn"
+version = "1.0.0"
+id = "artifacts/kido-learn"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 20858
+
+[services.development]
+run = "pnpm --filter @workspace/kido-learn run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/kido-learn", "run", "build" ]
+publicDir = "artifacts/kido-learn/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20858"
+BASE_PATH = "/"
