@@ -1159,17 +1159,17 @@ function ThumbsQuizGame({ onBack }: { onBack: () => void }) {
 
 /* ─────────── GAMES HUB ─────────── */
 const BRAIN_GAMES = [
-  { id: "math-speed",    title: "⚡ Math Speed Round",  desc: "Answer math questions as fast as you can!",   color: "from-blue-400 to-blue-600",   badge: "Math" },
-  { id: "memory-match",  title: "🃏 Memory Match",       desc: "Flip cards and find matching pairs!",          color: "from-purple-400 to-purple-600", badge: "Memory" },
-  { id: "quiz-race",     title: "🏁 Quiz Race",          desc: "Race against time on fun trivia questions!",   color: "from-green-400 to-green-600",  badge: "Trivia" },
-  { id: "word-builder",  title: "📝 Word Builder",       desc: "Rearrange letters to build real words!",       color: "from-orange-400 to-orange-600", badge: "English" },
-  { id: "spell-it",      title: "🔤 Spell It Right",     desc: "Fill in the missing letters to spell words!", color: "from-pink-400 to-pink-600",    badge: "Spelling" },
+  { id: "math-speed",   title: "Math Speed Round", emoji: "⚡", desc: "Answer math questions as fast as you can!",   color: "from-[#FF6B6B] to-[#FF8E53]",   badge: "Math" },
+  { id: "memory-match", title: "Memory Match",      emoji: "🃏", desc: "Flip cards and find matching pairs!",          color: "from-[#9B59B6] to-[#8E44AD]",   badge: "Memory" },
+  { id: "quiz-race",    title: "Quiz Race",          emoji: "🏁", desc: "Race against time on fun trivia questions!",   color: "from-[#4CAF50] to-[#45B649]",   badge: "Trivia" },
+  { id: "word-builder", title: "Word Builder",       emoji: "📝", desc: "Rearrange letters to build real words!",       color: "from-[#F7971E] to-[#FFD200]",   badge: "English" },
+  { id: "spell-it",     title: "Spell It Right",     emoji: "🔤", desc: "Fill in the missing letters to spell words!", color: "from-[#FF4E91] to-[#FF6B6B]",   badge: "Spelling" },
 ];
 
 const CAMERA_GAMES = [
-  { id: "finger-counting-cam", title: "✋ Finger Counting",  desc: "Hold up the right number of fingers — camera checks!", color: "from-indigo-400 to-violet-600", badge: "📷 Camera" },
-  { id: "color-hunt-cam",      title: "🎨 Color Hunt",       desc: "Find objects matching the shown color in real life!",   color: "from-rose-400 to-orange-500",  badge: "📷 Camera" },
-  { id: "thumbs-quiz-cam",     title: "👍 Thumbs Quiz",      desc: "Answer true/false questions with thumbs up or down!",  color: "from-teal-400 to-cyan-500",    badge: "📷 Camera" },
+  { id: "finger-counting-cam", title: "Finger Counting", emoji: "✋", desc: "Hold up the right number of fingers!", color: "from-[#5B2D8E] to-[#9B59B6]", badge: "📷 Camera" },
+  { id: "color-hunt-cam",      title: "Color Hunt",       emoji: "🎨", desc: "Find objects matching the shown color!",  color: "from-[#FF4E91] to-[#FF8E53]", badge: "📷 Camera" },
+  { id: "thumbs-quiz-cam",     title: "Thumbs Quiz",      emoji: "👍", desc: "Answer questions with thumbs up/down!",   color: "from-[#0DA2E7] to-[#26d0ce]", badge: "📷 Camera" },
 ];
 
 export default function GamesPage() {
@@ -1183,27 +1183,31 @@ export default function GamesPage() {
         {!activeGame && (
           <div className="space-y-8">
             <div className="text-center">
-              <h1 className="text-4xl font-extrabold mb-1">🎮 Learning Games</h1>
-              <p className="text-muted-foreground">Play games and learn at the same time!</p>
+              <h1 className="font-heading text-5xl text-gray-700 mb-1">🎮 Learning Games</h1>
+              <p className="text-gray-400 font-bold">Play games and learn at the same time!</p>
             </div>
 
             {/* Brain Games */}
             <div className="space-y-3">
-              <h2 className="text-xl font-bold flex items-center gap-2">🧠 Brain Games</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <h2 className="font-heading text-2xl text-gray-600 flex items-center gap-2">🧠 Brain Games</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {BRAIN_GAMES.map((game, i) => (
-                  <motion.div key={game.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}>
-                    <Card className="cursor-pointer hover:shadow-xl transition-all hover:-translate-y-1 overflow-hidden" onClick={() => setActiveGame(game.id)}>
-                      <div className={`h-2 bg-gradient-to-r ${game.color}`} />
-                      <CardContent className="p-5">
-                        <div className="flex items-start justify-between mb-2">
-                          <h3 className="font-bold text-lg">{game.title}</h3>
-                          <Badge className="shrink-0 ml-2 bg-secondary text-secondary-foreground">{game.badge}</Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground">{game.desc}</p>
-                        <p className="text-sm text-primary font-medium mt-3">Play now →</p>
-                      </CardContent>
-                    </Card>
+                  <motion.div
+                    key={game.id}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: i * 0.07 }}
+                    whileHover={{ scale: 1.04 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => setActiveGame(game.id)}
+                    className="cursor-pointer"
+                  >
+                    <div className={`bg-gradient-to-br ${game.color} rounded-3xl p-5 shadow-lg flex flex-col items-center text-center gap-2`}>
+                      <div className="text-4xl drop-shadow-md">{game.emoji}</div>
+                      <h3 className="font-heading text-white text-base leading-tight drop-shadow">{game.title}</h3>
+                      <p className="text-white/80 text-xs font-semibold line-clamp-2">{game.desc}</p>
+                      <span className="text-xs bg-white/25 text-white font-bold px-2 py-0.5 rounded-full">{game.badge}</span>
+                    </div>
                   </motion.div>
                 ))}
               </div>
@@ -1211,25 +1215,29 @@ export default function GamesPage() {
 
             {/* Camera Games */}
             <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <h2 className="text-xl font-bold">📷 Camera Games</h2>
-                <Badge className="bg-violet-100 text-violet-700">Needs Camera</Badge>
+              <div className="flex items-center gap-3">
+                <h2 className="font-heading text-2xl text-gray-600">📷 Camera Games</h2>
+                <span className="text-xs bg-violet-100 text-violet-700 font-bold px-3 py-1 rounded-full">Needs Camera</span>
               </div>
-              <p className="text-sm text-muted-foreground">Use your camera to play! Allow camera access when asked.</p>
+              <p className="text-sm text-gray-400 font-bold">Use your camera to play! Allow camera access when asked.</p>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {CAMERA_GAMES.map((game, i) => (
-                  <motion.div key={game.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 + i * 0.1 }}>
-                    <Card className="cursor-pointer hover:shadow-xl transition-all hover:-translate-y-1 overflow-hidden" onClick={() => setActiveGame(game.id)}>
-                      <div className={`h-2 bg-gradient-to-r ${game.color}`} />
-                      <CardContent className="p-5">
-                        <h3 className="font-bold text-base mb-1">{game.title}</h3>
-                        <p className="text-xs text-muted-foreground">{game.desc}</p>
-                        <div className="flex items-center justify-between mt-3">
-                          <span className="text-sm text-primary font-medium">Play now →</span>
-                          <span className="text-xs bg-violet-100 text-violet-600 px-1.5 py-0.5 rounded-full">{game.badge}</span>
-                        </div>
-                      </CardContent>
-                    </Card>
+                  <motion.div
+                    key={game.id}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.4 + i * 0.1 }}
+                    whileHover={{ scale: 1.04 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => setActiveGame(game.id)}
+                    className="cursor-pointer"
+                  >
+                    <div className={`bg-gradient-to-br ${game.color} rounded-3xl p-5 shadow-lg flex flex-col items-center text-center gap-2`}>
+                      <div className="text-4xl drop-shadow-md">{game.emoji}</div>
+                      <h3 className="font-heading text-white text-base leading-tight drop-shadow">{game.title}</h3>
+                      <p className="text-white/80 text-xs font-semibold">{game.desc}</p>
+                      <span className="text-xs bg-white/25 text-white font-bold px-2 py-0.5 rounded-full">{game.badge}</span>
+                    </div>
                   </motion.div>
                 ))}
               </div>

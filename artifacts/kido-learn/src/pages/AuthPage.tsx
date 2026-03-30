@@ -164,30 +164,40 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen stars-bg flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen sky-hero flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Floating items behind card */}
+      <div className="absolute top-8 left-[5%] text-5xl float-item select-none pointer-events-none font-heading font-bold" style={{ color: "#FF6B6B", textShadow: "0 3px 0 rgba(0,0,0,0.15)", animationDelay: "0s" }}>A</div>
+      <div className="absolute top-12 right-[8%] text-4xl float-item select-none pointer-events-none font-heading font-bold" style={{ color: "#4CAF50", textShadow: "0 3px 0 rgba(0,0,0,0.15)", animationDelay: "0.7s" }}>B</div>
+      <div className="absolute bottom-16 left-[10%] text-4xl float-item select-none pointer-events-none font-heading font-bold" style={{ color: "#F7971E", textShadow: "0 3px 0 rgba(0,0,0,0.15)", animationDelay: "0.4s" }}>1</div>
+      <div className="absolute bottom-20 right-[6%] text-4xl float-item select-none pointer-events-none font-heading font-bold" style={{ color: "#9B59B6", textShadow: "0 3px 0 rgba(0,0,0,0.15)", animationDelay: "1s" }}>2</div>
+      <div className="absolute top-1/3 left-[3%] text-3xl float-item-slow select-none pointer-events-none" style={{ animationDelay: "0.3s" }}>⭐</div>
+      <div className="absolute top-1/4 right-[4%] text-3xl float-item-slow select-none pointer-events-none" style={{ animationDelay: "1.2s" }}>🌟</div>
+
+      <div className="w-full max-w-md relative z-10">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
+          className="text-center mb-6"
         >
-          <div className="text-6xl mb-3">🦁</div>
-          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-purple-600 to-cyan-500 bg-clip-text text-transparent">
+          <div className="w-20 h-20 rounded-3xl kid-gradient flex items-center justify-center text-4xl shadow-xl mx-auto mb-3">
+            🦁
+          </div>
+          <h1 className="font-heading text-5xl text-white drop-shadow-lg" style={{ textShadow: "0 4px 12px rgba(0,0,0,0.2)" }}>
             KidoLearn
           </h1>
-          <p className="text-muted-foreground mt-1">Your adventure in learning starts here!</p>
+          <p className="text-white/90 font-bold mt-1">✨ Learn, Play &amp; Grow! ✨</p>
         </motion.div>
 
-        <Card className="shadow-xl border-0 overflow-hidden">
+        <Card className="shadow-2xl border-0 overflow-hidden rounded-3xl">
           <div className="kid-gradient px-4 pt-4 pb-4">
             <div className="flex gap-2 justify-center">
               {(["login", "register", "face"] as Mode[]).map((m) => (
                 <button
                   key={m}
                   onClick={() => setMode(m)}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                  className={`px-4 py-2 rounded-2xl text-sm font-bold transition-all ${
                     mode === m
-                      ? "bg-white text-purple-700 shadow"
+                      ? "bg-white text-[#0DA2E7] shadow-md"
                       : "text-white hover:bg-white/20"
                   }`}
                 >

@@ -1,0 +1,110 @@
+{
+  "colorScheme": "light",
+  "fonts": [
+    {
+      "family": "Nunito",
+      "role": "body"
+    },
+    {
+      "family": "Fredoka One",
+      "role": "heading"
+    },
+    {
+      "family": "Roboto",
+      "role": "body"
+    }
+  ],
+  "colors": {
+    "primary": "#0DA2E7",
+    "accent": "#0DA2E7",
+    "background": "#F7FAFC",
+    "textPrimary": "#1B1B1B",
+    "link": "#0DA2E7"
+  },
+  "typography": {
+    "fontFamilies": {
+      "primary": "Nunito",
+      "heading": "Fredoka One"
+    },
+    "fontStacks": {
+      "heading": [
+        "Fredoka One",
+        "cursive"
+      ],
+      "body": [
+        "Nunito",
+        "sans-serif"
+      ],
+      "paragraph": [
+        "Nunito",
+        "sans-serif"
+      ]
+    },
+    "fontSizes": {
+      "h1": "72px",
+      "h2": "72px",
+      "body": "24px"
+    }
+  },
+  "spacing": {
+    "baseUnit": 4,
+    "borderRadius": "16px"
+  },
+  "components": {
+    "buttonPrimary": {
+      "background": "#F7FAFC",
+      "textColor": "#FFFFFF",
+      "borderRadius": "9999px",
+      "borderRadiusCorners": {
+        "topLeft": "9999px",
+        "topRight": "9999px",
+        "bottomRight": "9999px",
+        "bottomLeft": "9999px"
+      },
+      "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.1) 0px 2px 4px -2px"
+    }
+  },
+  "images": {
+    "logo": null,
+    "favicon": null,
+    "ogImage": "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/05a452d8-706c-4d7c-9de1-eba888f244ff?Expires=1774857495&GoogleAccessId=go-api-on-aws%40gpt-engineer-390607.iam.gserviceaccount.com&Signature=pN7ALDpzOXSqdsqgfLFnFe52HhUrAdWZ3CUdQ86O0wbkEacdwmBAlydZuHPFZ1jq4%2B22ZucMizXuIn2trhlB0y1vwxXM13OUQYEVM%2BM6%2BgpgtxNCnxuTahvicvkyF221RlXHWc0Zx3eAaa4zZn7BUNkhFSO1XAdFcPKh6d2wFJhWJW%2FlqR8YeWhj0vy4eXBpRoEI7P3T4jbtwXBTSkuvfvXErUTfgbMTnubkmWRfWedLmH94%2FmO9XmJepRf5z%2B9QPnw9OpbhvBp48z%2Bld6%2F%2BPUFCnx8x5DYhhIKDAbdGKnVwXe51n9ciXgOOGbYCaplIx3rdjlNo9Km6fFe%2BLMAdjQ%3D%3D"
+  },
+  "__llm_button_reasoning": {
+    "primary": {
+      "index": 0,
+      "text": "🎮 Let's Play!",
+      "reasoning": "The button '🎮 Let's Play!' is the primary call-to-action due to its vibrant blue color, which stands out as an accent color, and its action-oriented text encouraging interaction."
+    },
+    "secondary": {
+      "index": -1,
+      "text": "N/A",
+      "reasoning": "There is only one button detected, so no secondary button can be selected."
+    },
+    "confidence": 0.95
+  },
+  "personality": {
+    "tone": "playful",
+    "energy": "high",
+    "targetAudience": "children and parents"
+  },
+  "designSystem": {
+    "framework": "tailwind",
+    "componentLibrary": ""
+  },
+  "confidence": {
+    "buttons": 0.95,
+    "colors": 0.9,
+    "overall": 0.925
+  },
+  "__llm_metadata": {
+    "logoSelection": {
+      "llmCalled": false,
+      "llmSucceeded": false,
+      "finalSource": "none"
+    },
+    "buttonClassification": {
+      "llmCalled": true,
+      "llmSucceeded": true
+    }
+  }
+}
