@@ -1157,6 +1157,550 @@ function ThumbsQuizGame({ onBack }: { onBack: () => void }) {
   );
 }
 
+/* ─────────── AIR DRAW GAME ─────────── */
+const AIR_DRAW_PALETTE = ["#FF6B6B","#FF8E53","#FFD200","#4CAF50","#0DA2E7","#9B59B6","#FF4E91","#1B1B1B"];
+
+function AirDrawGame({ onBack }: { onBack: () => void }) {
+  const videoRef  = useRef<HTMLVideoElement>(null);
+  const drawRef   = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const handsRef  = useRef<any>(null);
+  const rafRef    = useRef<number>(0);
+  const lastPt    = useRef<{ x: number; y: number } | null>(null);
+  const colorRef  = useRef("#FF6B6B");
+  const sizeRef   = useRef(8);
+  const eraserRef = useRef(false);
+
+  const [color,    _setColor]    = useState("#FF6B6B");
+  const [size,     _setSize]     = useState(8);
+  const [eraser,   _setEraser]   = useState(false);
+  const [handOk,   setHandOk]    = useState(false);
+  const [penUp,    setPenUp]     = useState(false);
+  const [camReady, setCamReady]  = useState(false);
+  const [camError, setCamError]  = useState(false);
+
+  function pickColor(c: string) { colorRef.current = c; _setColor(c); eraserRef.current = false; _setEraser(false); }
+  function pickSize(s: number)  { sizeRef.current = s; _setSize(s); }
+  function pickEraser()         { const e = !eraserRef.current; eraserRef.current = e; _setEraser(e); }
+
+  useEffect(() => {
+    if (!(window as any).Hands) {
+      const s = document.createElement("script");
+      s.src = "https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.min.js";
+      s.crossOrigin = "anonymous";
+      document.head.appendChild(s);
+    }
+    let mounted = true;
+    navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } })
+      .then(stream => {
+        if (!mounted) { stream.getTracks().forEach(t => t.stop()); return; }
+        streamRef.current = stream;
+        if (videoRef.current) videoRef.current.srcObject = stream;
+        setCamReady(true);
+      })
+      .catch(() => setCamError(true));
+    return () => {
+      mounted = false;
+      cancelAnimationFrame(rafRef.current);
+      streamRef.current?.getTracks().forEach(t => t.stop());
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!camReady) return;
+    let active = true;
+    function tryStart() {
+      const Hands = (window as any).Hands;
+      if (!Hands) { if (active) setTimeout(tryStart, 300); return; }
+      if (handsRef.current) return;
+      handsRef.current = new Hands({ locateFile: (f: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/${f}` });
+      handsRef.current.setOptions({ maxNumHands: 1, modelComplexity: 0, minDetectionConfidence: 0.75, minTrackingConfidence: 0.5 });
+      handsRef.current.onResults((r: any) => {
+        if (!active) return;
+        const canvas = drawRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+        const lms = r.multiHandLandmarks?.[0];
+        setHandOk(!!lms);
+        if (!lms) { lastPt.current = null; setPenUp(false); return; }
+        const tip = lms[8], thumb = lms[4];
+        const pinch = Math.hypot(tip.x - thumb.x, tip.y - thumb.y) < 0.065;
+        setPenUp(pinch);
+        const cx = (1 - tip.x) * canvas.width;
+        const cy = tip.y * canvas.height;
+        if (!pinch && lastPt.current) {
+          ctx.beginPath();
+          ctx.moveTo(lastPt.current.x, lastPt.current.y);
+          ctx.lineTo(cx, cy);
+          ctx.lineCap = "round"; ctx.lineJoin = "round";
+          if (eraserRef.current) {
+            ctx.globalCompositeOperation = "destination-out";
+            ctx.strokeStyle = "rgba(0,0,0,1)";
+            ctx.lineWidth = sizeRef.current * 3;
+          } else {
+            ctx.globalCompositeOperation = "source-over";
+            ctx.strokeStyle = colorRef.current;
+            ctx.lineWidth = sizeRef.current;
+          }
+          ctx.stroke();
+          ctx.globalCompositeOperation = "source-over";
+        }
+        lastPt.current = pinch ? null : { x: cx, y: cy };
+      });
+      const loop = async () => {
+        if (!active) return;
+        if (videoRef.current) try { await handsRef.current.send({ image: videoRef.current }); } catch {}
+        if (active) rafRef.current = requestAnimationFrame(loop);
+      };
+      loop();
+    }
+    tryStart();
+    return () => { active = false; cancelAnimationFrame(rafRef.current); };
+  }, [camReady]);
+
+  function clearDraw() { const c = drawRef.current; if (c) c.getContext("2d")?.clearRect(0, 0, c.width, c.height); }
+
+  if (camError) return (
+    <div className="text-center space-y-4 py-8">
+      <div className="text-5xl">📷</div>
+      <p className="text-muted-foreground">Camera not available. Please allow camera access.</p>
+      <Button variant="outline" onClick={onBack}>← Back to Games</Button>
+    </div>
+  );
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <Button variant="ghost" size="sm" onClick={onBack}>← Back</Button>
+        <h2 className="text-xl font-extrabold">✍️ Air Draw</h2>
+        <span className={`text-xs px-2 py-1 rounded-full font-bold ${!handOk ? "bg-gray-100 text-gray-400" : penUp ? "bg-orange-100 text-orange-600" : "bg-green-100 text-green-700"}`}>
+          {!handOk ? "🖐️ Show hand" : penUp ? "✋ Pen Up" : "✏️ Drawing"}
+        </span>
+      </div>
+      <p className="text-xs text-center text-muted-foreground">
+        <strong>Index finger</strong> draws · <strong>Pinch</strong> (thumb + index tip) lifts the pen
+      </p>
+      <div className="relative rounded-2xl overflow-hidden bg-black mx-auto" style={{ maxWidth: 520, aspectRatio: "4/3" }}>
+        <video ref={videoRef} autoPlay muted playsInline className="w-full h-full object-cover mirror" />
+        <canvas ref={drawRef} width={640} height={480} className="absolute inset-0 w-full h-full pointer-events-none" />
+        {!camReady && <div className="absolute inset-0 flex items-center justify-center bg-black/70 text-white text-sm">Starting camera…</div>}
+        {camReady && !handOk && (
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 text-white text-xs px-3 py-1.5 rounded-full whitespace-nowrap">
+            ✋ Show your hand to start drawing
+          </div>
+        )}
+        {penUp && handOk && (
+          <div className="absolute top-2 right-2 bg-orange-400/90 text-white text-xs px-2 py-1 rounded-full font-bold">✋ Pen lifted</div>
+        )}
+      </div>
+      <div className="flex flex-wrap gap-2 justify-center items-center">
+        {AIR_DRAW_PALETTE.map(c => (
+          <button key={c} onClick={() => pickColor(c)} className="rounded-full transition-all focus:outline-none flex-shrink-0"
+            style={{ width: 30, height: 30, background: c,
+              outline: color === c && !eraser ? "3px solid #1f2937" : c === "#1B1B1B" ? "1px solid #6b7280" : "none",
+              transform: color === c && !eraser ? "scale(1.25)" : "scale(1)" }} />
+        ))}
+        <button onClick={pickEraser}
+          className={`w-8 h-8 rounded-full bg-white shadow text-sm flex items-center justify-center transition-all focus:outline-none border ${eraser ? "border-gray-800 scale-125 ring-2 ring-gray-500" : "border-gray-200"}`}>
+          🧹
+        </button>
+        <Button variant="outline" size="sm" onClick={clearDraw} className="rounded-full h-8 text-xs">🗑️ Clear</Button>
+      </div>
+      <div className="flex gap-3 justify-center items-center">
+        <span className="text-xs text-muted-foreground font-medium">Brush size:</span>
+        {[3, 7, 13, 22].map(s => (
+          <button key={s} onClick={() => pickSize(s)} className="rounded-full transition-all focus:outline-none flex-shrink-0"
+            style={{ width: Math.max(s + 2, 14), height: Math.max(s + 2, 14),
+              background: eraser ? "#9ca3af" : color,
+              border: size === s ? "2.5px solid #1f2937" : "2px solid transparent" }} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─────────── COLOR FILL GAME ─────────── */
+const CF_SHAPES_LIST = [
+  { id: 0, cx: 107, cy: 120, r: 72, color: "#FF6B6B", emoji: "🌸" },
+  { id: 1, cx: 320, cy: 120, r: 72, color: "#0DA2E7", emoji: "⭐" },
+  { id: 2, cx: 533, cy: 120, r: 72, color: "#4CAF50", emoji: "🌿" },
+  { id: 3, cx: 107, cy: 360, r: 72, color: "#FFD200", emoji: "☀️" },
+  { id: 4, cx: 320, cy: 360, r: 72, color: "#FF4E91", emoji: "❤️" },
+  { id: 5, cx: 533, cy: 360, r: 72, color: "#9B59B6", emoji: "🔮" },
+];
+const CF_DWELL_MS = 1800;
+
+function ColorFillGame({ onBack }: { onBack: () => void }) {
+  const videoRef   = useRef<HTMLVideoElement>(null);
+  const overlayRef = useRef<HTMLCanvasElement>(null);
+  const streamRef  = useRef<MediaStream | null>(null);
+  const handsRef   = useRef<any>(null);
+  const rafRef     = useRef<number>(0);
+  const filledRef  = useRef<Set<number>>(new Set());
+  const dwellRef   = useRef<{ id: number; startTime: number } | null>(null);
+
+  const [handOk,   setHandOk]   = useState(false);
+  const [filledIds, setFilledIds] = useState<number[]>([]);
+  const [done,     setDone]      = useState(false);
+  const [camReady, setCamReady]  = useState(false);
+  const [camError, setCamError]  = useState(false);
+
+  useEffect(() => {
+    if (!(window as any).Hands) {
+      const s = document.createElement("script");
+      s.src = "https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.min.js";
+      s.crossOrigin = "anonymous";
+      document.head.appendChild(s);
+    }
+    let mounted = true;
+    navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } })
+      .then(stream => {
+        if (!mounted) { stream.getTracks().forEach(t => t.stop()); return; }
+        streamRef.current = stream;
+        if (videoRef.current) videoRef.current.srcObject = stream;
+        setCamReady(true);
+      })
+      .catch(() => setCamError(true));
+    return () => {
+      mounted = false;
+      cancelAnimationFrame(rafRef.current);
+      streamRef.current?.getTracks().forEach(t => t.stop());
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!camReady) return;
+    let active = true;
+    function tryStart() {
+      const Hands = (window as any).Hands;
+      if (!Hands) { if (active) setTimeout(tryStart, 300); return; }
+      if (handsRef.current) return;
+      handsRef.current = new Hands({ locateFile: (f: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/${f}` });
+      handsRef.current.setOptions({ maxNumHands: 1, modelComplexity: 0, minDetectionConfidence: 0.75, minTrackingConfidence: 0.5 });
+      handsRef.current.onResults((r: any) => {
+        if (!active) return;
+        const canvas = overlayRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const lms = r.multiHandLandmarks?.[0];
+        setHandOk(!!lms);
+
+        for (const shape of CF_SHAPES_LIST) {
+          ctx.beginPath();
+          ctx.arc(shape.cx, shape.cy, shape.r, 0, Math.PI * 2);
+          if (filledRef.current.has(shape.id)) {
+            ctx.fillStyle = shape.color;
+            ctx.fill();
+            ctx.strokeStyle = "rgba(255,255,255,0.6)";
+            ctx.lineWidth = 4;
+            ctx.stroke();
+          } else {
+            ctx.fillStyle = shape.color + "28";
+            ctx.fill();
+            ctx.strokeStyle = shape.color;
+            ctx.lineWidth = 5;
+            ctx.stroke();
+          }
+          ctx.font = filledRef.current.has(shape.id) ? "bold 38px serif" : "28px serif";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(shape.emoji, shape.cx, shape.cy);
+        }
+
+        if (!lms) return;
+        const tip = lms[8];
+        const fx = (1 - tip.x) * canvas.width;
+        const fy = tip.y * canvas.height;
+
+        const hovered = CF_SHAPES_LIST.find(s => Math.hypot(fx - s.cx, fy - s.cy) < s.r && !filledRef.current.has(s.id));
+        if (hovered) {
+          if (!dwellRef.current || dwellRef.current.id !== hovered.id) dwellRef.current = { id: hovered.id, startTime: Date.now() };
+          const prog = Math.min((Date.now() - dwellRef.current.startTime) / CF_DWELL_MS, 1);
+          ctx.beginPath();
+          ctx.arc(hovered.cx, hovered.cy, hovered.r + 14, -Math.PI / 2, -Math.PI / 2 + prog * Math.PI * 2);
+          ctx.strokeStyle = "#ffffff";
+          ctx.lineWidth = 8;
+          ctx.lineCap = "round";
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(hovered.cx, hovered.cy, hovered.r + 14, -Math.PI / 2, -Math.PI / 2 + prog * Math.PI * 2);
+          ctx.strokeStyle = hovered.color;
+          ctx.lineWidth = 4;
+          ctx.lineCap = "round";
+          ctx.stroke();
+          if (prog >= 1) {
+            filledRef.current.add(hovered.id);
+            dwellRef.current = null;
+            const next = [...filledRef.current];
+            setFilledIds(next);
+            if (next.length >= CF_SHAPES_LIST.length) { fireConfetti(); setDone(true); }
+          }
+        } else {
+          dwellRef.current = null;
+        }
+
+        ctx.beginPath();
+        ctx.arc(fx, fy, 14, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(255,255,255,0.85)";
+        ctx.fill();
+        ctx.strokeStyle = "#0DA2E7";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(fx, fy, 4, 0, Math.PI * 2);
+        ctx.fillStyle = "#0DA2E7";
+        ctx.fill();
+      });
+      const loop = async () => {
+        if (!active) return;
+        if (videoRef.current) try { await handsRef.current.send({ image: videoRef.current }); } catch {}
+        if (active) rafRef.current = requestAnimationFrame(loop);
+      };
+      loop();
+    }
+    tryStart();
+    return () => { active = false; cancelAnimationFrame(rafRef.current); };
+  }, [camReady]);
+
+  function resetGame() { filledRef.current = new Set(); setFilledIds([]); dwellRef.current = null; setDone(false); }
+
+  if (camError) return (
+    <div className="text-center space-y-4 py-8">
+      <div className="text-5xl">📷</div>
+      <p className="text-muted-foreground">Camera not available.</p>
+      <Button variant="outline" onClick={onBack}>← Back to Games</Button>
+    </div>
+  );
+
+  if (done) return (
+    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-8 space-y-4">
+      <div className="text-6xl">🎨</div>
+      <h3 className="text-2xl font-bold">Masterpiece Complete!</h3>
+      <p className="text-muted-foreground">You filled all {CF_SHAPES_LIST.length} shapes with color!</p>
+      <div className="flex gap-3 justify-center">
+        <Button onClick={resetGame} className="kid-gradient text-white font-bold">Paint Again!</Button>
+        <Button variant="outline" onClick={onBack}>← Back</Button>
+      </div>
+    </motion.div>
+  );
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <Button variant="ghost" size="sm" onClick={onBack}>← Back</Button>
+        <h2 className="text-xl font-extrabold">🎨 Color Fill</h2>
+        <Badge className="bg-[#0DA2E7]/10 text-[#0DA2E7] font-bold">{filledIds.length}/{CF_SHAPES_LIST.length} filled</Badge>
+      </div>
+      <p className="text-xs text-center text-muted-foreground">
+        Point your <strong>index finger</strong> at a circle and hold steady to fill it with color!
+      </p>
+      <div className="relative rounded-2xl overflow-hidden bg-black mx-auto" style={{ maxWidth: 520, aspectRatio: "4/3" }}>
+        <video ref={videoRef} autoPlay muted playsInline className="w-full h-full object-cover mirror" />
+        <canvas ref={overlayRef} width={640} height={480} className="absolute inset-0 w-full h-full pointer-events-none" />
+        {!camReady && <div className="absolute inset-0 flex items-center justify-center bg-black/70 text-white text-sm">Starting camera…</div>}
+        {camReady && !handOk && (
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 text-white text-xs px-3 py-1.5 rounded-full whitespace-nowrap">
+            ☝️ Show your index finger to play
+          </div>
+        )}
+      </div>
+      <div className="flex gap-2 justify-center flex-wrap">
+        {CF_SHAPES_LIST.map(s => (
+          <div key={s.id} className={`w-9 h-9 rounded-full flex items-center justify-center text-lg border-2 transition-all ${filledIds.includes(s.id) ? "scale-110 shadow-md" : "opacity-50"}`}
+            style={{ background: filledIds.includes(s.id) ? s.color : "transparent", borderColor: s.color }}>
+            {filledIds.includes(s.id) ? s.emoji : ""}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─────────── GESTURE MATCH GAME ─────────── */
+const GM_GESTURES = [
+  { id: "fist",     emoji: "✊", name: "Fist",       desc: "Close all fingers tightly into a fist" },
+  { id: "open",     emoji: "🖐️", name: "Open Hand",  desc: "Spread all five fingers wide open" },
+  { id: "peace",    emoji: "✌️", name: "Peace",      desc: "Index and middle fingers up, rest down" },
+  { id: "thumbsup", emoji: "👍", name: "Thumbs Up",  desc: "Only your thumb pointing up" },
+  { id: "point",    emoji: "☝️", name: "Pointing",   desc: "Only your index finger pointing up" },
+  { id: "rock",     emoji: "🤘", name: "Rock On",    desc: "Index and pinky up, middle and ring down" },
+] as const;
+type GestureId = typeof GM_GESTURES[number]["id"];
+
+function classifyGesture(lms: any[]): GestureId | null {
+  const up = [
+    lms[8].y < lms[6].y,
+    lms[12].y < lms[10].y,
+    lms[16].y < lms[14].y,
+    lms[20].y < lms[18].y,
+  ];
+  const thumbUp = lms[4].y < lms[2].y;
+  const n = up.filter(Boolean).length;
+  if (n === 0 && !thumbUp) return "fist";
+  if (n >= 4)              return "open";
+  if (up[0] && !up[1] && !up[2] && !up[3] && !thumbUp) return "point";
+  if (up[0] && up[1]  && !up[2] && !up[3] && !thumbUp) return "peace";
+  if (!up[0] && !up[1] && !up[2] && !up[3] && thumbUp) return "thumbsup";
+  if (up[0] && !up[1] && !up[2] && up[3])              return "rock";
+  return null;
+}
+
+function GestureMatchGame({ onBack }: { onBack: () => void }) {
+  const { videoRef, ready, error } = useCamera();
+  const handsRef = useRef<any>(null);
+  const rafRef   = useRef<number>(0);
+  const dwellRef = useRef<{ gesture: GestureId; startTime: number } | null>(null);
+  const roundRef = useRef(0);
+  const scoreRef = useRef(0);
+
+  const [mpLoaded, setMpLoaded] = useState(false);
+  const ROUNDS = 6;
+  const [round,     setRound]     = useState(0);
+  const [score,     setScore]     = useState(0);
+  const [done,      setDone]      = useState(false);
+  const [detected,  setDetected]  = useState<GestureId | null>(null);
+  const [dwellPct,  setDwellPct]  = useState(0);
+  const [targets]   = useState<GestureId[]>(() => {
+    const arr = GM_GESTURES.map(g => g.id) as GestureId[];
+    for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; }
+    return arr;
+  });
+
+  const target    = targets[Math.min(round, ROUNDS - 1)];
+  const targetDef = GM_GESTURES.find(g => g.id === target)!;
+  const detDef    = GM_GESTURES.find(g => g.id === detected);
+
+  useEffect(() => { roundRef.current = round; }, [round]);
+  useEffect(() => { scoreRef.current = score; }, [score]);
+
+  useEffect(() => {
+    if ((window as any).Hands) { setMpLoaded(true); return; }
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.min.js";
+    s.crossOrigin = "anonymous";
+    s.onload = () => setMpLoaded(true);
+    document.head.appendChild(s);
+  }, []);
+
+  useEffect(() => {
+    if (!mpLoaded || !ready) return;
+    let active = true;
+    const Hands = (window as any).Hands;
+    if (!Hands || handsRef.current) return;
+    handsRef.current = new Hands({ locateFile: (f: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/${f}` });
+    handsRef.current.setOptions({ maxNumHands: 1, modelComplexity: 0, minDetectionConfidence: 0.7, minTrackingConfidence: 0.5 });
+    handsRef.current.onResults((r: any) => {
+      if (!active) return;
+      const lms = r.multiHandLandmarks?.[0];
+      if (!lms) { setDetected(null); dwellRef.current = null; setDwellPct(0); return; }
+      const gesture = classifyGesture(lms);
+      setDetected(gesture);
+      const cur = targets[roundRef.current] ?? targets[0];
+      if (gesture === cur) {
+        if (!dwellRef.current || dwellRef.current.gesture !== gesture) dwellRef.current = { gesture, startTime: Date.now() };
+        const pct = Math.min((Date.now() - dwellRef.current.startTime) / 1500 * 100, 100);
+        setDwellPct(pct);
+        if (pct >= 100) {
+          dwellRef.current = null;
+          setDwellPct(0);
+          const nr = roundRef.current + 1;
+          const ns = scoreRef.current + 1;
+          if (nr >= ROUNDS) { setScore(ns); setRound(nr); setDone(true); if (ns >= ROUNDS - 1) fireConfetti(); }
+          else              { setScore(ns); setRound(nr); }
+        }
+      } else { dwellRef.current = null; setDwellPct(0); }
+    });
+    const loop = async () => {
+      if (!active) return;
+      if (videoRef.current) try { await handsRef.current.send({ image: videoRef.current }); } catch {}
+      if (active) rafRef.current = requestAnimationFrame(loop);
+    };
+    loop();
+    return () => { active = false; cancelAnimationFrame(rafRef.current); };
+  }, [mpLoaded, ready]);
+
+  if (error) return (
+    <div className="text-center space-y-4 py-8">
+      <div className="text-5xl">📷</div>
+      <p className="text-muted-foreground">Camera not available.</p>
+      <Button variant="outline" onClick={onBack}>← Back</Button>
+    </div>
+  );
+
+  if (done) return (
+    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-8 space-y-4">
+      <div className="text-6xl">{score >= 5 ? "🏆" : score >= 3 ? "⭐" : "💪"}</div>
+      <h3 className="text-2xl font-bold">Gesture Master!</h3>
+      <p className="text-5xl font-extrabold text-primary">{score}/{ROUNDS}</p>
+      <p className="text-muted-foreground">{score >= 5 ? "Perfect! You're a hand gesture pro!" : score >= 3 ? "Great job!" : "Keep practicing!"}</p>
+      <div className="flex gap-3 justify-center">
+        <Button onClick={() => { setRound(0); setScore(0); setDone(false); setDwellPct(0); setDetected(null); dwellRef.current = null; roundRef.current = 0; scoreRef.current = 0; }} className="kid-gradient text-white font-bold">
+          Play Again!
+        </Button>
+        <Button variant="outline" onClick={onBack}>← Back</Button>
+      </div>
+    </motion.div>
+  );
+
+  const CIRC = 2 * Math.PI * 44;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <Button variant="ghost" size="sm" onClick={onBack}>← Back</Button>
+        <h2 className="text-xl font-extrabold">🖐️ Gesture Match</h2>
+        <Badge className="bg-purple-100 text-purple-700 font-bold">{score}/{ROUNDS}</Badge>
+      </div>
+      <div className="w-full bg-secondary rounded-full h-2">
+        <div className="kid-gradient h-2 rounded-full transition-all" style={{ width: `${(round / ROUNDS) * 100}%` }} />
+      </div>
+
+      {/* Layout: video left, target right */}
+      <div className="flex gap-4 items-center flex-wrap justify-center">
+        {/* Video */}
+        <div className="relative rounded-xl overflow-hidden bg-black flex-shrink-0" style={{ width: 260, aspectRatio: "4/3" }}>
+          <video ref={videoRef} autoPlay muted playsInline className="w-full h-full object-cover mirror" />
+          <div className={`absolute bottom-1.5 left-1/2 -translate-x-1/2 text-xs px-2 py-0.5 rounded-full font-bold whitespace-nowrap ${detected ? "bg-green-500/90 text-white" : "bg-black/60 text-white"}`}>
+            {detected ? `${detDef?.emoji ?? "?"} ${detDef?.name ?? "..."}` : "✋ Show your hand"}
+          </div>
+        </div>
+
+        {/* Target gesture with SVG dwell ring */}
+        <div className="flex flex-col items-center gap-2 text-center flex-1 min-w-[160px]">
+          <p className="text-sm text-muted-foreground font-semibold">Make this gesture:</p>
+          <div className="relative flex items-center justify-center" style={{ width: 110, height: 110 }}>
+            <svg width="110" height="110" className="absolute inset-0" style={{ transform: "rotate(-90deg)" }}>
+              <circle cx="55" cy="55" r="48" fill="none" stroke="#e5e7eb" strokeWidth="7" />
+              <circle cx="55" cy="55" r="48" fill="none" stroke="#0DA2E7" strokeWidth="7" strokeLinecap="round"
+                strokeDasharray={`${2 * Math.PI * 48}`}
+                strokeDashoffset={`${2 * Math.PI * 48 * (1 - dwellPct / 100)}`}
+                style={{ transition: "stroke-dashoffset 0.05s linear" }} />
+            </svg>
+            <div className="text-6xl z-10 select-none">{targetDef?.emoji}</div>
+          </div>
+          <p className="font-extrabold text-lg leading-tight">{targetDef?.name}</p>
+          <p className="text-xs text-muted-foreground max-w-[180px] leading-snug">{targetDef?.desc}</p>
+          {dwellPct > 5 && (
+            <div className="flex items-center gap-1.5">
+              <div className="h-2 rounded-full bg-gray-200 w-28 overflow-hidden">
+                <div className="h-2 rounded-full kid-gradient transition-all" style={{ width: `${dwellPct}%` }} />
+              </div>
+              <span className="text-xs text-primary font-bold">{Math.round(dwellPct)}%</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <p className="text-xs text-center text-muted-foreground">
+        Round {round + 1} of {ROUNDS} · Hold the correct gesture for <strong>1.5 seconds</strong> to score!
+      </p>
+    </div>
+  );
+}
+
 /* ─────────── GAMES HUB ─────────── */
 const BRAIN_GAMES = [
   { id: "math-speed",   title: "Math Speed Round", emoji: "⚡", desc: "Answer math questions as fast as you can!",   color: "from-[#FF6B6B] to-[#FF8E53]",   badge: "Math" },
@@ -1167,9 +1711,12 @@ const BRAIN_GAMES = [
 ];
 
 const CAMERA_GAMES = [
-  { id: "finger-counting-cam", title: "Finger Counting", emoji: "✋", desc: "Hold up the right number of fingers!", color: "from-[#5B2D8E] to-[#9B59B6]", badge: "📷 Camera" },
-  { id: "color-hunt-cam",      title: "Color Hunt",       emoji: "🎨", desc: "Find objects matching the shown color!",  color: "from-[#FF4E91] to-[#FF8E53]", badge: "📷 Camera" },
-  { id: "thumbs-quiz-cam",     title: "Thumbs Quiz",      emoji: "👍", desc: "Answer questions with thumbs up/down!",   color: "from-[#0DA2E7] to-[#26d0ce]", badge: "📷 Camera" },
+  { id: "finger-counting-cam", title: "Finger Count",   emoji: "✋", desc: "Hold up the right number of fingers!",              color: "from-[#5B2D8E] to-[#9B59B6]",   badge: "📷 Camera" },
+  { id: "color-hunt-cam",      title: "Color Hunt",      emoji: "🎨", desc: "Find objects matching the shown color!",             color: "from-[#FF4E91] to-[#FF8E53]",   badge: "📷 Camera" },
+  { id: "thumbs-quiz-cam",     title: "Thumbs Quiz",     emoji: "👍", desc: "Answer questions with thumbs up/down!",              color: "from-[#0DA2E7] to-[#26d0ce]",   badge: "📷 Camera" },
+  { id: "air-draw",            title: "Air Draw",        emoji: "✍️", desc: "Draw with your finger in the air! Pinch to lift pen.", color: "from-[#FF6B6B] to-[#FF8E53]", badge: "📷 Camera" },
+  { id: "color-fill",          title: "Color Fill",      emoji: "🎨", desc: "Point at shapes and hold to fill them with color!",  color: "from-[#4CAF50] to-[#0DA2E7]",   badge: "📷 Camera" },
+  { id: "gesture-match",       title: "Gesture Match",   emoji: "🖐️", desc: "Match the hand gesture on screen — hold to score!", color: "from-[#9B59B6] to-[#8E44AD]",   badge: "📷 Camera" },
 ];
 
 export default function GamesPage() {
@@ -1258,6 +1805,9 @@ export default function GamesPage() {
                   {activeGame === "finger-counting-cam" && <FingerCountingCameraGame onBack={goBack} />}
                   {activeGame === "color-hunt-cam"      && <ColorHuntCameraGame onBack={goBack} />}
                   {activeGame === "thumbs-quiz-cam"     && <ThumbsQuizGame onBack={goBack} />}
+                  {activeGame === "air-draw"            && <AirDrawGame onBack={goBack} />}
+                  {activeGame === "color-fill"          && <ColorFillGame onBack={goBack} />}
+                  {activeGame === "gesture-match"       && <GestureMatchGame onBack={goBack} />}
                 </motion.div>
               </AnimatePresence>
             </CardContent>
