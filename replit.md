@@ -27,15 +27,18 @@ lib/
 - canvas-confetti for celebration effects
 - shadcn/ui components
 - Tailwind CSS with custom kid-friendly theme
-- All camera games use Flask (HTTP interval polling) — no MediaPipe JS CDN
+- All 6 camera games use **browser-side MediaPipe** (`@mediapipe/tasks-vision` CDN) — no Flask dependency for gesture detection
 
-**Hand Detection Backend (artifacts/flask-hands)**
-- Python Flask + Flask-CORS (port 5000)
+**Hand Detection (Browser-Side)**
+- `@mediapipe/tasks-vision` loaded dynamically from jsDelivr CDN
+- `useGestureDetection` hook: starts camera, runs `HandLandmarker.detectForVideo()` in rAF loop
+- Gesture classification: pointing, open_palm, peace, fist, thumbs_up, none
+- Sounds: `sounds.ts` (Web Audio API), TTS: `tts.ts` (SpeechSynthesis)
+- Components: `GestureOverlay` (camera PiP), `GestureCursor` (hand cursor), `GestureTutorial` (modal)
+
+**Hand Detection Backend (artifacts/flask-hands) — Legacy**
+- Python Flask + Flask-CORS (port 5000) — still running but no longer used for camera games
 - MediaPipe Tasks API v0.10 with `hand_landmarker.task` model
-- POST `/detect` — base64 JPEG → `{ gesture, landmarks, handDetected }`
-- GET `/health` — liveness check
-- Express proxies `/api/hands/*` → Flask (`artifacts/api-server/src/routes/hands.ts`)
-- Requires `mesa` Nix system dependency for libGLESv2
 
 **Backend (artifacts/api-server)**
 - Express.js + TypeScript

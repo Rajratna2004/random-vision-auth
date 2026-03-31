@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -627,4 +628,54 @@ select:focus-visible {
 }
 .gesture-hud-item.active-gesture span:first-child {
   filter: drop-shadow(0 0 4px rgba(255,255,255,0.8));
+}
+
+/* ─── KIDDO VISION CLASSES ─── */
+.font-display { font-family: 'Fredoka One', cursive; }
+.font-body    { font-family: 'Nunito', sans-serif; }
+
+.bg-kiddo-orange { background-color: hsl(25, 95%, 58%); }
+.bg-kiddo-green  { background-color: hsl(145, 63%, 49%); }
+.bg-kiddo-purple { background-color: hsl(270, 60%, 62%); }
+.bg-kiddo-cyan   { background-color: hsl(185, 72%, 50%); }
+.bg-kiddo-blue   { background-color: hsl(199, 89%, 48%); }
+.bg-kiddo-yellow { background-color: hsl(45, 100%, 60%); }
+
+.text-kiddo-yellow { color: hsl(45, 100%, 45%); }
+.text-kiddo-green  { color: hsl(145, 63%, 38%); }
+.text-kiddo-blue   { color: hsl(199, 89%, 38%); }
+
+.fill-kiddo-yellow { fill: hsl(45, 100%, 60%); }
+
+.kiddo-gradient-sky      { background: linear-gradient(135deg, hsl(199, 89%, 48%), hsl(185, 72%, 60%)); }
+.kiddo-gradient-sunset   { background: linear-gradient(135deg, hsl(25, 95%, 58%), hsl(340, 82%, 62%)); }
+.kiddo-gradient-forest   { background: linear-gradient(135deg, hsl(145, 63%, 49%), hsl(185, 72%, 50%)); }
+.kiddo-gradient-candy    { background: linear-gradient(135deg, hsl(270, 60%, 62%), hsl(340, 82%, 62%)); }
+.kiddo-gradient-sunshine { background: linear-gradient(135deg, hsl(45, 100%, 60%), hsl(25, 95%, 58%)); }
+
+.kiddo-btn {
+  border-radius: 9999px;
+  padding: 0.75rem 1.75rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+}
+.kiddo-btn:hover  { box-shadow: 0 8px 20px rgba(0,0,0,0.18); transform: scale(1.05); }
+.kiddo-btn:active { transform: scale(0.95); }
+
+.kiddo-card {
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  transition: all 0.3s;
+  cursor: pointer;
+}
+.kiddo-card:hover {
+  box-shadow: 0 16px 40px rgba(0,0,0,0.18);
+  transform: scale(1.05);
 }
