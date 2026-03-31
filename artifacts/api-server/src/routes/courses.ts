@@ -63,6 +63,8 @@ router.get("/courses/:id", async (req, res) => {
       order: l.order,
       durationMinutes: l.durationMinutes,
       videoUrl: l.videoUrl,
+      imageUrl: l.imageUrl ?? null,
+      challenges: l.challenges ?? null,
     })),
   });
 });

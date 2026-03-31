@@ -1,15 +1,154 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useParams } from "wouter";
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useState, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import LessonExperiment from "@/components/experiments/LessonExperiment";
+import { Badge } from "@/components/ui/badge";
 import AIQuizExperiment from "@/components/experiments/AIQuizExperiment";
 import { api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import confetti from "canvas-confetti";
+
+interface ChallengeItem {
+  question: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+}
+
+function FormattedText({ text }: { text: string }) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (part.startsWith("**") && part.endsWith("**")) {
+          return <strong key={i} className="font-bold text-foreground">{part.slice(2, -2)}</strong>;
+        }
+        return <span key={i}>{part}</span>;
+      })}
+    </>
+  );
+}
+
+function TheoryContent({ content }: { content: string }) {
+  const paragraphs = content.split(/\n\n+/);
+  return (
+    <div className="space-y-4 text-base leading-relaxed text-foreground/90">
+      {paragraphs.map((para, i) => {
+        const lines = para.split(/\n/);
+        const isList = lines.every(l => l.trim().startsWith("- ") || l.trim().startsWith("* ") || /^\d+\.\s/.test(l.trim()));
+        if (isList && lines.length > 1) {
+          return (
+            <ul key={i} className="space-y-1.5 ml-2">
+              {lines.map((line, j) => {
+                const cleaned = line.replace(/^[-*]\s/, "").replace(/^\d+\.\s/, "");
+                return (
+                  <li key={j} className="flex gap-2.5">
+                    <span className="mt-1 w-2 h-2 rounded-full bg-primary flex-shrink-0" />
+                    <span><FormattedText text={cleaned} /></span>
+                  </li>
+                );
+              })}
+            </ul>
+          );
+        }
+        return (
+          <p key={i}>
+            <FormattedText text={para} />
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
+function ChallengeCard({
+  challenge,
+  index,
+  onAnswer,
+}: {
+  challenge: ChallengeItem;
+  index: number;
+  onAnswer: (correct: boolean) => void;
+}) {
+  const [selected, setSelected] = useState<number | null>(null);
+
+  function handleSelect(idx: number) {
+    if (selected !== null) return;
+    setSelected(idx);
+    const correct = idx === challenge.correctIndex;
+    onAnswer(correct);
+    if (correct) {
+      confetti({ particleCount: 50, spread: 50, origin: { y: 0.65 }, colors: ["#0DA2E7", "#26d0ce", "#fbbf24"] });
+    }
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.04 }}
+    >
+      <Card className="overflow-hidden border border-border/60 shadow-sm">
+        <div className="px-5 py-4 bg-muted/40 border-b border-border/50 flex items-start gap-3">
+          <span className="flex-shrink-0 w-7 h-7 rounded-full kid-gradient text-white text-xs font-bold flex items-center justify-center">
+            {index + 1}
+          </span>
+          <p className="text-sm font-semibold text-foreground leading-snug pt-0.5">
+            {challenge.question}
+          </p>
+        </div>
+        <CardContent className="p-4 space-y-2">
+          <div className="grid grid-cols-1 gap-2">
+            {challenge.options.map((opt, i) => {
+              const isSelected = selected === i;
+              const isCorrect = i === challenge.correctIndex;
+              const answered = selected !== null;
+              let cls = "w-full text-left px-4 py-2.5 rounded-xl border-2 text-sm font-medium transition-all duration-200 ";
+              if (!answered) {
+                cls += "border-border hover:border-primary hover:bg-primary/5 cursor-pointer";
+              } else if (isCorrect) {
+                cls += "border-green-400 bg-green-50 text-green-700 cursor-default";
+              } else if (isSelected) {
+                cls += "border-red-400 bg-red-50 text-red-600 cursor-default";
+              } else {
+                cls += "border-border bg-muted/30 text-muted-foreground opacity-50 cursor-default";
+              }
+              return (
+                <button key={i} className={cls} onClick={() => handleSelect(i)} disabled={answered}>
+                  <span className="font-bold mr-2 text-primary/70">{String.fromCharCode(65 + i)}.</span>
+                  {opt}
+                  {answered && isCorrect && <span className="ml-2">✓</span>}
+                  {answered && isSelected && !isCorrect && <span className="ml-2">✗</span>}
+                </button>
+              );
+            })}
+          </div>
+          <AnimatePresence>
+            {selected !== null && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                className="overflow-hidden"
+              >
+                <div className={`mt-2 rounded-xl px-4 py-3 text-sm ${
+                  selected === challenge.correctIndex
+                    ? "bg-green-50 border border-green-200 text-green-700"
+                    : "bg-amber-50 border border-amber-200 text-amber-800"
+                }`}>
+                  <span className="mr-1">{selected === challenge.correctIndex ? "🎉" : "💡"}</span>
+                  {challenge.explanation}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}
 
 export default function LessonPage() {
   const { courseId, lessonId } = useParams<{ courseId: string; lessonId: string }>();
@@ -18,6 +157,8 @@ export default function LessonPage() {
   const { toast } = useToast();
   const [showQuiz, setShowQuiz] = useState(false);
   const [lessonComplete, setLessonComplete] = useState(false);
+  const [challengeScore, setChallengeScore] = useState(0);
+  const [answeredCount, setAnsweredCount] = useState(0);
 
   const { data: course, isLoading } = useQuery({
     queryKey: ["course", courseId],
@@ -32,86 +173,212 @@ export default function LessonPage() {
     },
   });
 
-  if (isLoading) {
-    return (
-      <Layout>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="text-6xl animate-bounce mb-4">📖</div>
-            <p className="text-muted-foreground">Loading lesson...</p>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
-
-  const lesson = (course as any)?.lessons?.find((l: any) => l.id === lessonId);
-  const lessons = (course as any)?.lessons ?? [];
-  const currentIndex = lessons.findIndex((l: any) => l.id === lessonId);
+  const lesson = useMemo(() => (course as any)?.lessons?.find((l: any) => l.id === lessonId), [course, lessonId]);
+  const lessons = useMemo(() => (course as any)?.lessons ?? [], [course]);
+  const currentIndex = useMemo(() => lessons.findIndex((l: any) => l.id === lessonId), [lessons, lessonId]);
   const nextLesson = lessons[currentIndex + 1];
   const prevLesson = lessons[currentIndex - 1];
 
-  if (!lesson) {
-    return (
-      <Layout>
-        <div className="text-center py-16">
-          <div className="text-6xl mb-4">😕</div>
-          <p className="text-xl font-bold">Lesson not found</p>
-          <Button className="mt-4" onClick={() => navigate(`/courses/${courseId}`)}>Back to Course</Button>
-        </div>
-      </Layout>
-    );
+  const challenges: ChallengeItem[] = useMemo(() => lesson?.challenges ?? [], [lesson]);
+  const totalChallenges = challenges.length;
+
+  function handleChallengeAnswer(correct: boolean) {
+    if (correct) setChallengeScore((s) => s + 1);
+    setAnsweredCount((c) => c + 1);
   }
 
   async function handleComplete() {
     if (lessonComplete) return;
     setLessonComplete(true);
     await progressMutation.mutateAsync();
-    confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 } });
-    toast({ title: "Lesson Complete! 🎉", description: "Great job! Keep it up!" });
+    confetti({ particleCount: 180, spread: 120, origin: { y: 0.5 }, colors: ["#0DA2E7", "#26d0ce", "#fbbf24", "#f472b6"] });
+    toast({ title: "Lesson Complete! 🎉", description: "Excellent work! Keep going!" });
   }
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center space-y-3">
+            <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+            <p className="text-muted-foreground font-medium">Loading lesson...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!lesson) {
+    return (
+      <Layout>
+        <div className="text-center py-16">
+          <p className="text-xl font-bold text-foreground mb-4">Lesson not found</p>
+          <Button onClick={() => navigate(`/courses/${courseId}`)}>← Back to Course</Button>
+        </div>
+      </Layout>
+    );
+  }
+
+  const courseTitle = (course as any)?.title ?? "Course";
+  const courseSubject = (course as any)?.subject ?? "general";
 
   return (
     <Layout>
-      <div className="max-w-3xl mx-auto space-y-6">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" onClick={() => navigate(`/courses/${courseId}`)}>
-            ← Back to {(course as any)?.title}
+      <div className="max-w-3xl mx-auto space-y-6 pb-12">
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-2 text-sm">
+          <Button variant="ghost" size="sm" className="h-8 px-2 text-muted-foreground hover:text-foreground" onClick={() => navigate(`/courses/${courseId}`)}>
+            ← {courseTitle}
           </Button>
+          <span className="text-muted-foreground/50">/</span>
+          <span className="text-foreground font-medium truncate">{lesson.title}</span>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <Card className="overflow-hidden">
-            <div className="kid-gradient px-6 py-4">
-              <p className="text-white/80 text-sm mb-1">Lesson {lesson.order}</p>
-              <h1 className="text-2xl font-extrabold text-white">{lesson.title}</h1>
-              <p className="text-white/80 text-sm mt-1">{lesson.durationMinutes} minutes</p>
+        {/* Hero Card with Image Banner */}
+        <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}>
+          <Card className="overflow-hidden shadow-lg border-0">
+            {/* Image Banner */}
+            <div className="relative h-52 overflow-hidden">
+              {lesson.imageUrl ? (
+                <img
+                  src={lesson.imageUrl}
+                  alt={lesson.title}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full kid-gradient" />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-6">
+                <div className="flex items-center gap-2 mb-2">
+                  <Badge className="bg-white/20 text-white border-white/30 text-xs backdrop-blur-sm">
+                    Lesson {lesson.order}
+                  </Badge>
+                  <Badge className="bg-white/20 text-white border-white/30 text-xs backdrop-blur-sm">
+                    {lesson.durationMinutes} min
+                  </Badge>
+                </div>
+                <h1 className="text-2xl md:text-3xl font-extrabold text-white leading-tight drop-shadow-sm">
+                  {lesson.title}
+                </h1>
+              </div>
             </div>
-            <CardContent className="p-6 prose max-w-none">
-              <p className="text-lg leading-relaxed text-foreground">{lesson.content}</p>
+
+            {/* Theory Content */}
+            <CardContent className="p-6 md:p-8">
+              <TheoryContent content={lesson.content} />
             </CardContent>
           </Card>
         </motion.div>
 
-        <LessonExperiment
-          key={lessonId}
-          subject={(course as any)?.subject ?? "general"}
-          lessonTitle={lesson.title}
-          lessonOrder={lesson.order}
-        />
+        {/* Challenges Section */}
+        {totalChallenges > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="space-y-4"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-extrabold text-foreground">Practice Challenges</h2>
+                <p className="text-sm text-muted-foreground mt-0.5">{totalChallenges} questions to test your understanding</p>
+              </div>
+              {answeredCount > 0 && (
+                <div className="text-right">
+                  <div className="text-2xl font-extrabold text-primary">{challengeScore}/{answeredCount}</div>
+                  <div className="text-xs text-muted-foreground">correct</div>
+                </div>
+              )}
+            </div>
 
-        <div className="flex items-center justify-between gap-3 flex-wrap">
+            {/* Progress bar */}
+            {answeredCount > 0 && (
+              <div className="w-full bg-secondary rounded-full h-2">
+                <motion.div
+                  className="kid-gradient h-2 rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${(answeredCount / totalChallenges) * 100}%` }}
+                  transition={{ duration: 0.5 }}
+                />
+              </div>
+            )}
+
+            <div className="space-y-3">
+              {challenges.map((ch, i) => (
+                <ChallengeCard
+                  key={i}
+                  challenge={ch}
+                  index={i}
+                  onAnswer={handleChallengeAnswer}
+                />
+              ))}
+            </div>
+
+            {/* Score summary when all answered */}
+            <AnimatePresence>
+              {answeredCount === totalChallenges && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                >
+                  <Card className="kid-gradient border-0 shadow-lg">
+                    <CardContent className="p-6 text-center text-white">
+                      <div className="text-4xl mb-2">
+                        {challengeScore === totalChallenges ? "🏆" : challengeScore >= totalChallenges * 0.7 ? "⭐" : "📚"}
+                      </div>
+                      <h3 className="text-xl font-extrabold">
+                        {challengeScore}/{totalChallenges} Correct!
+                      </h3>
+                      <p className="text-white/85 text-sm mt-1">
+                        {challengeScore === totalChallenges
+                          ? "Perfect! You've mastered this lesson!"
+                          : challengeScore >= totalChallenges * 0.7
+                          ? "Great job! Review the explanations to improve."
+                          : "Keep practicing! Read through the theory again."}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        )}
+
+        {/* AI Quiz Section */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+          {!showQuiz ? (
+            <Card className="border-dashed border-2 border-primary/30 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer"
+              onClick={() => setShowQuiz(true)}>
+              <CardContent className="p-6 flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-2xl flex-shrink-0 shadow-md">
+                  🤖
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-foreground text-base">AI-Powered Quiz</h3>
+                  <p className="text-sm text-muted-foreground">5 unique AI-generated questions about {lesson.title}</p>
+                </div>
+                <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-0 font-bold shrink-0">
+                  Start Quiz
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <AIQuizExperiment topic={lesson.title} difficulty="easy" />
+          )}
+        </motion.div>
+
+        {/* Complete / Navigation */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="flex items-center justify-between gap-3 pt-2 border-t border-border/50"
+        >
           <div>
-            {!showQuiz && (
-              <Button
-                variant="outline"
-                onClick={() => setShowQuiz(true)}
-                className="border-primary text-primary hover:bg-primary/5"
-              >
-                🤖 Take AI Quiz
+            {prevLesson && (
+              <Button variant="ghost" size="sm" onClick={() => navigate(`/courses/${courseId}/lessons/${prevLesson.id}`)}>
+                ← Prev
               </Button>
             )}
           </div>
@@ -119,28 +386,24 @@ export default function LessonPage() {
           {!lessonComplete ? (
             <Button
               onClick={handleComplete}
-              className="kid-gradient text-white font-bold px-8"
+              className="kid-gradient text-white font-bold px-8 shadow-md"
               disabled={progressMutation.isPending}
             >
-              {progressMutation.isPending ? "Saving..." : "✅ Mark as Complete!"}
+              {progressMutation.isPending ? "Saving..." : "✅ Mark Complete"}
             </Button>
           ) : (
             <div className="flex items-center gap-3">
-              <span className="text-green-600 font-bold">✅ Lesson Complete!</span>
-              {nextLesson && (
+              <span className="text-green-600 font-bold text-sm">✅ Completed!</span>
+              {nextLesson ? (
                 <Button
                   onClick={() => navigate(`/courses/${courseId}/lessons/${nextLesson.id}`)}
                   className="kid-gradient text-white font-bold"
                 >
-                  Next Lesson →
+                  Next: {nextLesson.title.length > 22 ? nextLesson.title.slice(0, 22) + "…" : nextLesson.title} →
                 </Button>
-              )}
-              {!nextLesson && (
+              ) : (
                 <Button
-                  onClick={() => {
-                    confetti({ particleCount: 200, spread: 120 });
-                    navigate(`/courses/${courseId}`);
-                  }}
+                  onClick={() => { confetti({ particleCount: 250, spread: 150 }); navigate(`/courses/${courseId}`); }}
                   className="kid-gradient text-white font-bold"
                 >
                   🏆 Course Complete!
@@ -148,38 +411,15 @@ export default function LessonPage() {
               )}
             </div>
           )}
-        </div>
 
-        {showQuiz && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <AIQuizExperiment
-              topic={lesson.title}
-              difficulty="easy"
-            />
-          </motion.div>
-        )}
-
-        <div className="flex justify-between pt-4 border-t">
-          {prevLesson ? (
-            <Button
-              variant="ghost"
-              onClick={() => navigate(`/courses/${courseId}/lessons/${prevLesson.id}`)}
-            >
-              ← Previous: {prevLesson.title}
-            </Button>
-          ) : <div />}
-          {nextLesson && (
-            <Button
-              variant="ghost"
-              onClick={() => navigate(`/courses/${courseId}/lessons/${nextLesson.id}`)}
-            >
-              Next: {nextLesson.title} →
-            </Button>
-          )}
-        </div>
+          <div>
+            {nextLesson && (
+              <Button variant="ghost" size="sm" onClick={() => navigate(`/courses/${courseId}/lessons/${nextLesson.id}`)}>
+                Next →
+              </Button>
+            )}
+          </div>
+        </motion.div>
       </div>
     </Layout>
   );

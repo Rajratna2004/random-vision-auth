@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, integer, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -31,8 +31,17 @@ export const lessonsTable = pgTable("lessons", {
   order: integer("order").notNull(),
   durationMinutes: integer("duration_minutes").notNull().default(5),
   videoUrl: text("video_url"),
+  imageUrl: text("image_url"),
+  challenges: jsonb("challenges").$type<ChallengeItem[]>(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
+
+export interface ChallengeItem {
+  question: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+}
 
 export const insertLessonSchema = createInsertSchema(lessonsTable).omit({
   id: true,
