@@ -107,15 +107,19 @@ export default function AuthPage() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
       setDetecting(true);
     } catch (e) {
       toast({ title: "Camera Error", description: "Could not access your camera. Please allow camera access.", variant: "destructive" });
       setMode("login");
     }
   }
+
+  useEffect(() => {
+    if (detecting && videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+      videoRef.current.play().catch(() => {});
+    }
+  }, [detecting]);
 
   function handleModeSwitch(m: Mode) {
     if (mode === "face" && m !== "face") stopCamera();

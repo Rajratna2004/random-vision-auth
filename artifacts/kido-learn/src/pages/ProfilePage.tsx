@@ -46,12 +46,18 @@ export default function ProfilePage() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       streamRef.current = stream;
-      if (videoRef.current) videoRef.current.srcObject = stream;
       setCameraActive(true);
     } catch {
       toast({ title: "Camera Error", description: "Could not access camera", variant: "destructive" });
     }
   }
+
+  useEffect(() => {
+    if (cameraActive && videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+      videoRef.current.play().catch(() => {});
+    }
+  }, [cameraActive]);
 
   function stopCamera() {
     streamRef.current?.getTracks().forEach((t) => t.stop());
