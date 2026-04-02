@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import AIQuizExperiment from "@/components/experiments/AIQuizExperiment";
 import { api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
-import { getLessonMedia, type DiagramStep } from "@/lib/lessonMedia";
+import { getLessonMedia, type DiagramStep, type ConceptImage } from "@/lib/lessonMedia";
 import confetti from "canvas-confetti";
 
 interface ChallengeItem {
@@ -62,6 +62,45 @@ function TheoryContent({ content }: { content: string }) {
         );
       })}
     </div>
+  );
+}
+
+function ConceptImageCard({ img, index }: { img: ConceptImage; index: number }) {
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.1, type: "spring", stiffness: 200 }}
+      className="relative rounded-2xl overflow-hidden border border-slate-100 shadow-sm bg-white flex flex-col"
+    >
+      <div className="relative w-full" style={{ paddingTop: "70%" }}>
+        {!loaded && !error && (
+          <div className="absolute inset-0 flex items-center justify-center bg-slate-100">
+            <div className="w-8 h-8 border-4 border-sky-400 border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
+        {error ? (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-50 gap-2">
+            <span className="text-4xl">{img.emoji}</span>
+            <span className="text-xs text-muted-foreground">{img.caption}</span>
+          </div>
+        ) : (
+          <img
+            src={img.url}
+            alt={img.caption}
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${loaded ? "opacity-100" : "opacity-0"}`}
+            onLoad={() => setLoaded(true)}
+            onError={() => setError(true)}
+          />
+        )}
+        <div className="absolute top-2 left-2 w-8 h-8 rounded-full bg-white/90 shadow flex items-center justify-center text-lg">
+          {img.emoji}
+        </div>
+      </div>
+      <p className="text-xs font-semibold text-center text-slate-600 px-3 py-2 leading-tight">{img.caption}</p>
+    </motion.div>
   );
 }
 
@@ -348,6 +387,33 @@ export default function LessonPage() {
           </motion.div>
         )}
 
+        {/* See It in Real Life! Image Section */}
+        {media.conceptImages && media.conceptImages.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.12 }}
+          >
+            <Card className="overflow-hidden shadow-md border-0">
+              <div className="flex items-center gap-3 px-5 py-4 border-b border-border/40 bg-gradient-to-r from-sky-50 to-cyan-50">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-cyan-500 flex items-center justify-center text-white text-lg shadow">
+                  🖼️
+                </div>
+                <div>
+                  <h2 className="font-extrabold text-foreground">See It in Real Life!</h2>
+                  <p className="text-xs text-muted-foreground">Real-world examples of this concept</p>
+                </div>
+              </div>
+              <CardContent className="p-5">
+                <div className="grid grid-cols-3 gap-3">
+                  {media.conceptImages.map((img, i) => (
+                    <ConceptImageCard key={i} img={img} index={i} />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
 
         {/* Key Facts Section */}
         <motion.div

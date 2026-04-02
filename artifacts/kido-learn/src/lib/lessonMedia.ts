@@ -5,6 +5,12 @@ export interface DiagramStep {
   color?: string;
 }
 
+export interface ConceptImage {
+  url: string;
+  caption: string;
+  emoji: string;
+}
+
 export interface LessonMedia {
   imageUrl: string;
   emoji: string;
@@ -12,6 +18,7 @@ export interface LessonMedia {
   keyFacts: string[];
   funFact: string;
   diagramSteps: DiagramStep[];
+  conceptImages?: ConceptImage[];
 }
 
 const B = "https://images.unsplash.com/photo-";
@@ -1259,6 +1266,47 @@ const DEFAULT_MEDIA: LessonMedia = {
   ],
 };
 
+const COURSE_IMAGES: Record<string, ConceptImage[]> = {
+  "Math Adventures": [
+    { url: `${B}1635070041078-e363dbe005cb?w=400&h=280&fit=crop&q=80`, caption: "Math equations on a blackboard", emoji: "🔢" },
+    { url: `${B}1580582932707-520aed937b7b?w=400&h=280&fit=crop&q=80`, caption: "Counting with an abacus", emoji: "🧮" },
+    { url: `${B}1503676260728-1c00da094a0b?w=400&h=280&fit=crop&q=80`, caption: "Kids learning math together", emoji: "👧" },
+  ],
+  "Science Explorer": [
+    { url: `${B}1504192010706-dd7f569ee2be?w=400&h=280&fit=crop&q=80`, caption: "Colourful science experiment", emoji: "🧪" },
+    { url: `${B}1416879595882-3373a0480b5b?w=400&h=280&fit=crop&q=80`, caption: "Plants growing in sunlight", emoji: "🌱" },
+    { url: `${B}1519681393784-d120267933ba?w=400&h=280&fit=crop&q=80`, caption: "Clouds and weather forming", emoji: "☁️" },
+  ],
+  "Reading & Writing": [
+    { url: `${B}1456513080510-7bf3a84b82f8?w=400&h=280&fit=crop&q=80`, caption: "Open book ready to read", emoji: "📖" },
+    { url: `${B}1481627834876-b7833e8f5570?w=400&h=280&fit=crop&q=80`, caption: "Stack of colourful storybooks", emoji: "📚" },
+    { url: `${B}1455390582262-044cdead277a?w=400&h=280&fit=crop&q=80`, caption: "Writing in a notebook", emoji: "✍️" },
+  ],
+  "World Geography": [
+    { url: `${B}1451187580459-43490279c0fa?w=400&h=280&fit=crop&q=80`, caption: "Globe showing the continents", emoji: "🌍" },
+    { url: `${B}1526778548025-fa2f459cd5c1?w=400&h=280&fit=crop&q=80`, caption: "Colourful world map", emoji: "🗺️" },
+    { url: `${B}1506905925346-21bda4d32df4?w=400&h=280&fit=crop&q=80`, caption: "Natural wonder landscape", emoji: "🏔️" },
+  ],
+  "Coding for Kids": [
+    { url: `${B}1587620962725-abab7fe55159?w=400&h=280&fit=crop&q=80`, caption: "Colourful code on a screen", emoji: "💻" },
+    { url: `${B}1498050108023-c5249f4df085?w=400&h=280&fit=crop&q=80`, caption: "Kid using a laptop to code", emoji: "👩‍💻" },
+    { url: `${B}1519389950473-47ba0277781c?w=400&h=280&fit=crop&q=80`, caption: "Robots and programming", emoji: "🤖" },
+  ],
+  "Art & Creativity": [
+    { url: `${B}1513364776144-60967b0f800f?w=400&h=280&fit=crop&q=80`, caption: "Painting with bright colors", emoji: "🎨" },
+    { url: `${B}1460661419201-fd4cecdf8a8b?w=400&h=280&fit=crop&q=80`, caption: "Artist's colorful palette", emoji: "🖌️" },
+    { url: `${B}1578662996442-48f60103fc96?w=400&h=280&fit=crop&q=80`, caption: "Music and creative arts", emoji: "🎵" },
+  ],
+};
+
 export function getLessonMedia(courseTitle: string, lessonOrder: number): LessonMedia {
-  return LESSON_MEDIA[courseTitle]?.[lessonOrder] ?? DEFAULT_MEDIA;
+  const base = LESSON_MEDIA[courseTitle]?.[lessonOrder] ?? DEFAULT_MEDIA;
+  return {
+    ...base,
+    conceptImages: base.conceptImages ?? COURSE_IMAGES[courseTitle] ?? [
+      { url: `${B}1503676260728-1c00da094a0b?w=400&h=280&fit=crop&q=80`, caption: "Students learning together", emoji: "📚" },
+      { url: `${B}1635070041078-e363dbe005cb?w=400&h=280&fit=crop&q=80`, caption: "Classroom concepts in action", emoji: "🏫" },
+      { url: `${B}1524578271613-d550eacf6090?w=400&h=280&fit=crop&q=80`, caption: "Exploring ideas and knowledge", emoji: "💡" },
+    ],
+  };
 }
