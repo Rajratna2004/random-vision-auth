@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import AIQuizExperiment from "@/components/experiments/AIQuizExperiment";
 import { api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
+import { getLessonMedia } from "@/lib/lessonMedia";
 import confetti from "canvas-confetti";
 
 interface ChallengeItem {
@@ -60,6 +61,52 @@ function TheoryContent({ content }: { content: string }) {
           </p>
         );
       })}
+    </div>
+  );
+}
+
+function VideoEmbed({ videoId, title }: { videoId: string; title: string }) {
+  const [error, setError] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
+  if (!videoId) return null;
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-3 h-full bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 text-center">
+        <span className="text-4xl">🎬</span>
+        <p className="text-sm font-semibold text-blue-800">Watch this lesson video on YouTube</p>
+        <a
+          href={`https://www.youtube.com/watch?v=${videoId}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="px-4 py-2 rounded-xl kid-gradient text-white text-sm font-bold shadow"
+        >
+          ▶ Open Video →
+        </a>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-lg bg-black">
+      {!loaded && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-900 to-indigo-900">
+          <div className="text-center text-white space-y-2">
+            <div className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto" />
+            <p className="text-sm font-medium opacity-80">Loading video...</p>
+          </div>
+        </div>
+      )}
+      <iframe
+        className="w-full h-full"
+        src={`https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1&cc_load_policy=1`}
+        title={title}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+        onLoad={() => setLoaded(true)}
+        onError={() => setError(true)}
+      />
     </div>
   );
 }
@@ -182,6 +229,12 @@ export default function LessonPage() {
   const challenges: ChallengeItem[] = useMemo(() => lesson?.challenges ?? [], [lesson]);
   const totalChallenges = challenges.length;
 
+  const courseTitle = (course as any)?.title ?? "";
+  const media = useMemo(
+    () => getLessonMedia(courseTitle, lesson?.order ?? 0),
+    [courseTitle, lesson?.order]
+  );
+
   function handleChallengeAnswer(correct: boolean) {
     if (correct) setChallengeScore((s) => s + 1);
     setAnsweredCount((c) => c + 1);
@@ -219,9 +272,6 @@ export default function LessonPage() {
     );
   }
 
-  const courseTitle = (course as any)?.title ?? "Course";
-  const courseSubject = (course as any)?.subject ?? "general";
-
   return (
     <Layout>
       <div className="max-w-3xl mx-auto space-y-6 pb-12">
@@ -239,15 +289,14 @@ export default function LessonPage() {
           <Card className="overflow-hidden shadow-lg border-0">
             {/* Image Banner */}
             <div className="relative h-52 overflow-hidden">
-              {lesson.imageUrl ? (
-                <img
-                  src={lesson.imageUrl}
-                  alt={lesson.title}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full kid-gradient" />
-              )}
+              <img
+                src={lesson.imageUrl || media.imageUrl}
+                alt={lesson.title}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = media.imageUrl;
+                }}
+              />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-6">
                 <div className="flex items-center gap-2 mb-2">
@@ -259,14 +308,86 @@ export default function LessonPage() {
                   </Badge>
                 </div>
                 <h1 className="text-2xl md:text-3xl font-extrabold text-white leading-tight drop-shadow-sm">
-                  {lesson.title}
+                  {media.emoji} {lesson.title}
                 </h1>
               </div>
             </div>
 
-            {/* Theory Content */}
-            <CardContent className="p-6 md:p-8">
-              <TheoryContent content={lesson.content} />
+            <CardContent className="p-6 md:p-8 space-y-6">
+              {/* Simple "What You'll Learn" Summary */}
+              <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-5 border border-blue-100">
+                <h2 className="text-sm font-bold text-blue-600 uppercase tracking-wide mb-2">💡 In Simple Words</h2>
+                <p className="text-base font-semibold text-blue-900 leading-relaxed">{media.simpleSummary}</p>
+              </div>
+
+              {/* Theory Content */}
+              <div>
+                <h2 className="text-lg font-extrabold text-foreground mb-3">📖 Let's Learn!</h2>
+                <TheoryContent content={lesson.content} />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Video Section */}
+        {media.videoId && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <Card className="overflow-hidden shadow-md border-0">
+              <div className="flex items-center gap-3 px-5 py-4 border-b border-border/40 bg-gradient-to-r from-red-50 to-orange-50">
+                <div className="w-10 h-10 rounded-xl bg-red-500 flex items-center justify-center text-white text-lg shadow">
+                  ▶
+                </div>
+                <div>
+                  <h2 className="font-extrabold text-foreground">Watch & Learn</h2>
+                  <p className="text-xs text-muted-foreground">Educational video about {lesson.title}</p>
+                </div>
+              </div>
+              <CardContent className="p-4">
+                <VideoEmbed videoId={media.videoId} title={lesson.title} />
+                <p className="text-xs text-muted-foreground mt-2 text-center">
+                  🎧 Turn on captions for better understanding
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {/* Key Facts Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+        >
+          <Card className="overflow-hidden shadow-md border-0">
+            <div className="px-5 py-4 border-b border-border/40 bg-gradient-to-r from-yellow-50 to-amber-50">
+              <h2 className="font-extrabold text-foreground flex items-center gap-2">
+                <span className="text-xl">⭐</span> Key Facts to Remember
+              </h2>
+            </div>
+            <CardContent className="p-5 space-y-3">
+              {media.keyFacts.map((fact, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 + i * 0.05 }}
+                  className="flex gap-3 items-start"
+                >
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full kid-gradient text-white text-xs font-bold flex items-center justify-center mt-0.5">
+                    {i + 1}
+                  </span>
+                  <p className="text-sm leading-relaxed text-foreground/90">{fact}</p>
+                </motion.div>
+              ))}
+
+              {/* Fun Fact */}
+              <div className="mt-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-4 border border-purple-100">
+                <p className="text-sm font-semibold text-purple-800 leading-relaxed">{media.funFact}</p>
+              </div>
             </CardContent>
           </Card>
         </motion.div>
@@ -276,12 +397,12 @@ export default function LessonPage() {
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
+            transition={{ delay: 0.2 }}
             className="space-y-4"
           >
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-extrabold text-foreground">Practice Challenges</h2>
+                <h2 className="text-xl font-extrabold text-foreground">🎯 Practice Challenges</h2>
                 <p className="text-sm text-muted-foreground mt-0.5">{totalChallenges} questions to test your understanding</p>
               </div>
               {answeredCount > 0 && (

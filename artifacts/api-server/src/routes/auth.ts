@@ -8,10 +8,54 @@ import { z } from "zod";
 
 const router: IRouter = Router();
 
+const COMMON_WORDS = [
+  "password", "passwd", "admin", "administrator", "root", "user",
+  "qwerty", "qwertyuiop", "letmein", "welcome", "monkey", "dragon",
+  "master", "abc123", "iloveyou", "sunshine", "princess", "football",
+  "baseball", "ninja", "shadow", "trustno1", "pokemon", "minecraft",
+  "kidolearn", "kido", "learn", "school", "student", "teacher",
+];
+
+const SEQUENTIAL_PATTERNS = [
+  "0123456789", "abcdefghijklmnopqrstuvwxyz",
+  "qwertyuiop", "asdfghjkl", "zxcvbnm",
+];
+
+function isPasswordStrong(password: string): { valid: boolean; reason?: string } {
+  if (password.length < 12) return { valid: false, reason: "Password must be at least 12 characters long" };
+  if (!/[A-Z]/.test(password)) return { valid: false, reason: "Password must include at least one uppercase letter (A-Z)" };
+  if (!/[a-z]/.test(password)) return { valid: false, reason: "Password must include at least one lowercase letter (a-z)" };
+  if (!/[0-9]/.test(password)) return { valid: false, reason: "Password must include at least one number (0-9)" };
+  if (!/[!@#$%^&*()\-_=+\[\]{};:'",.<>?/\\|`~]/.test(password)) {
+    return { valid: false, reason: "Password must include at least one special character (!@#$%^&*...)" };
+  }
+  const lower = password.toLowerCase();
+  if (COMMON_WORDS.some((w) => lower.includes(w))) {
+    return { valid: false, reason: "Password must not contain common words like 'password', 'admin', or 'qwerty'" };
+  }
+  if (/(.)\1{2,}/.test(password)) {
+    return { valid: false, reason: "Password must not have 3 or more repeating characters (aaa, 111...)" };
+  }
+  for (const seq of SEQUENTIAL_PATTERNS) {
+    for (let i = 0; i <= seq.length - 4; i++) {
+      if (lower.includes(seq.slice(i, i + 4))) {
+        return { valid: false, reason: "Password must not contain sequential patterns like '1234' or 'abcd'" };
+      }
+    }
+    const rev = seq.split("").reverse().join("");
+    for (let i = 0; i <= rev.length - 4; i++) {
+      if (lower.includes(rev.slice(i, i + 4))) {
+        return { valid: false, reason: "Password must not contain sequential patterns like '4321' or 'dcba'" };
+      }
+    }
+  }
+  return { valid: true };
+}
+
 const registerSchema = z.object({
   username: z.string().min(3),
   email: z.string().email(),
-  password: z.string().min(6),
+  password: z.string().min(12),
   firstName: z.string().min(1),
   lastName: z.string().min(1),
   role: z.enum(["student", "teacher"]).default("student"),
@@ -30,6 +74,12 @@ router.post("/register", async (req, res) => {
   }
 
   const { username, email, password, firstName, lastName, role } = parsed.data;
+
+  const passwordCheck = isPasswordStrong(password);
+  if (!passwordCheck.valid) {
+    res.status(400).json({ error: "WeakPassword", message: passwordCheck.reason });
+    return;
+  }
 
   const existing = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
   if (existing.length > 0) {

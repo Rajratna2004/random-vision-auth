@@ -3,6 +3,7 @@ import { db } from "@workspace/db";
 import { usersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { authenticate, type AuthRequest } from "../middlewares/authenticate.js";
+import { generateToken } from "../lib/auth.js";
 import { z } from "zod";
 
 const router: IRouter = Router();
@@ -67,10 +68,13 @@ router.post("/verify", async (req, res) => {
     return;
   }
 
+  const token = generateToken(bestMatch.user.id, bestMatch.user.role);
+
   res.json({
     match: true,
     distance: bestMatch.distance,
     message: "Face matched",
+    token,
     user: {
       id: String(bestMatch.user.id),
       username: bestMatch.user.username,
