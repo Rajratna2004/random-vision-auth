@@ -65,45 +65,6 @@ function TheoryContent({ content }: { content: string }) {
   );
 }
 
-function ConceptImageCard({ img, index }: { img: ConceptImage; index: number }) {
-  const [loaded, setLoaded] = useState(false);
-  const [error, setError] = useState(false);
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1, type: "spring", stiffness: 200 }}
-      className="relative rounded-2xl overflow-hidden border border-slate-100 shadow-sm bg-white flex flex-col"
-    >
-      <div className="relative w-full" style={{ paddingTop: "70%" }}>
-        {!loaded && !error && (
-          <div className="absolute inset-0 flex items-center justify-center bg-slate-100">
-            <div className="w-8 h-8 border-4 border-sky-400 border-t-transparent rounded-full animate-spin" />
-          </div>
-        )}
-        {error ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-50 gap-2">
-            <span className="text-4xl">{img.emoji}</span>
-            <span className="text-xs text-muted-foreground">{img.caption}</span>
-          </div>
-        ) : (
-          <img
-            src={img.url}
-            alt={img.caption}
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${loaded ? "opacity-100" : "opacity-0"}`}
-            onLoad={() => setLoaded(true)}
-            onError={() => setError(true)}
-          />
-        )}
-        <div className="absolute top-2 left-2 w-8 h-8 rounded-full bg-white/90 shadow flex items-center justify-center text-lg">
-          {img.emoji}
-        </div>
-      </div>
-      <p className="text-xs font-semibold text-center text-slate-600 px-3 py-2 leading-tight">{img.caption}</p>
-    </motion.div>
-  );
-}
-
 function ConceptDiagram({ steps }: { steps: DiagramStep[] }) {
   return (
     <div className="flex flex-wrap items-center justify-center gap-2 py-2">
@@ -142,6 +103,47 @@ function ConceptDiagram({ steps }: { steps: DiagramStep[] }) {
   );
 }
 
+function ConceptImageCard({ img, index }: { img: ConceptImage; index: number }) {
+  const [loaded, setLoaded] = useState(false);
+  const [errored, setErrored] = useState(false);
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.1 + index * 0.08 }}
+      className="flex flex-col rounded-2xl overflow-hidden border border-border/40 shadow-sm bg-white"
+    >
+      <div className="relative aspect-[4/3] bg-gradient-to-br from-sky-50 to-blue-100">
+        {!errored ? (
+          <img
+            src={img.url}
+            alt={img.caption}
+            onLoad={() => setLoaded(true)}
+            onError={() => setErrored(true)}
+            className={`w-full h-full object-cover transition-opacity duration-500 ${loaded ? "opacity-100" : "opacity-0"}`}
+          />
+        ) : null}
+        {!loaded && !errored && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-6 h-6 border-3 border-sky-300 border-t-sky-600 rounded-full animate-spin" />
+          </div>
+        )}
+        {errored && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+            <span className="text-4xl">{img.emoji}</span>
+            <span className="text-xs text-slate-500 font-medium">{img.caption}</span>
+          </div>
+        )}
+        <div className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm rounded-full w-8 h-8 flex items-center justify-center text-lg shadow-sm">
+          {img.emoji}
+        </div>
+      </div>
+      <div className="px-3 py-2 bg-white">
+        <p className="text-xs font-semibold text-slate-700 leading-snug">{img.caption}</p>
+      </div>
+    </motion.div>
+  );
+}
 
 function ChallengeCard({
   challenge,
@@ -387,24 +389,24 @@ export default function LessonPage() {
           </motion.div>
         )}
 
-        {/* See It in Real Life! Image Section */}
+        {/* Concept Images Section */}
         {media.conceptImages && media.conceptImages.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.12 }}
+            transition={{ delay: 0.15 }}
           >
             <Card className="overflow-hidden shadow-md border-0">
               <div className="flex items-center gap-3 px-5 py-4 border-b border-border/40 bg-gradient-to-r from-sky-50 to-cyan-50">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-cyan-500 flex items-center justify-center text-white text-lg shadow">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-cyan-600 flex items-center justify-center text-white text-lg shadow">
                   🖼️
                 </div>
                 <div>
                   <h2 className="font-extrabold text-foreground">See It in Real Life!</h2>
-                  <p className="text-xs text-muted-foreground">Real-world examples of this concept</p>
+                  <p className="text-xs text-muted-foreground">Photos that show this concept</p>
                 </div>
               </div>
-              <CardContent className="p-5">
+              <CardContent className="p-4">
                 <div className="grid grid-cols-3 gap-3">
                   {media.conceptImages.map((img, i) => (
                     <ConceptImageCard key={i} img={img} index={i} />
