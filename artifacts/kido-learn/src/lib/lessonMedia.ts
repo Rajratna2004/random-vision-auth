@@ -1,18 +1,34 @@
+export interface DiagramStep {
+  icon: string;
+  label?: string;
+  isArrow?: boolean;
+  color?: string;
+}
+
+export interface ConceptImage {
+  url: string;
+  caption: string;
+  emoji: string;
+}
+
 export interface LessonMedia {
-  videoId: string;
   imageUrl: string;
   emoji: string;
   simpleSummary: string;
   keyFacts: string[];
   funFact: string;
+  diagramSteps: DiagramStep[];
+  conceptImages: ConceptImage[];
 }
 
-// YouTube video IDs + Unsplash images for every lesson (6 courses × 10 lessons = 60)
+const B = "https://images.unsplash.com/photo-";
+const Q = "?w=400&h=280&fit=crop&q=80";
+const u = (id: string) => `${B}${id}${Q}`;
+
 const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
   "Math Adventures": {
     1: {
-      videoId: "AuX7nPBqDts",
-      imageUrl: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&fit=crop",
+      imageUrl: u("1635070041078-e363dbe005cb"),
       emoji: "➕",
       simpleSummary: "Addition means putting two groups together to find out how many there are in total!",
       keyFacts: [
@@ -22,10 +38,21 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Adding is like counting forward on a number line ➡️",
       ],
       funFact: "🌟 Every time you count objects, you're already using addition!",
+      diagramSteps: [
+        { icon: "🍎🍎", label: "2 apples" },
+        { icon: "➕", isArrow: true },
+        { icon: "🍎🍎🍎", label: "3 apples" },
+        { icon: "=", isArrow: true },
+        { icon: "🍎🍎🍎🍎🍎", label: "5 apples total!", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1635070041078-e363dbe005cb"), caption: "Adding numbers on a board", emoji: "🔢" },
+        { url: u("1580582932707-520aed937b7b"), caption: "Counting with blocks", emoji: "🧱" },
+        { url: u("1503676260728-1c00da094a0b"), caption: "Kids learning together", emoji: "👧👦" },
+      ],
     },
     2: {
-      videoId: "Wm7N-OfSFeo",
-      imageUrl: "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800&fit=crop",
+      imageUrl: u("1509228627152-72ae9ae6848d"),
       emoji: "➖",
       simpleSummary: "Subtraction is finding out how many are left when you take some away!",
       keyFacts: [
@@ -35,10 +62,21 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Subtracting on a number line means moving backwards ⬅️",
       ],
       funFact: "🌟 If you eat 3 cookies from a pack of 10, you have 7 left — that's subtraction!",
+      diagramSteps: [
+        { icon: "🍪🍪🍪🍪🍪", label: "5 cookies" },
+        { icon: "➖", isArrow: true },
+        { icon: "🍪🍪", label: "eat 2" },
+        { icon: "=", isArrow: true },
+        { icon: "🍪🍪🍪", label: "3 left!", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1509228627152-72ae9ae6848d"), caption: "Numbers on a classroom board", emoji: "📝" },
+        { url: u("1635070041078-e363dbe005cb"), caption: "Subtraction on a blackboard", emoji: "🖊️" },
+        { url: u("1580582932707-520aed937b7b"), caption: "Taking away from a group", emoji: "✋" },
+      ],
     },
     3: {
-      videoId: "mvOkMYCygps",
-      imageUrl: "https://images.unsplash.com/photo-1518133910546-b6c2fb7d79e3?w=800&fit=crop",
+      imageUrl: u("1518133910546-b6c2fb7d79e3"),
       emoji: "✖️",
       simpleSummary: "Multiplication is a fast way to add the same number over and over again!",
       keyFacts: [
@@ -48,10 +86,21 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "The order doesn't matter: 2 × 6 = 6 × 2 = 12.",
       ],
       funFact: "🌟 If 4 friends each have 3 balloons, that's 4 × 3 = 12 balloons total!",
+      diagramSteps: [
+        { icon: "🎈🎈🎈", label: "3 balloons" },
+        { icon: "×", isArrow: true },
+        { icon: "👧👦👧👦", label: "4 friends" },
+        { icon: "=", isArrow: true },
+        { icon: "12 🎈", label: "12 balloons!", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1518133910546-b6c2fb7d79e3"), caption: "Groups of objects multiplied", emoji: "🔢" },
+        { url: u("1588854337115-1c67d9247e4d"), caption: "Patterns in rows and columns", emoji: "🔲" },
+        { url: u("1503676260728-1c00da094a0b"), caption: "Multiplication table practice", emoji: "📊" },
+      ],
     },
     4: {
-      videoId: "F8RNMf3QTDI",
-      imageUrl: "https://images.unsplash.com/photo-1596495577886-d920f1fb7238?w=800&fit=crop",
+      imageUrl: u("1596495577886-d920f1fb7238"),
       emoji: "➗",
       simpleSummary: "Division means splitting a group into equal parts to see how many each part gets!",
       keyFacts: [
@@ -61,10 +110,21 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "You can't divide by zero — it doesn't make sense in math!",
       ],
       funFact: "🌟 Sharing 8 candies equally with 4 friends? That's 8 ÷ 4 = 2 each!",
+      diagramSteps: [
+        { icon: "🍕🍕🍕🍕🍕🍕🍕🍕", label: "8 slices total" },
+        { icon: "➗", isArrow: true },
+        { icon: "👧👦👧👦", label: "4 friends" },
+        { icon: "=", isArrow: true },
+        { icon: "🍕🍕", label: "2 each!", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1513151233558-d860c5398176"), caption: "Sharing pizza equally", emoji: "🍕" },
+        { url: u("1596495577886-d920f1fb7238"), caption: "Dividing objects into groups", emoji: "📦" },
+        { url: u("1503676260728-1c00da094a0b"), caption: "Fair sharing with friends", emoji: "🤝" },
+      ],
     },
     5: {
-      videoId: "n0FZhQ_GkKw",
-      imageUrl: "https://images.unsplash.com/photo-1513151233558-d860c5398176?w=800&fit=crop",
+      imageUrl: u("1513151233558-d860c5398176"),
       emoji: "🍕",
       simpleSummary: "Fractions show parts of a whole — like slices of pizza!",
       keyFacts: [
@@ -74,23 +134,44 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "1/4 + 1/4 + 1/4 + 1/4 = 1 whole!",
       ],
       funFact: "🌟 When you eat half a pizza, you ate 1/2 of it — that's a fraction!",
+      diagramSteps: [
+        { icon: "🟡", label: "1 whole circle" },
+        { icon: "➗", isArrow: true },
+        { icon: "🟡🟡", label: "= 2 halves (1/2)" },
+        { icon: "➗", isArrow: true },
+        { icon: "🟡🟡🟡🟡", label: "= 4 quarters (1/4)", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1513151233558-d860c5398176"), caption: "Pizza cut into equal slices", emoji: "🍕" },
+        { url: u("1588854337115-1c67d9247e4d"), caption: "Shapes divided into halves", emoji: "✂️" },
+        { url: u("1513104890138-7c749659a591"), caption: "Fractions of a pie", emoji: "🥧" },
+      ],
     },
     6: {
-      videoId: "SqW0yZzInNA",
-      imageUrl: "https://images.unsplash.com/photo-1588854337115-1c67d9247e4d?w=800&fit=crop",
+      imageUrl: u("1588854337115-1c67d9247e4d"),
       emoji: "📐",
       simpleSummary: "Geometry is about shapes — their sides, corners, and how they fit in space!",
       keyFacts: [
         "A triangle has 3 sides and 3 corners 🔺",
         "A square has 4 equal sides and 4 square corners.",
         "A circle has no sides — it's a perfect round shape ⭕",
-        "Shapes are everywhere around us: books are rectangles, clocks are circles!",
+        "Shapes are everywhere: books are rectangles, clocks are circles!",
       ],
       funFact: "🌟 Honeybees build their honeycombs in perfect hexagons — 6 sides each!",
+      diagramSteps: [
+        { icon: "🔺", label: "Triangle\n3 sides" },
+        { icon: "⬛", label: "Square\n4 equal sides" },
+        { icon: "🔷", label: "Diamond\n4 sides" },
+        { icon: "⭕", label: "Circle\nNo sides!", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1588854337115-1c67d9247e4d"), caption: "Geometric shapes around us", emoji: "🔷" },
+        { url: u("1518133910546-b6c2fb7d79e3"), caption: "Colorful pattern tiles", emoji: "🎨" },
+        { url: u("1503676260728-1c00da094a0b"), caption: "Finding shapes in real life", emoji: "🔍" },
+      ],
     },
     7: {
-      videoId: "RD0_6YZIxL0",
-      imageUrl: "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=800&fit=crop",
+      imageUrl: u("1611532736597-de2d4265fba3"),
       emoji: "📏",
       simpleSummary: "Measurement helps us compare sizes, weights, and distances!",
       keyFacts: [
@@ -100,10 +181,20 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Liters measure how much liquid fits in a container.",
       ],
       funFact: "🌟 Your thumb is about 1 centimeter wide — that's how ancient people measured inches!",
+      diagramSteps: [
+        { icon: "📏", label: "Length → cm, m" },
+        { icon: "⚖️", label: "Weight → g, kg" },
+        { icon: "🥤", label: "Volume → mL, L" },
+        { icon: "🌡️", label: "Temperature → °C", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1611532736597-de2d4265fba3"), caption: "Ruler measuring length", emoji: "📏" },
+        { url: u("1503676260728-1c00da094a0b"), caption: "Measuring in class", emoji: "🔬" },
+        { url: u("1635070041078-e363dbe005cb"), caption: "Units on a board", emoji: "📝" },
+      ],
     },
     8: {
-      videoId: "Fy1UjGXnGIY",
-      imageUrl: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=800&fit=crop",
+      imageUrl: u("1570295999919-56ceb5ecca61"),
       emoji: "🔢",
       simpleSummary: "Number patterns are sequences that follow a rule — can you find it?",
       keyFacts: [
@@ -113,10 +204,20 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Finding the rule lets you predict what comes next.",
       ],
       funFact: "🌟 The Fibonacci sequence (1, 1, 2, 3, 5, 8, 13…) appears in sunflowers and seashells!",
+      diagramSteps: [
+        { icon: "🔴🔵", label: "Red, Blue..." },
+        { icon: "🔴🔵", label: "Red, Blue..." },
+        { icon: "🔴🔵", label: "Red, Blue..." },
+        { icon: "❓", label: "What's next?", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1570295999919-56ceb5ecca61"), caption: "Patterns in nature and tiles", emoji: "🌸" },
+        { url: u("1588854337115-1c67d9247e4d"), caption: "Color and shape patterns", emoji: "🎨" },
+        { url: u("1518133910546-b6c2fb7d79e3"), caption: "Repeating bead patterns", emoji: "📿" },
+      ],
     },
     9: {
-      videoId: "1aNpSVKEbvU",
-      imageUrl: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&fit=crop",
+      imageUrl: u("1503676260728-1c00da094a0b"),
       emoji: "🧩",
       simpleSummary: "Word problems use math to solve real-life situations — read carefully!",
       keyFacts: [
@@ -126,10 +227,20 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Always check your answer by reading the question again!",
       ],
       funFact: "🌟 Ancient Egyptians used word problems 4,000 years ago to build pyramids!",
+      diagramSteps: [
+        { icon: "📖", label: "1. Read the problem" },
+        { icon: "💡", label: "2. Find the numbers" },
+        { icon: "🔢", label: "3. Choose + − × ÷" },
+        { icon: "✅", label: "4. Solve & Check!", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1503676260728-1c00da094a0b"), caption: "Solving math word problems", emoji: "📖" },
+        { url: u("1580582932707-520aed937b7b"), caption: "Drawing diagrams to help", emoji: "✏️" },
+        { url: u("1635070041078-e363dbe005cb"), caption: "Writing out the solution", emoji: "🖊️" },
+      ],
     },
     10: {
-      videoId: "WmVLcj-XKnM",
-      imageUrl: "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&fit=crop",
+      imageUrl: u("1580582932707-520aed937b7b"),
       emoji: "⚡",
       simpleSummary: "Mental math lets you solve problems fast — right in your head!",
       keyFacts: [
@@ -139,12 +250,23 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Practice makes you faster — even 5 minutes a day helps!",
       ],
       funFact: "🌟 Mental math champions can multiply 7-digit numbers in their heads!",
+      diagramSteps: [
+        { icon: "47 + 9", label: "Hard problem" },
+        { icon: "➡️", isArrow: true },
+        { icon: "47 + 10 = 57", label: "Add 10 first" },
+        { icon: "57 - 1 = 56", label: "Then subtract 1 ⚡", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1580582932707-520aed937b7b"), caption: "Thinking fast in your head", emoji: "🧠" },
+        { url: u("1503676260728-1c00da094a0b"), caption: "Mental math practice", emoji: "⚡" },
+        { url: u("1635070041078-e363dbe005cb"), caption: "Quick calculation tricks", emoji: "🎯" },
+      ],
     },
   },
+
   "Science Explorer": {
     1: {
-      videoId: "TWz_Z9yLew0",
-      imageUrl: "https://images.unsplash.com/photo-1504192010706-dd7f569ee2be?w=800&fit=crop",
+      imageUrl: u("1504192010706-dd7f569ee2be"),
       emoji: "💧",
       simpleSummary: "Water travels from oceans to clouds to rain and back again — it never stops!",
       keyFacts: [
@@ -154,10 +276,21 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Collection: Water flows back into rivers, lakes, and oceans 🌊",
       ],
       funFact: "🌟 The same water that dinosaurs drank millions of years ago is still cycling around our planet today!",
+      diagramSteps: [
+        { icon: "☀️", label: "Sun heats water" },
+        { icon: "↑", isArrow: true },
+        { icon: "☁️", label: "Forms clouds" },
+        { icon: "🌧️", label: "Rain falls" },
+        { icon: "🌊", label: "Back to ocean!", color: "blue" },
+      ],
+      conceptImages: [
+        { url: u("1504192010706-dd7f569ee2be"), caption: "Rain falling from clouds", emoji: "🌧️" },
+        { url: u("1519681393784-d120267933ba"), caption: "Water vapor and clouds forming", emoji: "☁️" },
+        { url: u("1464037866556-6812c9d1c72e"), caption: "Water flowing back to ocean", emoji: "🌊" },
+      ],
     },
     2: {
-      videoId: "AP-jP7cHDXI",
-      imageUrl: "https://images.unsplash.com/photo-1559825481-12a05cc00344?w=800&fit=crop",
+      imageUrl: u("1559825481-12a05cc00344"),
       emoji: "🧊",
       simpleSummary: "Matter can be solid, liquid, or gas — and it can change between them!",
       keyFacts: [
@@ -166,11 +299,22 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Gas: particles spread out freely — fills all available space (air, steam) 💨",
         "Heat causes matter to melt or evaporate; cold causes it to freeze.",
       ],
-      funFact: "🌟 Dry ice is solid CO₂ that turns directly into gas (no liquid stage) — it skips the liquid state!",
+      funFact: "🌟 Dry ice is solid CO₂ that turns directly into gas — it skips the liquid state!",
+      diagramSteps: [
+        { icon: "🧊", label: "Solid (ice)\ntightly packed" },
+        { icon: "🔥→", isArrow: true },
+        { icon: "💧", label: "Liquid (water)\nflows freely" },
+        { icon: "🔥→", isArrow: true },
+        { icon: "💨", label: "Gas (steam)\nspreads out!", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1519681393784-d120267933ba"), caption: "Ice — solid state of water", emoji: "🧊" },
+        { url: u("1504192010706-dd7f569ee2be"), caption: "Water — liquid state", emoji: "💧" },
+        { url: u("1581091226825-a6a2a5aee158"), caption: "Steam — gas state", emoji: "💨" },
+      ],
     },
     3: {
-      videoId: "RnqqGEnKtRc",
-      imageUrl: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800&fit=crop",
+      imageUrl: u("1416879595882-3373a0480b5b"),
       emoji: "🌱",
       simpleSummary: "Plants grow from tiny seeds and make their own food using sunlight!",
       keyFacts: [
@@ -180,10 +324,21 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Flowers help the plant reproduce — they attract bees and butterflies 🌸",
       ],
       funFact: "🌟 The world's tallest tree (a redwood) is taller than a 35-story building!",
+      diagramSteps: [
+        { icon: "🌰", label: "Tiny seed" },
+        { icon: "💧+🌡️→", isArrow: true },
+        { icon: "🌱", label: "Sprout appears" },
+        { icon: "☀️+💧→", isArrow: true },
+        { icon: "🌳", label: "Grows into tree!", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1416879595882-3373a0480b5b"), caption: "Seeds sprouting into plants", emoji: "🌱" },
+        { url: u("1470770903676-69b98201ea1c"), caption: "Leaves doing photosynthesis", emoji: "☀️" },
+        { url: u("1506905925346-21bda4d32df4"), caption: "Fully grown trees in forest", emoji: "🌳" },
+      ],
     },
     4: {
-      videoId: "nT8FHK8FcaM",
-      imageUrl: "https://images.unsplash.com/photo-1474511320723-9a56873867b5?w=800&fit=crop",
+      imageUrl: u("1474511320723-9a56873867b5"),
       emoji: "🦁",
       simpleSummary: "Every animal lives in a habitat perfectly suited to its needs!",
       keyFacts: [
@@ -193,10 +348,20 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "A habitat provides food, water, shelter, and space 🏠",
       ],
       funFact: "🌟 Polar bears have black skin under their white fur — it helps absorb heat from the sun!",
+      diagramSteps: [
+        { icon: "🐪", label: "Desert\nhot & dry" },
+        { icon: "🐟", label: "Ocean\nwet & salty" },
+        { icon: "🦁", label: "Savanna\nwarm & grassy" },
+        { icon: "🐻", label: "Forest\ncool & shady", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1474511320723-9a56873867b5"), caption: "Lion in its natural habitat", emoji: "🦁" },
+        { url: u("1464037866556-6812c9d1c72e"), caption: "Ocean habitat for sea life", emoji: "🐠" },
+        { url: u("1416879595882-3373a0480b5b"), caption: "Forest habitat and plants", emoji: "🌿" },
+      ],
     },
     5: {
-      videoId: "ITbCG9iCe3Y",
-      imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&fit=crop",
+      imageUrl: u("1581091226825-a6a2a5aee158"),
       emoji: "⚙️",
       simpleSummary: "Simple machines make work easier by changing the direction or size of a force!",
       keyFacts: [
@@ -206,23 +371,44 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Inclined Plane: a ramp makes it easier to move things up ⛰️",
       ],
       funFact: "🌟 Ancient Egyptians built the pyramids using simple machines — ramps, sleds, and levers!",
+      diagramSteps: [
+        { icon: "🔧", label: "Lever\n(seesaw)" },
+        { icon: "🎡", label: "Wheel\n(cart)" },
+        { icon: "🏗️", label: "Pulley\n(flagpole)" },
+        { icon: "📐", label: "Ramp\n(slide)", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1581091226825-a6a2a5aee158"), caption: "Gears and simple machines", emoji: "⚙️" },
+        { url: u("1503676260728-1c00da094a0b"), caption: "Kids learning with levers", emoji: "🔧" },
+        { url: u("1611532736597-de2d4265fba3"), caption: "Measuring force and distance", emoji: "📏" },
+      ],
     },
     6: {
-      videoId: "0Z0-aRs44Cs",
-      imageUrl: "https://images.unsplash.com/photo-1518152006812-edab29b069ac?w=800&fit=crop",
+      imageUrl: u("1518152006812-edab29b069ac"),
       emoji: "⚡",
       simpleSummary: "Electricity is the flow of tiny particles called electrons through a wire!",
       keyFacts: [
-        "Electrons flow from negative (-) to positive (+) in a circuit ⚡",
+        "Electrons flow from negative (–) to positive (+) in a circuit ⚡",
         "A circuit must be complete (no gaps) for electricity to flow.",
         "Conductors (copper, iron) let electricity through; insulators (rubber, plastic) block it.",
         "Batteries push electrons using chemical energy 🔋",
       ],
       funFact: "🌟 Lightning is electricity jumping from clouds to the ground — a single bolt has 1 billion volts!",
+      diagramSteps: [
+        { icon: "🔋", label: "Battery\n(power source)" },
+        { icon: "→", isArrow: true },
+        { icon: "💡", label: "Bulb\n(lights up!)" },
+        { icon: "→", isArrow: true },
+        { icon: "🔋", label: "Circuit complete! ⚡", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1518152006812-edab29b069ac"), caption: "Lightning — huge electricity", emoji: "⚡" },
+        { url: u("1581091226825-a6a2a5aee158"), caption: "Circuits and wires in machines", emoji: "🔌" },
+        { url: u("1587620962725-abab7fe55159"), caption: "Electronic devices we use daily", emoji: "💡" },
+      ],
     },
     7: {
-      videoId: "2UHS883_P60",
-      imageUrl: "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=800&fit=crop",
+      imageUrl: u("1451187580459-43490279c0fa"),
       emoji: "🌍",
       simpleSummary: "Earth has layers — like a hard-boiled egg — each with its own properties!",
       keyFacts: [
@@ -232,10 +418,20 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Inner Core: solid iron ball, incredibly hot (about 5,000°C!) 🔥",
       ],
       funFact: "🌟 The Earth's crust is only about 1% of its total volume — most of Earth is the mantle!",
+      diagramSteps: [
+        { icon: "🟤", label: "Crust\n(we live here)" },
+        { icon: "🔴", label: "Mantle\n(hot rock)" },
+        { icon: "🟠", label: "Outer Core\n(liquid metal)" },
+        { icon: "⭕", label: "Inner Core\n(solid iron 🔥)", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1451187580459-43490279c0fa"), caption: "Earth from space — our home!", emoji: "🌍" },
+        { url: u("1470770903676-69b98201ea1c"), caption: "Mountains — Earth's crust rising", emoji: "⛰️" },
+        { url: u("1506905925346-21bda4d32df4"), caption: "Volcanoes show the hot mantle", emoji: "🌋" },
+      ],
     },
     8: {
-      videoId: "yqc9zR5ov5c",
-      imageUrl: "https://images.unsplash.com/photo-1454789548928-9efd52dc4031?w=800&fit=crop",
+      imageUrl: u("1454789548928-9efd52dc4031"),
       emoji: "🌕",
       simpleSummary: "The Moon orbits Earth, and Earth orbits the Sun — our solar system is enormous!",
       keyFacts: [
@@ -245,10 +441,20 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Our solar system has 8 planets: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune.",
       ],
       funFact: "🌟 If Earth were the size of a grape, the Sun would be as big as a 6-story building!",
+      diagramSteps: [
+        { icon: "☀️", label: "The Sun\n(center)" },
+        { icon: "🌍", label: "Earth orbits\nthe Sun (1 year)" },
+        { icon: "🌕", label: "Moon orbits\nEarth (29 days)" },
+        { icon: "🌟", label: "Solar System! 🚀", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1454789548928-9efd52dc4031"), caption: "Space and our galaxy", emoji: "🌌" },
+        { url: u("1519681393784-d120267933ba"), caption: "Night sky with moon and stars", emoji: "🌕" },
+        { url: u("1451187580459-43490279c0fa"), caption: "Earth from outer space", emoji: "🌍" },
+      ],
     },
     9: {
-      videoId: "IbKDiTMlXpk",
-      imageUrl: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&fit=crop",
+      imageUrl: u("1519681393784-d120267933ba"),
       emoji: "🌡️",
       simpleSummary: "Weather is what's happening in the atmosphere right now — it changes every day!",
       keyFacts: [
@@ -258,10 +464,20 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Meteorologists use satellites, radar, and weather stations to forecast weather 📡",
       ],
       funFact: "🌟 A tornado's wind can spin faster than 300 mph — faster than a race car!",
+      diagramSteps: [
+        { icon: "☀️", label: "Sunny" },
+        { icon: "⛅", label: "Cloudy" },
+        { icon: "🌧️", label: "Rainy" },
+        { icon: "❄️", label: "Snowy", color: "blue" },
+      ],
+      conceptImages: [
+        { url: u("1519681393784-d120267933ba"), caption: "Snow — cold weather", emoji: "❄️" },
+        { url: u("1504192010706-dd7f569ee2be"), caption: "Rain falling from storm clouds", emoji: "🌧️" },
+        { url: u("1451187580459-43490279c0fa"), caption: "Weather seen from satellites", emoji: "🛰️" },
+      ],
     },
     10: {
-      videoId: "mQrlgH97v94",
-      imageUrl: "https://images.unsplash.com/photo-1532094349884-543290648cca?w=800&fit=crop",
+      imageUrl: u("1532094349884-543290648cca"),
       emoji: "🧫",
       simpleSummary: "The human body is made of trillions of tiny cells working together like a team!",
       keyFacts: [
@@ -271,12 +487,23 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Your body makes millions of new cells every second!",
       ],
       funFact: "🌟 You have about 37 trillion cells in your body — more than all the stars in the Milky Way!",
+      diagramSteps: [
+        { icon: "🫀", label: "Heart cells\n(pump blood)" },
+        { icon: "🧠", label: "Nerve cells\n(carry signals)" },
+        { icon: "💪", label: "Muscle cells\n(create movement)" },
+        { icon: "🩸", label: "Blood cells\n(carry oxygen!)", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1532094349884-543290648cca"), caption: "Looking at cells under microscope", emoji: "🔬" },
+        { url: u("1581091226825-a6a2a5aee158"), caption: "Human body systems working", emoji: "🫀" },
+        { url: u("1503676260728-1c00da094a0b"), caption: "Learning about the human body", emoji: "📚" },
+      ],
     },
   },
+
   "Reading & Writing Stars": {
     1: {
-      videoId: "PKbdpU7GWAY",
-      imageUrl: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&fit=crop",
+      imageUrl: u("1481627834876-b7833e8f5570"),
       emoji: "📖",
       simpleSummary: "Every story has characters, a setting, a problem, and a solution!",
       keyFacts: [
@@ -285,11 +512,21 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Plot: the events that happen — beginning, middle, end 📚",
         "Theme: the big message or lesson the author wants you to learn.",
       ],
-      funFact: "🌟 The world's longest novel (À la recherche du temps perdu) has 1.5 million words — about 9,000 pages!",
+      funFact: "🌟 The world's longest novel has 1.5 million words — about 9,000 pages!",
+      diagramSteps: [
+        { icon: "🧑", label: "Characters\n(who?)" },
+        { icon: "🌲", label: "Setting\n(where & when?)" },
+        { icon: "⚡", label: "Problem\n(what happens?)" },
+        { icon: "🌈", label: "Solution\n(how it ends!)", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1481627834876-b7833e8f5570"), caption: "Books contain stories to discover", emoji: "📚" },
+        { url: u("1456513080510-7bf3a84b82f8"), caption: "Reading a great story", emoji: "📖" },
+        { url: u("1478720568477-152d9b164e26"), caption: "Stories become theater and movies", emoji: "🎭" },
+      ],
     },
     2: {
-      videoId: "qFbYNpFkXj0",
-      imageUrl: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&fit=crop",
+      imageUrl: u("1456513080510-7bf3a84b82f8"),
       emoji: "🧠",
       simpleSummary: "Good readers ask questions, make predictions, and connect ideas to understand text!",
       keyFacts: [
@@ -299,10 +536,20 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Summarize: put the key ideas in your own words after reading.",
       ],
       funFact: "🌟 Speed readers can read 1,000+ words per minute — that's a page every 30 seconds!",
+      diagramSteps: [
+        { icon: "📖", label: "Read carefully" },
+        { icon: "❓", label: "Ask questions" },
+        { icon: "💡", label: "Find main idea" },
+        { icon: "✍️", label: "Summarize it!", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1456513080510-7bf3a84b82f8"), caption: "Careful reading builds understanding", emoji: "🤔" },
+        { url: u("1481627834876-b7833e8f5570"), caption: "Books with different types of text", emoji: "📚" },
+        { url: u("1507842217343-583bb7270b66"), caption: "Library full of knowledge", emoji: "🏛️" },
+      ],
     },
     3: {
-      videoId: "UF8uR6Z6KLc",
-      imageUrl: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=800&fit=crop",
+      imageUrl: u("1455390582262-044cdead277a"),
       emoji: "✍️",
       simpleSummary: "Good writing has a beginning (hook), middle (details), and end (conclusion)!",
       keyFacts: [
@@ -312,10 +559,20 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Revise and edit: always re-read your writing to make it better! ✏️",
       ],
       funFact: "🌟 J.K. Rowling wrote Harry Potter on paper napkins in a café before she could afford a computer!",
+      diagramSteps: [
+        { icon: "🎣", label: "Hook\n(grab attention!)" },
+        { icon: "📄", label: "Body\n(main ideas)" },
+        { icon: "📄", label: "Body\n(more details)" },
+        { icon: "🏁", label: "Conclusion\n(wrap it up!)", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1455390582262-044cdead277a"), caption: "Writing a great story", emoji: "✍️" },
+        { url: u("1524578271613-d550eacf6090"), caption: "Drafting and editing your work", emoji: "📝" },
+        { url: u("1503676260728-1c00da094a0b"), caption: "Sharing writing with the class", emoji: "🎤" },
+      ],
     },
     4: {
-      videoId: "f1GFR_0V_Ac",
-      imageUrl: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&fit=crop",
+      imageUrl: u("1503676260728-1c00da094a0b"),
       emoji: "🔤",
       simpleSummary: "Grammar rules help us write clearly so readers can understand exactly what we mean!",
       keyFacts: [
@@ -325,10 +582,20 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "A sentence needs at least a subject (noun) and a predicate (verb) to be complete.",
       ],
       funFact: "🌟 The sentence 'Buffalo buffalo Buffalo buffalo buffalo buffalo Buffalo buffalo' is grammatically correct English!",
+      diagramSteps: [
+        { icon: "🐱", label: "Noun\n(cat, school, idea)" },
+        { icon: "🏃", label: "Verb\n(run, jump, is)" },
+        { icon: "🎨", label: "Adjective\n(big, blue, happy)" },
+        { icon: "📝", label: "= A sentence! ✅", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1503676260728-1c00da094a0b"), caption: "Grammar lessons in the classroom", emoji: "🏫" },
+        { url: u("1455390582262-044cdead277a"), caption: "Writing sentences with correct grammar", emoji: "✍️" },
+        { url: u("1481627834876-b7833e8f5570"), caption: "Grammar guides and books", emoji: "📚" },
+      ],
     },
     5: {
-      videoId: "RK9pjY6-f5I",
-      imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&fit=crop",
+      imageUrl: u("1571019613454-1cb2f99b2d8b"),
       emoji: "🔡",
       simpleSummary: "Spelling tricks help you remember tricky words — patterns make spelling easier!",
       keyFacts: [
@@ -338,10 +605,20 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Prefixes and suffixes: un + happy = unhappy; play + ful = playful.",
       ],
       funFact: "🌟 The word 'queue' is 80% silent — you only pronounce the letter 'q'!",
+      diagramSteps: [
+        { icon: "☀️+🌧️", label: "sun + shine = sunshine" },
+        { icon: "➕", isArrow: true },
+        { icon: "un+😊", label: "un + happy = unhappy" },
+        { icon: "🎉", label: "Word building is fun!", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1571019613454-1cb2f99b2d8b"), caption: "Spelling words letter by letter", emoji: "🔡" },
+        { url: u("1455390582262-044cdead277a"), caption: "Writing and memorizing spellings", emoji: "✏️" },
+        { url: u("1503676260728-1c00da094a0b"), caption: "Spelling bee competition practice", emoji: "🏆" },
+      ],
     },
     6: {
-      videoId: "0enr38yptZo",
-      imageUrl: "https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=800&fit=crop",
+      imageUrl: u("1516979187457-637abb4f9353"),
       emoji: "🗣️",
       simpleSummary: "Vocabulary means knowing lots of words — the more you know, the better you read and write!",
       keyFacts: [
@@ -350,11 +627,21 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Antonyms: words with opposite meanings (hot ↔ cold, fast ↔ slow) 🔄",
         "Root words: 'port' means carry → transport, import, export.",
       ],
-      funFact: "🌟 Shakespeare invented over 1,700 English words we still use today — including 'bedroom', 'lonely', and 'generous'!",
+      funFact: "🌟 Shakespeare invented over 1,700 English words we still use today — including 'bedroom' and 'lonely'!",
+      diagramSteps: [
+        { icon: "🔥", label: "HOT" },
+        { icon: "↔️", isArrow: true },
+        { icon: "🧊", label: "COLD\n(antonyms)" },
+        { icon: "big=large=huge", label: "Synonyms!", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1516979187457-637abb4f9353"), caption: "Dictionary — explore new words", emoji: "📕" },
+        { url: u("1481627834876-b7833e8f5570"), caption: "Reading books expands vocabulary", emoji: "📚" },
+        { url: u("1455390582262-044cdead277a"), caption: "Writing new words to remember them", emoji: "✍️" },
+      ],
     },
     7: {
-      videoId: "6qEq3vnFtHk",
-      imageUrl: "https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=800&fit=crop",
+      imageUrl: u("1478720568477-152d9b164e26"),
       emoji: "🎭",
       simpleSummary: "Poetry uses rhythm, rhyme, and vivid images to express feelings and ideas!",
       keyFacts: [
@@ -363,11 +650,21 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Simile: comparing using 'like' or 'as' (as fast as lightning ⚡)",
         "Metaphor: saying something IS something else (life is a rollercoaster 🎢)",
       ],
-      funFact: "🌟 The shortest poem ever written is 'Fleas / Adam / Had'em' — just 3 words and 6 syllables!",
+      funFact: "🌟 The shortest poem ever is 'Fleas / Adam / Had'em' — just 6 syllables!",
+      diagramSteps: [
+        { icon: "🌙 tune", label: "moon, tune, June\n(rhyme)" },
+        { icon: "🥁", label: "DUM-da-DUM-da\n(rhythm)" },
+        { icon: "⚡", label: "Fast AS lightning\n(simile)" },
+        { icon: "🎭", label: "Life IS a journey\n(metaphor!)", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1478720568477-152d9b164e26"), caption: "Poetry brings words to life on stage", emoji: "🎭" },
+        { url: u("1455390582262-044cdead277a"), caption: "Writing your own poem", emoji: "✏️" },
+        { url: u("1481627834876-b7833e8f5570"), caption: "Poetry books of all kinds", emoji: "📚" },
+      ],
     },
     8: {
-      videoId: "mzDeT6JUrFk",
-      imageUrl: "https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=800&fit=crop",
+      imageUrl: u("1507842217343-583bb7270b66"),
       emoji: "📰",
       simpleSummary: "Nonfiction writing shares real facts, opinions, and information about the world!",
       keyFacts: [
@@ -377,10 +674,20 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Bias: when a writer favors one side — good readers notice this!",
       ],
       funFact: "🌟 The first newspaper was printed in Germany in 1605 — before that, news spread by word of mouth!",
+      diagramSteps: [
+        { icon: "✅", label: "FACT\n(provable!)" },
+        { icon: "vs", isArrow: true },
+        { icon: "💭", label: "OPINION\n(what I think)" },
+        { icon: "🕵️", label: "You decide which is which!", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1507842217343-583bb7270b66"), caption: "Library full of nonfiction books", emoji: "📚" },
+        { url: u("1524578271613-d550eacf6090"), caption: "Researching facts for writing", emoji: "🔍" },
+        { url: u("1456513080510-7bf3a84b82f8"), caption: "Reading nonfiction articles", emoji: "📰" },
+      ],
     },
     9: {
-      videoId: "GMoqg_s4Dl4",
-      imageUrl: "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&fit=crop",
+      imageUrl: u("1455390582262-044cdead277a"),
       emoji: "🖊️",
       simpleSummary: "Persuasive writing tries to convince the reader to agree with your opinion!",
       keyFacts: [
@@ -390,10 +697,20 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Address the other side (counterargument) and explain why you still disagree.",
       ],
       funFact: "🌟 The most persuasive word in English is 'you' — it makes people feel personally involved!",
+      diagramSteps: [
+        { icon: "💬", label: "My opinion:\n'Recess is important!'" },
+        { icon: "1️⃣", label: "Reason 1:\nExercise helps focus" },
+        { icon: "2️⃣", label: "Reason 2:\nFriendships grow" },
+        { icon: "🏁", label: "Conclusion:\nAgree with me!", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1455390582262-044cdead277a"), caption: "Writing a persuasive essay", emoji: "✍️" },
+        { url: u("1503676260728-1c00da094a0b"), caption: "Debating and sharing opinions", emoji: "💬" },
+        { url: u("1524578271613-d550eacf6090"), caption: "Finding evidence to support ideas", emoji: "🔍" },
+      ],
     },
     10: {
-      videoId: "ZyHvNnqq3KM",
-      imageUrl: "https://images.unsplash.com/photo-1524578271613-d550eacf6090?w=800&fit=crop",
+      imageUrl: u("1524578271613-d550eacf6090"),
       emoji: "🌐",
       simpleSummary: "Research skills help you find trustworthy information and use it in your writing!",
       keyFacts: [
@@ -402,26 +719,47 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Note-taking: write down key ideas in your own words — not copy-paste!",
         "Citation: always credit the author/source of information you use.",
       ],
-      funFact: "🌟 Wikipedia has over 60 million articles in 300+ languages — but always double-check important facts!",
+      funFact: "🌟 Wikipedia has over 60 million articles in 300+ languages!",
+      diagramSteps: [
+        { icon: "❓", label: "Question:\nWhat do I want to know?" },
+        { icon: "🔍", label: "Search:\nUse good keywords" },
+        { icon: "📋", label: "Take notes:\nIn your own words" },
+        { icon: "📝", label: "Write & cite\nyour sources!", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1524578271613-d550eacf6090"), caption: "Researching information online", emoji: "🌐" },
+        { url: u("1507842217343-583bb7270b66"), caption: "Using library books for research", emoji: "📚" },
+        { url: u("1455390582262-044cdead277a"), caption: "Writing up research findings", emoji: "✍️" },
+      ],
     },
   },
+
   "World Geography Quest": {
     1: {
-      videoId: "nI7DFGgdQag",
-      imageUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&fit=crop",
+      imageUrl: u("1451187580459-43490279c0fa"),
       emoji: "🌍",
       simpleSummary: "Earth has 7 continents and 5 oceans — let's explore them all!",
       keyFacts: [
         "7 Continents: Asia, Africa, North America, South America, Antarctica, Europe, Australia 🗺️",
         "5 Oceans: Pacific (largest), Atlantic, Indian, Southern, Arctic (smallest) 🌊",
         "Asia is the largest continent — it has more than half of all Earth's people!",
-        "Antarctica is the coldest, driest, and windiest continent — no permanent human population.",
+        "Antarctica is the coldest, driest, and windiest continent.",
       ],
-      funFact: "🌟 The Pacific Ocean is so large you could fit all 7 continents inside it and still have room to spare!",
+      funFact: "🌟 The Pacific Ocean is so large you could fit all 7 continents inside it!",
+      diagramSteps: [
+        { icon: "🌏", label: "Asia\n(largest!)" },
+        { icon: "🌍", label: "Africa\n(2nd largest)" },
+        { icon: "🌎", label: "Americas\n(North & South)" },
+        { icon: "🧊", label: "Antarctica\n(coldest!)", color: "blue" },
+      ],
+      conceptImages: [
+        { url: u("1451187580459-43490279c0fa"), caption: "Earth from space — see the continents!", emoji: "🌍" },
+        { url: u("1526778548025-fa2f459cd5c1"), caption: "World map showing all continents", emoji: "🗺️" },
+        { url: u("1464037866556-6812c9d1c72e"), caption: "Oceans cover 71% of Earth", emoji: "🌊" },
+      ],
     },
     2: {
-      videoId: "LmOFEFSe1MM",
-      imageUrl: "https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?w=800&fit=crop",
+      imageUrl: u("1526778548025-fa2f459cd5c1"),
       emoji: "🏛️",
       simpleSummary: "There are 195 countries in the world, each with its own capital city and flag!",
       keyFacts: [
@@ -430,24 +768,44 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "China and India each have over 1 billion people — the most of any country.",
         "Every country has a flag that represents its history and values 🏳️",
       ],
-      funFact: "🌟 The country of Monaco is smaller than New York's Central Park — yet it's one of the richest nations!",
+      funFact: "🌟 Monaco is smaller than Central Park in New York City!",
+      diagramSteps: [
+        { icon: "🗺️", label: "195 countries" },
+        { icon: "🏙️", label: "Each has a capital city" },
+        { icon: "🏳️", label: "Each has a flag" },
+        { icon: "🌐", label: "All connected globally!", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1526778548025-fa2f459cd5c1"), caption: "World map with country borders", emoji: "🗺️" },
+        { url: u("1516450360452-9312f5e86fc7"), caption: "Flags of the world", emoji: "🏳️" },
+        { url: u("1451187580459-43490279c0fa"), caption: "Countries from above in space", emoji: "🌍" },
+      ],
     },
     3: {
-      videoId: "1S-MFEgFYbI",
-      imageUrl: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&fit=crop",
+      imageUrl: u("1516450360452-9312f5e86fc7"),
       emoji: "🎎",
       simpleSummary: "Every culture around the world has its own unique food, music, clothing, and traditions!",
       keyFacts: [
-        "Japan has a tradition called 'hanami' — people gather to admire cherry blossoms 🌸",
+        "Japan has 'hanami' — people gather to admire cherry blossoms 🌸",
         "India celebrates Diwali, the Festival of Lights, with fireworks and oil lamps 🪔",
         "Brazil's Carnival is one of the world's biggest festivals — millions attend! 🎉",
-        "Food tells the story of a culture — spices, ingredients, and recipes passed through generations.",
+        "Food tells the story of a culture — spices and recipes passed through generations.",
       ],
-      funFact: "🌟 There are over 7,000 languages spoken in the world — but only about 23 languages are spoken by half of all people!",
+      funFact: "🌟 Over 7,000 languages are spoken in the world today!",
+      diagramSteps: [
+        { icon: "🍜", label: "Asia\n(rice, noodles)" },
+        { icon: "🍕", label: "Europe\n(bread, pasta)" },
+        { icon: "🌮", label: "Americas\n(corn, spices)" },
+        { icon: "🌍", label: "Every culture\nis unique! 🎉", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1516450360452-9312f5e86fc7"), caption: "Festival celebrating culture", emoji: "🎉" },
+        { url: u("1467226632440-65f0b4957563"), caption: "Traditional foods from around the world", emoji: "🍜" },
+        { url: u("1511632765486-a01980e01a18"), caption: "Families sharing traditions", emoji: "👨‍👩‍👧" },
+      ],
     },
     4: {
-      videoId: "9mLdo4uMHMQ",
-      imageUrl: "https://images.unsplash.com/photo-1470770903676-69b98201ea1c?w=800&fit=crop",
+      imageUrl: u("1470770903676-69b98201ea1c"),
       emoji: "🌡️",
       simpleSummary: "Different parts of Earth have different climates based on their distance from the equator!",
       keyFacts: [
@@ -456,24 +814,44 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Polar zone (near poles): freezing cold all year — ice and tundra 🧊",
         "Climate affects what food people grow and how they build their homes.",
       ],
-      funFact: "🌟 The Atacama Desert in Chile is the driest place on Earth — some parts haven't had rain in 400 years!",
+      funFact: "🌟 The Atacama Desert hasn't had rain in some parts for 400 years!",
+      diagramSteps: [
+        { icon: "🌴🌡️", label: "Equator\n(tropical, hot)" },
+        { icon: "🌸❄️", label: "Middle\n(4 seasons)" },
+        { icon: "🧊🐻‍❄️", label: "Poles\n(freezing!)" },
+        { icon: "🌍", label: "Climate shapes\nhow we live!", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1470770903676-69b98201ea1c"), caption: "Tropical forest — hot and wet", emoji: "🌴" },
+        { url: u("1519681393784-d120267933ba"), caption: "Polar regions covered in ice", emoji: "🧊" },
+        { url: u("1506905925346-21bda4d32df4"), caption: "Mountains with snow — cold climate", emoji: "⛰️" },
+      ],
     },
     5: {
-      videoId: "sYB82e40EJ0",
-      imageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&fit=crop",
+      imageUrl: u("1506905925346-21bda4d32df4"),
       emoji: "🏔️",
       simpleSummary: "Earth's natural wonders show the amazing power of nature — from mountains to waterfalls!",
       keyFacts: [
         "Mount Everest (8,849 m) is the highest point on Earth 🏔️",
         "The Great Barrier Reef in Australia is the world's largest living structure 🐠",
         "The Amazon River carries more water than the next 7 largest rivers combined 🌊",
-        "The Northern Lights (aurora borealis) are caused by solar particles hitting Earth's atmosphere ✨",
+        "The Northern Lights are caused by solar particles hitting Earth's atmosphere ✨",
       ],
-      funFact: "🌟 Victoria Falls on the border of Zimbabwe and Zambia is so loud, it can be heard 40 km away!",
+      funFact: "🌟 Victoria Falls can be heard 40 km away — that's the sound of nature's power!",
+      diagramSteps: [
+        { icon: "🏔️", label: "Mount Everest\n8,849 m high!" },
+        { icon: "🌊", label: "Amazon River\nworld's biggest!" },
+        { icon: "🐠", label: "Great Barrier Reef\nlargest living thing!" },
+        { icon: "🌌", label: "Northern Lights ✨\nnature's fireworks!", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1506905925346-21bda4d32df4"), caption: "Mountain peaks — Earth's tallest points", emoji: "🏔️" },
+        { url: u("1464037866556-6812c9d1c72e"), caption: "Amazing ocean and reef systems", emoji: "🐠" },
+        { url: u("1454789548928-9efd52dc4031"), caption: "Northern Lights — nature's light show", emoji: "✨" },
+      ],
     },
     6: {
-      videoId: "KVIADVHLxMU",
-      imageUrl: "https://images.unsplash.com/photo-1569949381669-ecf31ae8e613?w=800&fit=crop",
+      imageUrl: u("1569949381669-ecf31ae8e613"),
       emoji: "🗺️",
       simpleSummary: "Maps are tools that help us understand where places are in relation to each other!",
       keyFacts: [
@@ -482,11 +860,21 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "The equator (0° latitude) divides Earth into Northern and Southern hemispheres.",
         "GPS satellites in space help phones and cars show maps instantly 📡",
       ],
-      funFact: "🌟 Ancient maps from 600 BC showed Babylon at the center of the world — every civilization thought they were at the center!",
+      funFact: "🌟 Ancient maps from 600 BC showed Babylon at the center of the world!",
+      diagramSteps: [
+        { icon: "↕️", label: "Latitude lines\n(north-south position)" },
+        { icon: "↔️", label: "Longitude lines\n(east-west position)" },
+        { icon: "📍", label: "Where they meet\n= your exact location!" },
+        { icon: "📡", label: "GPS uses\n24 satellites!", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1526778548025-fa2f459cd5c1"), caption: "World map with latitude/longitude grid", emoji: "🗺️" },
+        { url: u("1569949381669-ecf31ae8e613"), caption: "Navigation tools and compasses", emoji: "🧭" },
+        { url: u("1451187580459-43490279c0fa"), caption: "Satellites helping GPS navigation", emoji: "📡" },
+      ],
     },
     7: {
-      videoId: "YbAWny7FV3w",
-      imageUrl: "https://images.unsplash.com/photo-1467226632440-65f0b4957563?w=800&fit=crop",
+      imageUrl: u("1467226632440-65f0b4957563"),
       emoji: "🏙️",
       simpleSummary: "Cities are hubs of culture, trade, and innovation — over half the world's people live in them!",
       keyFacts: [
@@ -495,37 +883,68 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Megacities have 10 million+ people: Mumbai, São Paulo, Mexico City, Cairo 🌆",
         "Urban planning decides how streets, parks, and buildings are organized.",
       ],
-      funFact: "🌟 Shanghai's metro system carries more passengers per day than the entire US Amtrak rail network does in a year!",
+      funFact: "🌟 Shanghai's metro carries more passengers daily than the entire US Amtrak does in a year!",
+      diagramSteps: [
+        { icon: "💧", label: "Water source\n(why cities start here)" },
+        { icon: "🏗️", label: "Buildings\ngrow up" },
+        { icon: "🚇", label: "Transport\nconnects people" },
+        { icon: "🌆", label: "Megacity!\n10M+ people", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1467226632440-65f0b4957563"), caption: "Bustling city streets and culture", emoji: "🏙️" },
+        { url: u("1511632765486-a01980e01a18"), caption: "People living together in cities", emoji: "👥" },
+        { url: u("1526778548025-fa2f459cd5c1"), caption: "City planning from a bird's eye view", emoji: "🗺️" },
+      ],
     },
     8: {
-      videoId: "4bm5E4hklxQ",
-      imageUrl: "https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?w=800&fit=crop",
+      imageUrl: u("1464037866556-6812c9d1c72e"),
       emoji: "🌊",
       simpleSummary: "Oceans cover 71% of Earth's surface and are home to the most diverse ecosystems!",
       keyFacts: [
         "The ocean has 5 zones: sunlight, twilight, midnight, abyssal, and hadal zones 🌊",
-        "The Mariana Trench is 11 km deep — deeper than Mount Everest is tall!",
+        "The Mariana Trench is 11 km deep — deeper than Everest is tall!",
         "Coral reefs cover only 1% of the ocean but house 25% of all marine species.",
-        "The ocean produces over half the world's oxygen — mostly from phytoplankton.",
+        "The ocean produces over half the world's oxygen — mostly from tiny phytoplankton.",
       ],
-      funFact: "🌟 We've explored less than 20% of Earth's oceans — more people have walked on the Moon than have been to the deepest part of the sea!",
+      funFact: "🌟 We've explored less than 20% of Earth's oceans — more people have walked on the Moon!",
+      diagramSteps: [
+        { icon: "☀️🐠", label: "Sunlight zone\n(0-200 m)" },
+        { icon: "🐙", label: "Twilight zone\n(200-1,000 m)" },
+        { icon: "🦑", label: "Midnight zone\n(1,000-4,000 m)" },
+        { icon: "⬛", label: "Hadal zone\n(deepest — 11km!)", color: "blue" },
+      ],
+      conceptImages: [
+        { url: u("1464037866556-6812c9d1c72e"), caption: "Magnificent ocean and coral reefs", emoji: "🐠" },
+        { url: u("1504192010706-dd7f569ee2be"), caption: "Waves on the ocean surface", emoji: "🌊" },
+        { url: u("1451187580459-43490279c0fa"), caption: "Oceans seen from outer space", emoji: "🌍" },
+      ],
     },
     9: {
-      videoId: "zOj2T-q7HjY",
-      imageUrl: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=800&fit=crop",
+      imageUrl: u("1511632765486-a01980e01a18"),
       emoji: "🌾",
       simpleSummary: "Agriculture feeds the world — how and where food is grown depends on climate and geography!",
       keyFacts: [
         "Fertile soil + water + sunlight = perfect farming conditions 🌾",
         "Rice feeds more people than any other crop — grown in flooded paddies in Asia.",
         "Greenhouses let farmers grow vegetables even in cold climates 🏡",
-        "Modern technology (GPS tractors, drones) makes farms more productive than ever.",
+        "Modern technology (GPS tractors, drones) makes farms more productive.",
       ],
-      funFact: "🌟 The Netherlands — one of the world's smallest countries — is the 2nd largest food exporter on Earth!",
+      funFact: "🌟 The Netherlands — one of the world's smallest countries — is the 2nd largest food exporter!",
+      diagramSteps: [
+        { icon: "☀️+💧+🌱", label: "Sunlight + Water\n+ Good soil" },
+        { icon: "➡️", isArrow: true },
+        { icon: "🌾🥕🍅", label: "Crops grow!" },
+        { icon: "➡️", isArrow: true },
+        { icon: "🍽️", label: "Food on your plate!", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1416879595882-3373a0480b5b"), caption: "Crops growing in farm fields", emoji: "🌾" },
+        { url: u("1470770903676-69b98201ea1c"), caption: "Different climates = different crops", emoji: "🌍" },
+        { url: u("1503676260728-1c00da094a0b"), caption: "Learning where food comes from", emoji: "🥕" },
+      ],
     },
     10: {
-      videoId: "VFkQSGyeCWg",
-      imageUrl: "https://images.unsplash.com/photo-1497436072909-60f360e1d4b1?w=800&fit=crop",
+      imageUrl: u("1497436072909-60f360e1d4b1"),
       emoji: "♻️",
       simpleSummary: "Earth's resources are precious — we must protect the environment for future generations!",
       keyFacts: [
@@ -534,13 +953,24 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Recycling reduces waste: 1 tonne of recycled paper saves 17 trees.",
         "Climate change is making storms stronger and sea levels higher 🌊",
       ],
-      funFact: "🌟 If everyone on Earth lived like the average American, we'd need 5 Earths to support us all!",
+      funFact: "🌟 If everyone lived like the average American, we'd need 5 Earths to support us all!",
+      diagramSteps: [
+        { icon: "☀️🌬️💧", label: "Renewable energy\n(solar, wind, hydro)" },
+        { icon: "♻️", label: "Recycle &\nreduce waste" },
+        { icon: "🌳", label: "Protect\nforests" },
+        { icon: "🌍💚", label: "Healthy planet\nfor everyone!", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1497436072909-60f360e1d4b1"), caption: "Clean mountains — protecting nature", emoji: "🏔️" },
+        { url: u("1416879595882-3373a0480b5b"), caption: "Green forests absorb CO₂", emoji: "🌳" },
+        { url: u("1451187580459-43490279c0fa"), caption: "Our beautiful Earth from space", emoji: "🌍" },
+      ],
     },
   },
+
   "Coding for Kids": {
     1: {
-      videoId: "SzJ46YA_RaA",
-      imageUrl: "https://images.unsplash.com/photo-1587620962725-abab7fe55159?w=800&fit=crop",
+      imageUrl: u("1587620962725-abab7fe55159"),
       emoji: "💻",
       simpleSummary: "Programming means giving step-by-step instructions to a computer to solve a problem!",
       keyFacts: [
@@ -549,11 +979,22 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Programming languages (Python, Scratch, JavaScript) translate human ideas into computer actions.",
         "Bugs are mistakes in code — programmers find and fix them through debugging 🐛",
       ],
-      funFact: "🌟 The first computer programmer was Ada Lovelace in 1843 — more than 100 years before the first computer was built!",
+      funFact: "🌟 The first computer programmer was Ada Lovelace in 1843 — before computers existed!",
+      diagramSteps: [
+        { icon: "🧑", label: "You write\ninstructions" },
+        { icon: "→", isArrow: true },
+        { icon: "💻", label: "Computer reads\nyour code" },
+        { icon: "→", isArrow: true },
+        { icon: "🎯", label: "Problem solved! ✅", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1587620962725-abab7fe55159"), caption: "Code on a computer screen", emoji: "💻" },
+        { url: u("1498050108023-c5249f4df085"), caption: "Laptops — tools for programming", emoji: "🖥️" },
+        { url: u("1519389950473-47ba0277781c"), caption: "Kids learning to code together", emoji: "👧👦" },
+      ],
     },
     2: {
-      videoId: "ltjU26L5t28",
-      imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&fit=crop",
+      imageUrl: u("1551288049-bebda4e38f71"),
       emoji: "🔁",
       simpleSummary: "Sequences are steps in order; loops repeat steps automatically to save time!",
       keyFacts: [
@@ -562,11 +1003,21 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "For loop: repeat a fixed number of times (do this 10 times).",
         "While loop: keep repeating while something is true (while hungry: eat).",
       ],
-      funFact: "🌟 A video game that runs at 60 frames per second executes its game loop 60 times every second!",
+      funFact: "🌟 A video game running at 60fps executes its game loop 60 times every second!",
+      diagramSteps: [
+        { icon: "1️⃣ Wake up", label: "Step 1" },
+        { icon: "2️⃣ Eat breakfast", label: "Step 2" },
+        { icon: "3️⃣ Go to school", label: "Step 3" },
+        { icon: "🔁 Repeat tomorrow!", label: "LOOP!", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1551288049-bebda4e38f71"), caption: "Data flowing through loops and sequences", emoji: "🔄" },
+        { url: u("1587620962725-abab7fe55159"), caption: "Code with repeating patterns", emoji: "🔁" },
+        { url: u("1498050108023-c5249f4df085"), caption: "Programming sequences step by step", emoji: "📋" },
+      ],
     },
     3: {
-      videoId: "m2Ux2PnJe6E",
-      imageUrl: "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=800&fit=crop",
+      imageUrl: u("1555949963-ff9fe0c870eb"),
       emoji: "🤔",
       simpleSummary: "Conditions let programs make decisions — like 'if it's raining, bring an umbrella'!",
       keyFacts: [
@@ -575,11 +1026,21 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Comparison operators: == (equals), > (greater than), < (less than) ⚖️",
         "Boolean: a value that's either TRUE or FALSE — computers love true/false!",
       ],
-      funFact: "🌟 All complex AI decisions boil down to thousands of if-else conditions happening in milliseconds!",
+      funFact: "🌟 All complex AI decisions boil down to thousands of if-else conditions!",
+      diagramSteps: [
+        { icon: "🌧️?", label: "IF it is raining..." },
+        { icon: "☂️", label: "THEN: bring umbrella" },
+        { icon: "ELSE:", isArrow: true },
+        { icon: "🕶️", label: "ELSE: wear sunglasses!", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1555949963-ff9fe0c870eb"), caption: "Code making decisions — if/else", emoji: "🤔" },
+        { url: u("1587620962725-abab7fe55159"), caption: "Computer choosing between options", emoji: "✅" },
+        { url: u("1498050108023-c5249f4df085"), caption: "Programming logic with conditions", emoji: "⚖️" },
+      ],
     },
     4: {
-      videoId: "wY3pRfT8NXs",
-      imageUrl: "https://images.unsplash.com/photo-1562813733-b31f71025d54?w=800&fit=crop",
+      imageUrl: u("1562813733-b31f71025d54"),
       emoji: "📦",
       simpleSummary: "Variables are like labeled boxes that store information a program can use later!",
       keyFacts: [
@@ -588,50 +1049,90 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Data types: numbers (42), text/strings ('hello'), true/false (booleans).",
         "Good variable names describe what they hold: playerScore, not x!",
       ],
-      funFact: "🌟 The game Minecraft uses millions of variables to track every block, player, and creature in the world!",
+      funFact: "🌟 Minecraft uses millions of variables to track every block and creature!",
+      diagramSteps: [
+        { icon: "📦 name", label: "Box labeled 'name'\nstores = 'Alex'" },
+        { icon: "📦 score", label: "Box labeled 'score'\nstores = 0" },
+        { icon: "score + 10", label: "Update the box\nscore = 10 now!" },
+        { icon: "📦 score = 10", label: "Variable changed! ✅", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1562813733-b31f71025d54"), caption: "Variables as labeled storage boxes", emoji: "📦" },
+        { url: u("1587620962725-abab7fe55159"), caption: "Code with different variable types", emoji: "🔢" },
+        { url: u("1551288049-bebda4e38f71"), caption: "Data stored and retrieved in programs", emoji: "💾" },
+      ],
     },
     5: {
-      videoId: "HrMCFVUTGis",
-      imageUrl: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&fit=crop",
+      imageUrl: u("1498050108023-c5249f4df085"),
       emoji: "🎮",
       simpleSummary: "Functions are reusable blocks of code — write once, use many times!",
       keyFacts: [
         "Function: a named block of code that does one specific task 🧩",
         "Call a function by its name to run its code: jump(); or moveRight();",
         "Functions can accept inputs (parameters) and send back results (return values).",
-        "Good functions do ONE thing and do it well — makes code easier to understand.",
+        "Good functions do ONE thing and do it well.",
       ],
-      funFact: "🌟 The operating system on your phone has millions of functions all working together — right now!",
+      funFact: "🌟 Your phone's operating system has millions of functions all working together!",
+      diagramSteps: [
+        { icon: "📝 makeJuice()", label: "Define the function\nonce..." },
+        { icon: "🥤 makeJuice()", label: "Call it anytime!" },
+        { icon: "🥤 makeJuice()", label: "Call it again!" },
+        { icon: "🥤×∞", label: "Write once,\nuse everywhere! ✅", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1498050108023-c5249f4df085"), caption: "Functions make coding efficient", emoji: "🧩" },
+        { url: u("1587620962725-abab7fe55159"), caption: "Reusable code blocks in action", emoji: "🔧" },
+        { url: u("1519389950473-47ba0277781c"), caption: "Building apps with functions", emoji: "🎮" },
+      ],
     },
     6: {
-      videoId: "9SjQKT2PjWk",
-      imageUrl: "https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?w=800&fit=crop",
+      imageUrl: u("1614741118887-7a4ee193a5fa"),
       emoji: "🌐",
       simpleSummary: "The internet connects billions of computers around the world to share information instantly!",
       keyFacts: [
         "Data travels as packets — small chunks sent separately and reassembled 📦",
-        "IP address: a unique number that identifies every device on the internet (like a home address).",
+        "IP address: a unique number that identifies every device on the internet.",
         "HTML builds the structure of web pages; CSS makes them look pretty 🎨",
         "Servers are powerful computers that store and send websites when you visit them.",
       ],
       funFact: "🌟 Every minute, humans upload 500 hours of video to YouTube and send 300 million emails!",
+      diagramSteps: [
+        { icon: "🖥️ You", label: "Your computer\nsends a request" },
+        { icon: "→📡", isArrow: true },
+        { icon: "🌐 Internet", label: "Travels through\nnetwork" },
+        { icon: "→🖥️ Server", label: "Website data\ncomes back!", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1614741118887-7a4ee193a5fa"), caption: "Web code (HTML/CSS) on screen", emoji: "🌐" },
+        { url: u("1587620962725-abab7fe55159"), caption: "Building websites with code", emoji: "💻" },
+        { url: u("1498050108023-c5249f4df085"), caption: "Browsing the internet", emoji: "🖱️" },
+      ],
     },
     7: {
-      videoId: "E9JRHaGG4K4",
-      imageUrl: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&fit=crop",
+      imageUrl: u("1485827404703-89b55fcc595e"),
       emoji: "🤖",
       simpleSummary: "Artificial Intelligence teaches computers to learn from data and make smart decisions!",
       keyFacts: [
         "Machine learning: computers improve through practice with lots of data 📊",
         "Neural networks: inspired by how the human brain processes information 🧠",
         "AI can recognize faces, translate languages, and beat humans at chess.",
-        "The more data AI trains on, the more accurate and useful it becomes.",
+        "The more data AI trains on, the more accurate it becomes.",
       ],
-      funFact: "🌟 AlphaGo (an AI) learned to play the game Go by studying 30 million moves — then beat the world champion!",
+      funFact: "🌟 AlphaGo learned to play Go by studying 30 million moves — then beat the world champion!",
+      diagramSteps: [
+        { icon: "📊 Data", label: "Lots of data\nfed to AI" },
+        { icon: "🧠 Learn", label: "AI finds\npatterns" },
+        { icon: "✅ Predict", label: "Makes smart\ndecisions" },
+        { icon: "📈 Improve", label: "Gets better\nover time!", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1485827404703-89b55fcc595e"), caption: "Robot and AI technology", emoji: "🤖" },
+        { url: u("1551288049-bebda4e38f71"), caption: "Data that AI learns from", emoji: "📊" },
+        { url: u("1587620962725-abab7fe55159"), caption: "AI code and neural networks", emoji: "🧠" },
+      ],
     },
     8: {
-      videoId: "GE3JOFwTxeI",
-      imageUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&fit=crop",
+      imageUrl: u("1518770660439-4636190af475"),
       emoji: "🔒",
       simpleSummary: "Cybersecurity protects computers and information from hackers and bad actors!",
       keyFacts: [
@@ -640,39 +1141,70 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Phishing: fake emails or websites that trick you into giving away private info 🎣",
         "Always update software — patches fix security holes that hackers exploit.",
       ],
-      funFact: "🌟 Over 2,000 cyberattacks happen every day — that's one attack every 39 seconds somewhere in the world!",
+      funFact: "🌟 Over 2,000 cyberattacks happen every day — one attack every 39 seconds somewhere!",
+      diagramSteps: [
+        { icon: "😈 Hacker", label: "Tries to steal\nyour data" },
+        { icon: "🔒 Password", label: "Strong password\nblocks them" },
+        { icon: "🔐 Encryption", label: "Data scrambled\n= unreadable" },
+        { icon: "✅ You're safe!", label: "Cybersecurity\nprotects you!", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1518770660439-4636190af475"), caption: "Circuits and security in computers", emoji: "🔒" },
+        { url: u("1587620962725-abab7fe55159"), caption: "Secure code keeps data safe", emoji: "🔐" },
+        { url: u("1498050108023-c5249f4df085"), caption: "Safe internet use on devices", emoji: "💻" },
+      ],
     },
     9: {
-      videoId: "TkpWxKBtJYU",
-      imageUrl: "https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&fit=crop",
+      imageUrl: u("1504639725590-34d0984388bd"),
       emoji: "📱",
       simpleSummary: "Apps are programs designed to run on specific devices — making computers useful for everyone!",
       keyFacts: [
         "App = application — a program built for a specific purpose (camera, maps, games) 📱",
-        "Mobile apps run on phones; web apps run in browsers; desktop apps run on computers.",
+        "Mobile apps run on phones; web apps run in browsers; desktop apps on computers.",
         "The App Store and Google Play each have over 3 million apps available!",
         "App development: design → code → test → launch → improve based on feedback.",
       ],
-      funFact: "🌟 Instagram was built by just 13 people — and sold to Facebook for $1 billion just 18 months after launch!",
+      funFact: "🌟 Instagram was built by 13 people and sold to Facebook for $1 billion just 18 months after launch!",
+      diagramSteps: [
+        { icon: "💡 Idea", label: "App idea:\n'What problem to solve?'" },
+        { icon: "🎨 Design", label: "Draw screens\nand buttons" },
+        { icon: "💻 Code", label: "Write the\nprogram code" },
+        { icon: "📱 Launch!", label: "People use\nyour app! 🎉", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1504639725590-34d0984388bd"), caption: "Coding an app on a computer", emoji: "💻" },
+        { url: u("1498050108023-c5249f4df085"), caption: "Testing apps on mobile devices", emoji: "📱" },
+        { url: u("1519389950473-47ba0277781c"), caption: "App developers working together", emoji: "👥" },
+      ],
     },
     10: {
-      videoId: "qABGqIosCBE",
-      imageUrl: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&fit=crop",
+      imageUrl: u("1519389950473-47ba0277781c"),
       emoji: "🚀",
       simpleSummary: "Your first project! Put it all together — variables, loops, conditions, and functions!",
       keyFacts: [
         "Start small: a simple game might just need 50 lines of code! 🎮",
         "Plan first: sketch out what you want to build before writing code 📝",
         "Test often: run your code after every small change to catch bugs early.",
-        "Share your work: showing others your project helps you improve and inspires them!",
+        "Share your work: showing others your project helps you improve!",
       ],
-      funFact: "🌟 Minecraft was created by just one person (Markus 'Notch' Persson) and became one of the best-selling games ever!",
+      funFact: "🌟 Minecraft was created by just one person and became one of the best-selling games ever!",
+      diagramSteps: [
+        { icon: "📝 Plan", label: "Sketch your\ngame idea" },
+        { icon: "💻 Code", label: "Write\nvariables & loops" },
+        { icon: "🐛 Debug", label: "Fix bugs,\ntest again" },
+        { icon: "🚀 Launch!", label: "Share with\nthe world! 🎉", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1519389950473-47ba0277781c"), caption: "Team building their first project", emoji: "🚀" },
+        { url: u("1587620962725-abab7fe55159"), caption: "Code for a mini game project", emoji: "🎮" },
+        { url: u("1504639725590-34d0984388bd"), caption: "Testing and launching the app!", emoji: "✅" },
+      ],
     },
   },
+
   "Art & Creativity": {
     1: {
-      videoId: "8mXNHUiK5as",
-      imageUrl: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&fit=crop",
+      imageUrl: u("1513364776144-60967b0f800f"),
       emoji: "🎨",
       simpleSummary: "Color theory explains how colors work together to create beautiful art!",
       keyFacts: [
@@ -681,11 +1213,21 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Warm colors (red, orange, yellow) feel energetic; cool colors (blue, green) feel calm.",
         "Complementary colors sit opposite on the color wheel — they make each other pop!",
       ],
-      funFact: "🌟 Ancient Egyptians made blue paint from lapis lazuli — a gemstone so rare it was worth more than gold!",
+      funFact: "🌟 Ancient Egyptians made blue paint from lapis lazuli — worth more than gold!",
+      diagramSteps: [
+        { icon: "🔴+🟡", label: "Red + Yellow\n= Orange 🟠" },
+        { icon: "🟡+🔵", label: "Yellow + Blue\n= Green 🟢" },
+        { icon: "🔴+🔵", label: "Red + Blue\n= Purple 🟣" },
+        { icon: "🌈", label: "Infinite colors\nto create! 🎨", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1513364776144-60967b0f800f"), caption: "Colorful paint palette for artists", emoji: "🎨" },
+        { url: u("1460661419201-fd4cecdf8a8b"), caption: "Mixing colors to create new ones", emoji: "🖌️" },
+        { url: u("1452860606245-08befc0ff44b"), caption: "Artist using color theory in work", emoji: "🎭" },
+      ],
     },
     2: {
-      videoId: "eGKiqKP3MDs",
-      imageUrl: "https://images.unsplash.com/photo-1452860606245-08befc0ff44b?w=800&fit=crop",
+      imageUrl: u("1452860606245-08befc0ff44b"),
       emoji: "✏️",
       simpleSummary: "Drawing is about observation — really LOOKING at what you want to draw before you start!",
       keyFacts: [
@@ -694,11 +1236,21 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Light and shadow (shading) make flat drawings look three-dimensional 💡",
         "Gesture drawing: capture movement and emotion quickly with loose strokes.",
       ],
-      funFact: "🌟 Leonardo da Vinci filled over 7,000 pages of notebooks with drawings and observations — including flying machines 500 years before airplanes!",
+      funFact: "🌟 Leonardo da Vinci filled over 7,000 pages of notebooks with drawings!",
+      diagramSteps: [
+        { icon: "⭕", label: "Start with\nbasic shapes" },
+        { icon: "✏️", label: "Add details\nand outlines" },
+        { icon: "🌑", label: "Shade dark\nareas" },
+        { icon: "🖼️", label: "Drawing complete! 🎉", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1452860606245-08befc0ff44b"), caption: "Hand drawing with pencil and detail", emoji: "✏️" },
+        { url: u("1541961017774-22349e4a1262"), caption: "Sketching basic shapes first", emoji: "⭕" },
+        { url: u("1460661419201-fd4cecdf8a8b"), caption: "Finished artwork with shading", emoji: "🖼️" },
+      ],
     },
     3: {
-      videoId: "bG7-6ylH0k0",
-      imageUrl: "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800&fit=crop",
+      imageUrl: u("1460661419201-fd4cecdf8a8b"),
       emoji: "🖼️",
       simpleSummary: "Composition is HOW you arrange objects in an artwork to guide the viewer's eye!",
       keyFacts: [
@@ -707,11 +1259,21 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Leading lines: roads, rivers, paths guide the viewer's eye into the image.",
         "Negative space: the empty area around the subject can be just as important!",
       ],
-      funFact: "🌟 The Mona Lisa is only 30×21 inches — smaller than most school posters — yet it's the world's most famous painting!",
+      funFact: "🌟 The Mona Lisa is only 30×21 inches — smaller than most school posters!",
+      diagramSteps: [
+        { icon: "📐", label: "Rule of thirds:\ndivide into 9 squares" },
+        { icon: "🏔️", label: "Background:\nfar away things" },
+        { icon: "🌳", label: "Midground:\nmiddle distance" },
+        { icon: "🌸", label: "Foreground:\nclose up details!", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1460661419201-fd4cecdf8a8b"), caption: "Painting with great composition", emoji: "🖼️" },
+        { url: u("1618005198919-d3d4b5a92ead"), caption: "Photography using rule of thirds", emoji: "📸" },
+        { url: u("1452860606245-08befc0ff44b"), caption: "Arranging elements in artwork", emoji: "✏️" },
+      ],
     },
     4: {
-      videoId: "rBvCfSW3Yxo",
-      imageUrl: "https://images.unsplash.com/photo-1549490349-8643362247b5?w=800&fit=crop",
+      imageUrl: u("1549490349-8643362247b5"),
       emoji: "🏺",
       simpleSummary: "Sculpture is 3D art you can walk around and touch — it exists in real space!",
       keyFacts: [
@@ -720,11 +1282,21 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Carving: subtractive — removing material. Modeling: additive — building up material.",
         "Installation art: large sculptures that transform an entire space or room.",
       ],
-      funFact: "🌟 Michelangelo spent 2 years carving David out of a single block of marble that other sculptors had rejected as flawed!",
+      funFact: "🌟 Michelangelo spent 2 years carving David from a single block of marble!",
+      diagramSteps: [
+        { icon: "🧱 Clay", label: "Start with\nraw material" },
+        { icon: "✂️", label: "Carve OR\nModel & build" },
+        { icon: "🎨", label: "Paint and\nfinish it" },
+        { icon: "🏺", label: "3D sculpture\ncomplete! ✅", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1549490349-8643362247b5"), caption: "Sculptures created by artists", emoji: "🏺" },
+        { url: u("1460661419201-fd4cecdf8a8b"), caption: "Clay and material for sculpting", emoji: "🧱" },
+        { url: u("1513364776144-60967b0f800f"), caption: "Art tools and creative materials", emoji: "🎨" },
+      ],
     },
     5: {
-      videoId: "PaVQCFSFNTo",
-      imageUrl: "https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?w=800&fit=crop",
+      imageUrl: u("1618005198919-d3d4b5a92ead"),
       emoji: "🎭",
       simpleSummary: "Art movements show how artists changed their style to reflect the world around them!",
       keyFacts: [
@@ -733,11 +1305,21 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Pop Art: uses images from popular culture and advertising (Andy Warhol's soup cans).",
         "Abstract art: uses shapes, colors, and forms without depicting real objects.",
       ],
-      funFact: "🌟 Van Gogh only sold ONE painting during his lifetime — today his works sell for over $100 million each!",
+      funFact: "🌟 Van Gogh only sold ONE painting during his lifetime — today they sell for $100 million+!",
+      diagramSteps: [
+        { icon: "🌊", label: "Impressionism\n(blurry & dreamy)" },
+        { icon: "🔷", label: "Cubism\n(broken shapes)" },
+        { icon: "🎨", label: "Pop Art\n(bright & bold)" },
+        { icon: "⬛", label: "Abstract\n(your imagination!)", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1618005198919-d3d4b5a92ead"), caption: "Camera and art documentation", emoji: "📸" },
+        { url: u("1460661419201-fd4cecdf8a8b"), caption: "Different painting styles compared", emoji: "🎨" },
+        { url: u("1513364776144-60967b0f800f"), caption: "Art history through color and style", emoji: "🖼️" },
+      ],
     },
     6: {
-      videoId: "YsRZtbpBoiU",
-      imageUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&fit=crop",
+      imageUrl: u("1493225457124-a3eb161ffa5f"),
       emoji: "🎵",
       simpleSummary: "Music is organized sound — rhythm, melody, and harmony work together to express emotions!",
       keyFacts: [
@@ -746,50 +1328,90 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Harmony: multiple notes played together that sound pleasing.",
         "Tempo: how fast or slow the music plays (largo = slow, presto = very fast) 🎻",
       ],
-      funFact: "🌟 Beethoven composed some of his greatest symphonies after becoming completely deaf — he felt vibrations through the floor!",
+      funFact: "🌟 Beethoven composed great symphonies after becoming completely deaf — he felt vibrations!",
+      diagramSteps: [
+        { icon: "🥁 BOOM-boom", label: "Rhythm\n(the beat)" },
+        { icon: "🎵 la-la-la", label: "Melody\n(the tune)" },
+        { icon: "🎶 do-mi-sol", label: "Harmony\n(notes together)" },
+        { icon: "🎵🎶🥁", label: "= Beautiful music! 🎉", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1493225457124-a3eb161ffa5f"), caption: "Musical instruments creating melody", emoji: "🎵" },
+        { url: u("1578662996442-48f60103fc96"), caption: "Music written as notes and rhythm", emoji: "🎼" },
+        { url: u("1516979187457-637abb4f9353"), caption: "Songs and compositions throughout history", emoji: "📜" },
+      ],
     },
     7: {
-      videoId: "sSpdAsGpPT4",
-      imageUrl: "https://images.unsplash.com/photo-1594389615253-47a0ac2c32a4?w=800&fit=crop",
+      imageUrl: u("1594389615253-47a0ac2c32a4"),
       emoji: "📸",
       simpleSummary: "Photography captures a moment in time — light, composition, and timing make a great photo!",
       keyFacts: [
         "A camera lens focuses light onto a sensor or film to create an image 📷",
-        "Golden hour: just after sunrise and before sunset gives the most beautiful, warm light.",
+        "Golden hour: just after sunrise and before sunset gives the most beautiful light.",
         "Rule of thirds works for photography too — don't always center your subject!",
         "Macro photography: extreme close-ups reveal the hidden beauty in tiny things 🔍",
       ],
-      funFact: "🌟 The world's oldest surviving photograph was taken in 1826 and required an 8-HOUR exposure time — today phones take photos in 1/1000th of a second!",
+      funFact: "🌟 The oldest surviving photograph was taken in 1826 and required an 8-HOUR exposure!",
+      diagramSteps: [
+        { icon: "☀️", label: "Light enters\nthe camera lens" },
+        { icon: "📷", label: "Lens focuses\nthe light" },
+        { icon: "💾", label: "Sensor captures\nthe image" },
+        { icon: "🖼️", label: "Your photo! 📸", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1594389615253-47a0ac2c32a4"), caption: "Camera capturing a beautiful shot", emoji: "📸" },
+        { url: u("1618005198919-d3d4b5a92ead"), caption: "Photography with different compositions", emoji: "🖼️" },
+        { url: u("1460661419201-fd4cecdf8a8b"), caption: "Photos as art on gallery walls", emoji: "🏛️" },
+      ],
     },
     8: {
-      videoId: "OJPiL1m2UuY",
-      imageUrl: "https://images.unsplash.com/photo-1565008447742-97f6f38c985c?w=800&fit=crop",
+      imageUrl: u("1565008447742-97f6f38c985c"),
       emoji: "🎬",
       simpleSummary: "Animation brings drawings to life by showing many still images very quickly!",
       keyFacts: [
-        "24 frames per second: animation requires 24 different drawings for just 1 second of movement! 🎬",
-        "Keyframes: the most important positions in an animation — the in-between frames fill the gaps.",
-        "12 principles of animation include squash/stretch, anticipation, and follow-through.",
+        "24 frames per second: animation requires 24 different drawings for just 1 second! 🎬",
+        "Keyframes: the most important positions — in-between frames fill the gaps.",
+        "12 principles include squash/stretch, anticipation, and follow-through.",
         "Pixar's Toy Story (1995) was the first fully computer-animated feature film 🤖",
       ],
-      funFact: "🌟 Each frame of the movie 'Brave' took 100+ computers working together for an average of 100 hours to render!",
+      funFact: "🌟 Each frame of the movie 'Brave' took 100+ computers an average of 100 hours to render!",
+      diagramSteps: [
+        { icon: "🖼️1", label: "Frame 1\n(position A)" },
+        { icon: "🖼️2", label: "Frame 2\n(slightly moved)" },
+        { icon: "🖼️3", label: "Frame 3\n(more movement)" },
+        { icon: "🎬×24/sec", label: "24 per second =\nsmooth animation! 🎉", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1565008447742-97f6f38c985c"), caption: "Animation frames played quickly", emoji: "🎬" },
+        { url: u("1541961017774-22349e4a1262"), caption: "Drawing frames on a tablet", emoji: "✏️" },
+        { url: u("1485827404703-89b55fcc595e"), caption: "Computer animation and 3D rendering", emoji: "💻" },
+      ],
     },
     9: {
-      videoId: "vBmQH-VXBU0",
-      imageUrl: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800&fit=crop",
+      imageUrl: u("1541961017774-22349e4a1262"),
       emoji: "🖌️",
       simpleSummary: "Digital art uses computers and software to create artwork — the tools are endless!",
       keyFacts: [
         "Drawing tablets let artists draw naturally with a stylus on a pressure-sensitive surface.",
         "Layers: work on different parts of your artwork separately without ruining the rest 📑",
-        "Raster art (Photoshop): made of pixels. Vector art (Illustrator): made of paths — scales perfectly!",
+        "Raster art (Photoshop): made of pixels. Vector art: made of paths — scales perfectly!",
         "Digital art can be printed, shared online, or animated — endless possibilities.",
       ],
-      funFact: "🌟 The first computer-generated image was created in 1960 by a researcher who wanted to test if computers could display shapes — it was just some random triangles!",
+      funFact: "🌟 The first computer-generated image was created in 1960 — it was just random triangles!",
+      diagramSteps: [
+        { icon: "🖊️ Tablet", label: "Draw with\ndigital pen" },
+        { icon: "📑 Layers", label: "Work in\nseparate layers" },
+        { icon: "🎨 Tools", label: "Endless brushes,\ncolors, effects" },
+        { icon: "✅ Share!", label: "Share anywhere\nonline! 🌐", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1541961017774-22349e4a1262"), caption: "Creating digital art on an iPad", emoji: "🖌️" },
+        { url: u("1565008447742-97f6f38c985c"), caption: "Digital illustrations and design", emoji: "🎨" },
+        { url: u("1618005198919-d3d4b5a92ead"), caption: "Photography edited digitally", emoji: "📸" },
+      ],
     },
     10: {
-      videoId: "YtkjvbTnEjA",
-      imageUrl: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&fit=crop",
+      imageUrl: u("1578662996442-48f60103fc96"),
       emoji: "🎪",
       simpleSummary: "Your creativity is unique — art is about expressing YOUR ideas and seeing the world your way!",
       keyFacts: [
@@ -798,13 +1420,23 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         "Study artists you admire, then add your own twist to develop your voice.",
         "Share your art! Art connects people across language and cultural barriers 🌍",
       ],
-      funFact: "🌟 Henri Matisse, one of the greatest artists ever, created some of his most famous work while bedridden in his 80s using scissors and colored paper!",
+      funFact: "🌟 Matisse created some of his most famous work while bedridden in his 80s using scissors and paper!",
+      diagramSteps: [
+        { icon: "💡 Idea", label: "Your unique\nartistic vision" },
+        { icon: "🎨 Create", label: "Choose your\nmedium & tools" },
+        { icon: "✨ Express", label: "Pour your\nfeelings in" },
+        { icon: "🌍 Share!", label: "Inspire others\nwith your art! 🎉", color: "green" },
+      ],
+      conceptImages: [
+        { url: u("1578662996442-48f60103fc96"), caption: "Your own unique artwork awaits", emoji: "🎨" },
+        { url: u("1513364776144-60967b0f800f"), caption: "Every color choice is your own", emoji: "🌈" },
+        { url: u("1460661419201-fd4cecdf8a8b"), caption: "Express yourself through art", emoji: "✨" },
+      ],
     },
   },
 };
 
 const DEFAULT_MEDIA: LessonMedia = {
-  videoId: "",
   imageUrl: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&fit=crop",
   emoji: "📚",
   simpleSummary: "This lesson explores a fascinating topic — read carefully and you'll be an expert!",
@@ -815,6 +1447,17 @@ const DEFAULT_MEDIA: LessonMedia = {
     "Ask questions when something is unclear — curiosity is a superpower!",
   ],
   funFact: "🌟 The human brain can form new connections at any age — you're literally reshaping your brain right now by learning!",
+  diagramSteps: [
+    { icon: "📖", label: "Read carefully" },
+    { icon: "💡", label: "Find key ideas" },
+    { icon: "✍️", label: "Take notes" },
+    { icon: "✅", label: "You learned it!", color: "green" },
+  ],
+  conceptImages: [
+    { url: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=280&fit=crop&q=80", caption: "Books full of knowledge", emoji: "📚" },
+    { url: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400&h=280&fit=crop&q=80", caption: "Learning together in class", emoji: "🏫" },
+    { url: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=400&h=280&fit=crop&q=80", caption: "Writing down what you learn", emoji: "✏️" },
+  ],
 };
 
 export function getLessonMedia(courseTitle: string, lessonOrder: number): LessonMedia {
