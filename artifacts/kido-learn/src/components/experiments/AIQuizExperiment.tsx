@@ -17,15 +17,18 @@ export default function AIQuizExperiment({ topic, difficulty = "easy" }: AIQuizP
   const [selected, setSelected] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [done, setDone] = useState(false);
+  const [quizSeed, setQuizSeed] = useState(() => Date.now());
 
-  const { data: quiz, isLoading, refetch } = useQuery({
-    queryKey: ["quiz", topic, difficulty],
-    queryFn: () => api.ai.quiz({ topic, numQuestions: 5, difficulty }),
+  const { data: quiz, isLoading } = useQuery({
+    queryKey: ["quiz", topic, difficulty, quizSeed],
+    queryFn: () => api.ai.quiz({ topic, numQuestions: 5, difficulty, seed: quizSeed }),
     enabled: started,
-    staleTime: 0,
+    staleTime: Infinity,
+    gcTime: 0,
   });
 
   function handleStart() {
+    setQuizSeed(Date.now());
     setStarted(true);
     setCurrentQ(0);
     setSelected(null);
@@ -34,11 +37,11 @@ export default function AIQuizExperiment({ topic, difficulty = "easy" }: AIQuizP
   }
 
   function handleNewQuiz() {
+    setQuizSeed(Date.now());
     setCurrentQ(0);
     setSelected(null);
     setScore(0);
     setDone(false);
-    refetch();
   }
 
   function handleSelect(idx: number) {

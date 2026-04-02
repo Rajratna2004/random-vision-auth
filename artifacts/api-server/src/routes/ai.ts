@@ -15,10 +15,22 @@ function getClient() {
   });
 }
 
+const QUESTION_STYLES = [
+  "scenario-based story questions (e.g. 'If Sarah has 3 apples and gives 1 away...')",
+  "visual imagination questions (e.g. 'Picture a number line...')",
+  "real-world application questions (e.g. 'At the store you buy...')",
+  "fill-in-the-blank style questions",
+  "true/false style questions rewritten as multiple choice",
+  "definition or vocabulary questions",
+  "cause-and-effect questions",
+  "compare and contrast questions",
+];
+
 const quizRequestSchema = z.object({
   topic: z.string().min(1),
   numQuestions: z.number().int().min(1).max(10).default(5),
   difficulty: z.enum(["easy", "medium", "hard"]).default("medium"),
+  seed: z.number().optional(),
 });
 
 router.post("/quiz", authenticate, async (req: AuthRequest, res) => {
@@ -28,10 +40,34 @@ router.post("/quiz", authenticate, async (req: AuthRequest, res) => {
     return;
   }
 
-  const { topic, numQuestions, difficulty } = parsed.data;
+  const { topic, numQuestions, difficulty, seed = Date.now() } = parsed.data;
 
-  const prompt = `Generate a ${difficulty} difficulty quiz about "${topic}" for kids aged 8-14.
+  const styleIndex = seed % QUESTION_STYLES.length;
+  const style = QUESTION_STYLES[styleIndex];
+  const angleIndex = seed % 7;
+  const angles = [
+    "Focus on fun real-life examples a child would relate to (games, food, animals, school).",
+    "Use creative storytelling contexts (space, jungle, underwater, time travel).",
+    "Use sports and outdoor activities as the context for questions.",
+    "Use cooking, baking, and food as the context.",
+    "Use animals and nature as the context.",
+    "Use superheroes and fantasy as the context for problems.",
+    "Use everyday shopping and money as the context.",
+  ];
+  const angleHint = angles[angleIndex];
+
+  const prompt = `You are generating a UNIQUE and FRESH quiz. This is quiz session #${seed}.
+
+Generate a ${difficulty} difficulty quiz about "${topic}" for kids aged 8-14.
 Create exactly ${numQuestions} multiple choice questions.
+
+IMPORTANT — This quiz MUST be completely different from any previous quiz on this topic:
+- Use the question style: ${style}
+- ${angleHint}
+- Vary the numbers, names, and examples used — do NOT use the most obvious or textbook-standard questions
+- Mix question types: some conceptual, some applied, some creative
+- If the topic is math, use different numbers each time (avoid always using 5, 10, 15, 20)
+- Randomness seed hint: ${seed} — let this influence your creative choices
 
 Respond ONLY with valid JSON in this exact format:
 {
@@ -50,12 +86,15 @@ Rules:
 - Each question has exactly 4 options
 - correctIndex is 0-based (0, 1, 2, or 3)
 - Questions should be educational and age-appropriate
-- Explanations should be encouraging and educational`;
+- Explanations should be encouraging and educational
+- Make sure all 4 options are plausible (no obviously wrong answers)
+- Do NOT repeat the same question or numbers from a typical quiz on this topic`;
 
   const completion = await getClient().chat.completions.create({
     model: "gpt-4o-mini",
     messages: [{ role: "user", content: prompt }],
     response_format: { type: "json_object" },
+    temperature: 1.0,
   });
 
   const content = completion.choices[0]?.message?.content;
