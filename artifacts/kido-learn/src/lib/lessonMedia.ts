@@ -5,10 +5,14 @@ export interface DiagramStep {
   color?: string;
 }
 
-export interface ConceptImage {
-  url: string;
-  caption: string;
-  emoji: string;
+export type DiagramLayout = "sequence" | "combine";
+
+export interface VisualExample {
+  leftLabel: string;
+  op: string;
+  rightLabel: string;
+  resultLabel: string;
+  legend: string;
 }
 
 export interface LessonMedia {
@@ -18,7 +22,9 @@ export interface LessonMedia {
   keyFacts: string[];
   funFact: string;
   diagramSteps: DiagramStep[];
-  conceptImages: ConceptImage[];
+  layout?: DiagramLayout;
+  visualExamples?: VisualExample[];
+  conceptImages?: { url: string; caption: string; emoji: string }[];
 }
 
 const B = "https://images.unsplash.com/photo-";
@@ -45,6 +51,15 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         { icon: "=", isArrow: true },
         { icon: "🍎🍎🍎🍎🍎", label: "5 apples total!", color: "green" },
       ],
+      layout: "combine",
+      visualExamples: [
+        { leftLabel: "🍎🍎", op: "+", rightLabel: "🍎🍎🍎", resultLabel: "🍎🍎🍎🍎🍎", legend: "2 + 3 = 5" },
+        { leftLabel: "⭐⭐⭐", op: "+", rightLabel: "⭐", resultLabel: "⭐⭐⭐⭐", legend: "3 + 1 = 4" },
+        { leftLabel: "🐸🐸", op: "+", rightLabel: "🐸🐸🐸🐸", resultLabel: "🐸🐸🐸🐸🐸🐸", legend: "2 + 4 = 6" },
+        { leftLabel: "🌸🌸🌸🌸", op: "+", rightLabel: "🌸🌸", resultLabel: "🌸🌸🌸🌸🌸🌸", legend: "4 + 2 = 6" },
+        { leftLabel: "🍪", op: "+", rightLabel: "🍪🍪🍪🍪🍪", resultLabel: "🍪🍪🍪🍪🍪🍪", legend: "1 + 5 = 6" },
+        { leftLabel: "🎈🎈🎈", op: "+", rightLabel: "🎈🎈🎈🎈", resultLabel: "🎈🎈🎈🎈🎈🎈🎈", legend: "3 + 4 = 7" },
+      ],
       conceptImages: [
         { url: u("1635070041078-e363dbe005cb"), caption: "Adding numbers on a board", emoji: "🔢" },
         { url: u("1580582932707-520aed937b7b"), caption: "Counting with blocks", emoji: "🧱" },
@@ -68,6 +83,15 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         { icon: "🍪🍪", label: "eat 2" },
         { icon: "=", isArrow: true },
         { icon: "🍪🍪🍪", label: "3 left!", color: "green" },
+      ],
+      layout: "combine",
+      visualExamples: [
+        { leftLabel: "🍎🍎🍎🍎🍎", op: "−", rightLabel: "🍎🍎", resultLabel: "🍎🍎🍎", legend: "5 − 2 = 3" },
+        { leftLabel: "⭐⭐⭐⭐", op: "−", rightLabel: "⭐", resultLabel: "⭐⭐⭐", legend: "4 − 1 = 3" },
+        { leftLabel: "🐸🐸🐸🐸🐸🐸", op: "−", rightLabel: "🐸🐸🐸", resultLabel: "🐸🐸🐸", legend: "6 − 3 = 3" },
+        { leftLabel: "🌸🌸🌸🌸🌸", op: "−", rightLabel: "🌸🌸", resultLabel: "🌸🌸🌸", legend: "5 − 2 = 3" },
+        { leftLabel: "🍪🍪🍪🍪🍪🍪🍪", op: "−", rightLabel: "🍪🍪🍪🍪", resultLabel: "🍪🍪🍪", legend: "7 − 4 = 3" },
+        { leftLabel: "🎈🎈🎈🎈🎈🎈", op: "−", rightLabel: "🎈", resultLabel: "🎈🎈🎈🎈🎈", legend: "6 − 1 = 5" },
       ],
       conceptImages: [
         { url: u("1509228627152-72ae9ae6848d"), caption: "Numbers on a classroom board", emoji: "📝" },
@@ -93,6 +117,15 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         { icon: "=", isArrow: true },
         { icon: "12 🎈", label: "12 balloons!", color: "green" },
       ],
+      layout: "combine",
+      visualExamples: [
+        { leftLabel: "🍎🍎🍎", op: "×", rightLabel: "2", resultLabel: "🍎🍎🍎🍎🍎🍎", legend: "3 × 2 = 6" },
+        { leftLabel: "⭐⭐", op: "×", rightLabel: "4", resultLabel: "⭐×8", legend: "2 × 4 = 8" },
+        { leftLabel: "🐸🐸🐸🐸", op: "×", rightLabel: "2", resultLabel: "🐸×8", legend: "4 × 2 = 8" },
+        { leftLabel: "🌸🌸🌸", op: "×", rightLabel: "3", resultLabel: "🌸×9", legend: "3 × 3 = 9" },
+        { leftLabel: "🍪🍪", op: "×", rightLabel: "5", resultLabel: "🍪×10", legend: "2 × 5 = 10" },
+        { leftLabel: "🎈🎈🎈🎈", op: "×", rightLabel: "3", resultLabel: "🎈×12", legend: "4 × 3 = 12" },
+      ],
       conceptImages: [
         { url: u("1518133910546-b6c2fb7d79e3"), caption: "Groups of objects multiplied", emoji: "🔢" },
         { url: u("1588854337115-1c67d9247e4d"), caption: "Patterns in rows and columns", emoji: "🔲" },
@@ -116,6 +149,15 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         { icon: "👧👦👧👦", label: "4 friends" },
         { icon: "=", isArrow: true },
         { icon: "🍕🍕", label: "2 each!", color: "green" },
+      ],
+      layout: "combine",
+      visualExamples: [
+        { leftLabel: "🍕🍕🍕🍕🍕🍕", op: "÷", rightLabel: "3", resultLabel: "🍕🍕 each", legend: "6 ÷ 3 = 2" },
+        { leftLabel: "⭐⭐⭐⭐⭐⭐⭐⭐", op: "÷", rightLabel: "4", resultLabel: "⭐⭐ each", legend: "8 ÷ 4 = 2" },
+        { leftLabel: "🍎×9", op: "÷", rightLabel: "3", resultLabel: "🍎🍎🍎 each", legend: "9 ÷ 3 = 3" },
+        { leftLabel: "🐸×10", op: "÷", rightLabel: "5", resultLabel: "🐸🐸 each", legend: "10 ÷ 5 = 2" },
+        { leftLabel: "🍪🍪🍪🍪🍪🍪🍪🍪", op: "÷", rightLabel: "2", resultLabel: "🍪🍪🍪🍪 each", legend: "8 ÷ 2 = 4" },
+        { leftLabel: "🎈×12", op: "÷", rightLabel: "4", resultLabel: "🎈🎈🎈 each", legend: "12 ÷ 4 = 3" },
       ],
       conceptImages: [
         { url: u("1513151233558-d860c5398176"), caption: "Sharing pizza equally", emoji: "🍕" },
@@ -141,6 +183,15 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         { icon: "➗", isArrow: true },
         { icon: "🟡🟡🟡🟡", label: "= 4 quarters (1/4)", color: "green" },
       ],
+      layout: "combine",
+      visualExamples: [
+        { leftLabel: "🍕", op: "÷ 2 =", rightLabel: "🍕🍕", resultLabel: "1/2 each", legend: "Half: 1 whole → 2 pieces" },
+        { leftLabel: "🍰", op: "÷ 3 =", rightLabel: "🍰🍰🍰", resultLabel: "1/3 each", legend: "Third: 1 whole → 3 pieces" },
+        { leftLabel: "🍫", op: "÷ 4 =", rightLabel: "🍫🍫🍫🍫", resultLabel: "1/4 each", legend: "Quarter: 1 whole → 4 pieces" },
+        { leftLabel: "🎂", op: "÷ 8 =", rightLabel: "🎂×8 pieces", resultLabel: "1/8 each", legend: "Eighth: 1 whole → 8 pieces" },
+        { leftLabel: "🍎🍎🍎", op: "out of", rightLabel: "🍎×5 total", resultLabel: "3/5", legend: "3 out of 5 apples = 3/5" },
+        { leftLabel: "⭐⭐", op: "out of", rightLabel: "⭐×6 total", resultLabel: "2/6 = 1/3", legend: "2 out of 6 stars = 1/3" },
+      ],
       conceptImages: [
         { url: u("1513151233558-d860c5398176"), caption: "Pizza cut into equal slices", emoji: "🍕" },
         { url: u("1588854337115-1c67d9247e4d"), caption: "Shapes divided into halves", emoji: "✂️" },
@@ -163,6 +214,15 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         { icon: "⬛", label: "Square\n4 equal sides" },
         { icon: "🔷", label: "Diamond\n4 sides" },
         { icon: "⭕", label: "Circle\nNo sides!", color: "green" },
+      ],
+      layout: "combine",
+      visualExamples: [
+        { leftLabel: "🔺", op: "has", rightLabel: "3 sides", resultLabel: "Triangle", legend: "Triangle: 3 sides & 3 corners" },
+        { leftLabel: "⬛", op: "has", rightLabel: "4 equal sides", resultLabel: "Square", legend: "Square: 4 equal sides" },
+        { leftLabel: "🟦", op: "has", rightLabel: "4 sides (not equal)", resultLabel: "Rectangle", legend: "Rectangle: 2 long + 2 short" },
+        { leftLabel: "⭕", op: "has", rightLabel: "0 sides, 0 corners", resultLabel: "Circle", legend: "Circle: perfectly round!" },
+        { leftLabel: "⬟", op: "has", rightLabel: "6 sides", resultLabel: "Hexagon", legend: "Hexagon: like a bee's honeycomb" },
+        { leftLabel: "🔶", op: "has", rightLabel: "5 sides", resultLabel: "Pentagon", legend: "Pentagon: like the Pentagon building!" },
       ],
       conceptImages: [
         { url: u("1588854337115-1c67d9247e4d"), caption: "Geometric shapes around us", emoji: "🔷" },
@@ -187,6 +247,15 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         { icon: "🥤", label: "Volume → mL, L" },
         { icon: "🌡️", label: "Temperature → °C", color: "green" },
       ],
+      layout: "combine",
+      visualExamples: [
+        { leftLabel: "📏 Length", op: "measured in", rightLabel: "cm or m", resultLabel: "1 m = 100 cm", legend: "A door is about 2 meters tall" },
+        { leftLabel: "⚖️ Weight", op: "measured in", rightLabel: "g or kg", resultLabel: "1 kg = 1000 g", legend: "A bag of apples ≈ 1 kg" },
+        { leftLabel: "🥤 Volume", op: "measured in", rightLabel: "mL or L", resultLabel: "1 L = 1000 mL", legend: "A juice bottle is about 1 liter" },
+        { leftLabel: "🌡️ Temperature", op: "measured in", rightLabel: "°C or °F", resultLabel: "0°C = Freezing!", legend: "Water boils at 100°C" },
+        { leftLabel: "⏱️ Time", op: "measured in", rightLabel: "sec, min, hr", resultLabel: "60 sec = 1 min", legend: "1 hour = 60 minutes" },
+        { leftLabel: "📐 Angles", op: "measured in", rightLabel: "degrees °", resultLabel: "360° = full turn", legend: "A right angle = 90 degrees" },
+      ],
       conceptImages: [
         { url: u("1611532736597-de2d4265fba3"), caption: "Ruler measuring length", emoji: "📏" },
         { url: u("1503676260728-1c00da094a0b"), caption: "Measuring in class", emoji: "🔬" },
@@ -209,6 +278,15 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         { icon: "🔴🔵", label: "Red, Blue..." },
         { icon: "🔴🔵", label: "Red, Blue..." },
         { icon: "❓", label: "What's next?", color: "green" },
+      ],
+      layout: "combine",
+      visualExamples: [
+        { leftLabel: "🔴🔵🔴🔵🔴", op: "→ next?", rightLabel: "?", resultLabel: "🔵 Blue!", legend: "Color pattern: Red-Blue repeats" },
+        { leftLabel: "2, 4, 6, 8", op: "→ next?", rightLabel: "?", resultLabel: "10 ➕2 each", legend: "Even numbers: add 2 each time" },
+        { leftLabel: "1, 3, 9, 27", op: "→ next?", rightLabel: "?", resultLabel: "81 ✖3 each", legend: "Multiply pattern: ×3 each step" },
+        { leftLabel: "🔺🟦🔺🟦🔺", op: "→ next?", rightLabel: "?", resultLabel: "🟦 Square!", legend: "Shape pattern: Triangle-Square repeats" },
+        { leftLabel: "5, 10, 15, 20", op: "→ next?", rightLabel: "?", resultLabel: "25 ➕5 each", legend: "Skip counting by 5s" },
+        { leftLabel: "1, 1, 2, 3, 5, 8", op: "→ next?", rightLabel: "?", resultLabel: "13 🌀", legend: "Fibonacci: add last 2 numbers!" },
       ],
       conceptImages: [
         { url: u("1570295999919-56ceb5ecca61"), caption: "Patterns in nature and tiles", emoji: "🌸" },
@@ -233,6 +311,15 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         { icon: "🔢", label: "3. Choose + − × ÷" },
         { icon: "✅", label: "4. Solve & Check!", color: "green" },
       ],
+      layout: "combine",
+      visualExamples: [
+        { leftLabel: "🍎×5 apples", op: "+", rightLabel: "🍎×3 more", resultLabel: "🍎×8 total ✅", legend: "Tom has 5. Gets 3 more. How many?" },
+        { leftLabel: "🎈×10 balloons", op: "−", rightLabel: "🎈×4 pop!", resultLabel: "🎈×6 left ✅", legend: "10 balloons, 4 pop. How many left?" },
+        { leftLabel: "🍫×3 boxes", op: "× 6 each", rightLabel: "= 18 total", resultLabel: "🍫×18 ✅", legend: "3 boxes of 6 chocolates each" },
+        { leftLabel: "🎁×12 gifts", op: "÷ 4 friends", rightLabel: "= 3 each", resultLabel: "🎁×3 each ✅", legend: "12 gifts shared by 4 friends" },
+        { leftLabel: "🚗 at 9:00", op: "travels 2hr", rightLabel: "arrived 11:00", resultLabel: "⏱️ 2 hours ✅", legend: "Time word problem" },
+        { leftLabel: "💰 $15 saved", op: "spend $7", rightLabel: "how much left?", resultLabel: "💰 $8 left ✅", legend: "Money word problem" },
+      ],
       conceptImages: [
         { url: u("1503676260728-1c00da094a0b"), caption: "Solving math word problems", emoji: "📖" },
         { url: u("1580582932707-520aed937b7b"), caption: "Drawing diagrams to help", emoji: "✏️" },
@@ -255,6 +342,15 @@ const LESSON_MEDIA: Record<string, Record<number, LessonMedia>> = {
         { icon: "➡️", isArrow: true },
         { icon: "47 + 10 = 57", label: "Add 10 first" },
         { icon: "57 - 1 = 56", label: "Then subtract 1 ⚡", color: "green" },
+      ],
+      layout: "combine",
+      visualExamples: [
+        { leftLabel: "47 + 9", op: "→ add 10 then −1", rightLabel: "= 57−1", resultLabel: "= 56 ⚡", legend: "Trick: Add 10, subtract 1" },
+        { leftLabel: "38 + 25", op: "→ 40 + 23", rightLabel: "round up!", resultLabel: "= 63 ⚡", legend: "Trick: Round to nearest 10" },
+        { leftLabel: "7 + 7", op: "= double 7", rightLabel: "= ?", resultLabel: "= 14 ⚡", legend: "Doubles: 7+7=14 (memorize!)" },
+        { leftLabel: "16 × 5", op: "= 16 ÷ 2 × 10", rightLabel: "= 8 × 10", resultLabel: "= 80 ⚡", legend: "Trick: Halve then multiply by 10" },
+        { leftLabel: "99 + 45", op: "= 100 + 44", rightLabel: "round 99→100", resultLabel: "= 144 ⚡", legend: "Trick: Round 99 up to 100" },
+        { leftLabel: "25 × 4", op: "= 100", rightLabel: "always!", resultLabel: "= 100 ⚡", legend: "Quick fact: 25×4 always = 100" },
       ],
       conceptImages: [
         { url: u("1580582932707-520aed937b7b"), caption: "Thinking fast in your head", emoji: "🧠" },

@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import AIQuizExperiment from "@/components/experiments/AIQuizExperiment";
 import { api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
-import { getLessonMedia, type DiagramStep } from "@/lib/lessonMedia";
+import { getLessonMedia, type DiagramStep, type VisualExample } from "@/lib/lessonMedia";
 import confetti from "canvas-confetti";
 
 interface ChallengeItem {
@@ -65,42 +65,115 @@ function TheoryContent({ content }: { content: string }) {
   );
 }
 
-function ConceptDiagram({ steps }: { steps: DiagramStep[] }) {
+const CARD_PALETTES = [
+  { bg: "from-blue-100 to-blue-50 border-blue-300", op: "text-blue-600", result: "bg-emerald-50 border-emerald-300 text-emerald-700" },
+  { bg: "from-purple-100 to-purple-50 border-purple-300", op: "text-purple-600", result: "bg-emerald-50 border-emerald-300 text-emerald-700" },
+  { bg: "from-orange-100 to-orange-50 border-orange-300", op: "text-orange-600", result: "bg-emerald-50 border-emerald-300 text-emerald-700" },
+  { bg: "from-cyan-100 to-cyan-50 border-cyan-300", op: "text-teal-600", result: "bg-emerald-50 border-emerald-300 text-emerald-700" },
+  { bg: "from-pink-100 to-pink-50 border-pink-300", op: "text-rose-600", result: "bg-emerald-50 border-emerald-300 text-emerald-700" },
+  { bg: "from-amber-100 to-amber-50 border-amber-300", op: "text-amber-700", result: "bg-emerald-50 border-emerald-300 text-emerald-700" },
+];
+
+function CombineLayout({ examples }: { examples: VisualExample[] }) {
   return (
-    <div className="flex flex-wrap items-center justify-center gap-2 py-2">
-      {steps.map((step, i) => {
-        if (step.isArrow) {
-          return (
-            <div key={i} className="flex items-center justify-center text-2xl text-muted-foreground px-1">
-              {step.icon}
-            </div>
-          );
-        }
-        const colors: Record<string, string> = {
-          green: "from-emerald-50 to-green-50 border-emerald-200",
-          blue: "from-blue-50 to-sky-50 border-blue-200",
-          red: "from-red-50 to-rose-50 border-red-200",
-        };
-        const colorClass = step.color ? colors[step.color] ?? colors.green : "from-white to-slate-50 border-slate-200";
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      {examples.map((ex, i) => {
+        const pal = CARD_PALETTES[i % CARD_PALETTES.length];
         return (
           <motion.div
             key={i}
-            initial={{ opacity: 0, scale: 0.8, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ delay: i * 0.12, type: "spring", stiffness: 200 }}
-            className={`flex flex-col items-center justify-center rounded-2xl border-2 bg-gradient-to-b ${colorClass} px-4 py-3 min-w-[80px] shadow-sm`}
+            initial={{ opacity: 0, y: 14, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ delay: i * 0.08, type: "spring", stiffness: 220, damping: 18 }}
+            className={`bg-gradient-to-br ${pal.bg} border-2 rounded-2xl p-4 shadow-sm`}
           >
-            <span className="text-2xl leading-tight text-center">{step.icon}</span>
-            {step.label && (
-              <span className="text-[10px] font-semibold text-slate-600 text-center mt-1 whitespace-pre-line leading-tight">
-                {step.label}
-              </span>
-            )}
+            <div className="flex items-center justify-center gap-1.5 flex-wrap text-base leading-snug mb-2 min-h-[2.5rem]">
+              <span className="bg-white/80 rounded-xl px-2.5 py-1.5 text-lg font-medium">{ex.leftLabel}</span>
+              <span className={`font-black text-xl ${pal.op} px-1`}>{ex.op}</span>
+              <span className="bg-white/80 rounded-xl px-2.5 py-1.5 text-lg font-medium">{ex.rightLabel}</span>
+              {ex.resultLabel && (
+                <>
+                  <span className="font-bold text-slate-400 text-xl">=</span>
+                  <span className={`rounded-xl px-2.5 py-1.5 text-lg font-bold border-2 ${pal.result}`}>{ex.resultLabel}</span>
+                </>
+              )}
+            </div>
+            <p className="text-center text-xs font-bold text-slate-600 leading-tight">{ex.legend}</p>
           </motion.div>
         );
       })}
     </div>
   );
+}
+
+const STEP_PALETTES = [
+  "from-blue-100 to-blue-50 border-blue-300",
+  "from-purple-100 to-purple-50 border-purple-300",
+  "from-emerald-100 to-emerald-50 border-emerald-300",
+  "from-amber-100 to-amber-50 border-amber-300",
+  "from-pink-100 to-pink-50 border-pink-300",
+  "from-cyan-100 to-cyan-50 border-cyan-300",
+  "from-orange-100 to-orange-50 border-orange-300",
+  "from-violet-100 to-violet-50 border-violet-300",
+];
+
+function SequenceLayout({ steps }: { steps: DiagramStep[] }) {
+  const realSteps = steps.filter(s => !s.isArrow);
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-2 py-1">
+      {realSteps.map((step, i) => {
+        const colorClass = step.color === "green"
+          ? "from-emerald-100 to-emerald-50 border-emerald-300"
+          : step.color === "blue"
+          ? "from-blue-100 to-blue-50 border-blue-300"
+          : step.color === "red"
+          ? "from-red-100 to-red-50 border-red-300"
+          : STEP_PALETTES[i % STEP_PALETTES.length];
+        return (
+          <div key={i} className="flex items-center gap-2">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.75, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ delay: i * 0.1, type: "spring", stiffness: 240, damping: 18 }}
+              className={`flex flex-col items-center justify-center rounded-2xl border-2 bg-gradient-to-b ${colorClass} px-4 py-3 min-w-[90px] max-w-[130px] shadow-sm`}
+            >
+              <span className="text-3xl leading-tight text-center">{step.icon}</span>
+              {step.label && (
+                <span className="text-[11px] font-bold text-slate-700 text-center mt-1.5 whitespace-pre-line leading-snug">
+                  {step.label}
+                </span>
+              )}
+            </motion.div>
+            {i < realSteps.length - 1 && (
+              <motion.div
+                initial={{ opacity: 0, x: -6 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.1 + 0.06 }}
+                className="text-2xl text-blue-400 font-bold flex-shrink-0"
+              >
+                →
+              </motion.div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function ConceptVisualSection({
+  diagramSteps,
+  visualExamples,
+  layout,
+}: {
+  diagramSteps: DiagramStep[];
+  visualExamples?: VisualExample[];
+  layout?: string;
+}) {
+  if (layout === "combine" && visualExamples && visualExamples.length > 0) {
+    return <CombineLayout examples={visualExamples} />;
+  }
+  return <SequenceLayout steps={diagramSteps} />;
 }
 
 
@@ -322,8 +395,8 @@ export default function LessonPage() {
           </Card>
         </motion.div>
 
-        {/* Concept Diagram Section */}
-        {media.diagramSteps && media.diagramSteps.length > 0 && (
+        {/* Visual Examples Section */}
+        {(media.diagramSteps?.length > 0 || media.visualExamples?.length) && (
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -332,17 +405,25 @@ export default function LessonPage() {
             <Card className="overflow-hidden shadow-md border-0">
               <div className="flex items-center gap-3 px-5 py-4 border-b border-border/40 bg-gradient-to-r from-violet-50 to-purple-50">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-lg shadow">
-                  💡
+                  {media.layout === "combine" ? "🧩" : "💡"}
                 </div>
                 <div>
-                  <h2 className="font-extrabold text-foreground">How It Works — Step by Step</h2>
-                  <p className="text-xs text-muted-foreground">See the concept visually!</p>
+                  <h2 className="font-extrabold text-foreground">
+                    {media.layout === "combine" ? "See It in Action — Visual Examples" : "How It Works — Step by Step"}
+                  </h2>
+                  <p className="text-xs text-muted-foreground">
+                    {media.layout === "combine"
+                      ? `${media.visualExamples?.length ?? 0} examples to explore`
+                      : "Follow each step to understand the concept"}
+                  </p>
                 </div>
               </div>
               <CardContent className="p-5">
-                <div className="bg-gradient-to-br from-slate-50 to-white rounded-2xl border border-slate-100 p-4">
-                  <ConceptDiagram steps={media.diagramSteps} />
-                </div>
+                <ConceptVisualSection
+                  diagramSteps={media.diagramSteps ?? []}
+                  visualExamples={media.visualExamples}
+                  layout={media.layout}
+                />
               </CardContent>
             </Card>
           </motion.div>
