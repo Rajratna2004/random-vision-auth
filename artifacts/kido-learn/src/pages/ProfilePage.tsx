@@ -9,6 +9,7 @@ import { getStoredUser, setStoredUser, getToken } from "@/lib/store";
 import { api } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import * as faceapi from "face-api.js";
+import ProgressDashboard from "@/components/ProgressDashboard";
 
 export default function ProfilePage() {
   const { toast } = useToast();
@@ -133,29 +134,17 @@ export default function ProfilePage() {
           </Card>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-          <Card>
-            <CardHeader>
-              <CardTitle>📊 Learning Stats</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div className="p-4 bg-primary/10 rounded-xl">
-                  <div className="text-3xl font-bold text-primary">{stats.coursesStarted}</div>
-                  <div className="text-sm text-muted-foreground mt-1">Courses Started</div>
-                </div>
-                <div className="p-4 bg-green-50 rounded-xl">
-                  <div className="text-3xl font-bold text-green-600">{stats.lessonsCompleted}</div>
-                  <div className="text-sm text-muted-foreground mt-1">Lessons Done</div>
-                </div>
-                <div className="p-4 bg-yellow-50 rounded-xl">
-                  <div className="text-3xl font-bold text-yellow-600">{stats.coursesCompleted}</div>
-                  <div className="text-sm text-muted-foreground mt-1">Courses Completed</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+        <ProgressDashboard
+          firstName={user.firstName}
+          lastName={user.lastName}
+          progress={{
+            coursesStarted: stats.coursesStarted,
+            lessonsCompleted: stats.lessonsCompleted,
+            coursesCompleted: stats.coursesCompleted,
+            totalCourses: 6,
+            totalLessons: 60,
+          }}
+        />
 
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
           <Card>

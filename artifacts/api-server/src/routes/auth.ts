@@ -22,7 +22,7 @@ const SEQUENTIAL_PATTERNS = [
 ];
 
 function isPasswordStrong(password: string): { valid: boolean; reason?: string } {
-  if (password.length < 12) return { valid: false, reason: "Password must be at least 12 characters long" };
+  if (password.length < 6) return { valid: false, reason: "Password must be at least 6 characters long" };
   if (!/[A-Z]/.test(password)) return { valid: false, reason: "Password must include at least one uppercase letter (A-Z)" };
   if (!/[a-z]/.test(password)) return { valid: false, reason: "Password must include at least one lowercase letter (a-z)" };
   if (!/[0-9]/.test(password)) return { valid: false, reason: "Password must include at least one number (0-9)" };
@@ -55,7 +55,7 @@ function isPasswordStrong(password: string): { valid: boolean; reason?: string }
 const registerSchema = z.object({
   username: z.string().min(3),
   email: z.string().email(),
-  password: z.string().min(12),
+  password: z.string().min(6),
   firstName: z.string().min(1),
   lastName: z.string().min(1),
   role: z.enum(["student", "teacher"]).default("student"),

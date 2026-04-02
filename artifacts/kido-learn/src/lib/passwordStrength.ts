@@ -56,8 +56,8 @@ export function checkPasswordStrength(password: string): PasswordStrength {
   const checks: PasswordCheck[] = [
     {
       id: "length",
-      label: "At least 12 characters long",
-      passed: password.length >= 12,
+      label: "At least 6 characters long",
+      passed: password.length >= 6,
     },
     {
       id: "uppercase",
