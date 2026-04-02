@@ -15,184 +15,321 @@ function getClient() {
   });
 }
 
-const FUN_CONTEXTS = [
-  "Use toys, games, and playgrounds as context.",
-  "Use animals and a jungle adventure as context.",
-  "Use space and astronauts as context.",
-  "Use food, pizza, and ice cream as context.",
-  "Use sports and a championship game as context.",
-  "Use superheroes and a city as context.",
-  "Use a school trip or field trip as context.",
+// ─────────────────────────────────────────────────────────────────────────────
+// Seeded pseudo-random number generator (LCG) — deterministic but varied
+// ─────────────────────────────────────────────────────────────────────────────
+function mkRng(seed: number) {
+  let s = (seed >>> 0) || 1;
+  return function () {
+    s = (Math.imul(1664525, s) + 1013904223) >>> 0;
+    return s / 0x100000000;
+  };
+}
+
+function randInt(rng: () => number, min: number, max: number) {
+  return Math.floor(rng() * (max - min + 1)) + min;
+}
+
+function shuffle<T>(arr: T[], rng: () => number): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// Generate 3 wrong options close to the correct answer
+function wrongOptions(correct: number, rng: () => number, min: number, max: number): number[] {
+  const pool = new Set<number>();
+  const deltas = [-3, -2, -1, 1, 2, 3, 4, -4, 5, -5];
+  for (const d of deltas) {
+    const w = correct + d;
+    if (w !== correct && w >= min && w <= max) pool.add(w);
+    if (pool.size >= 6) break;
+  }
+  while (pool.size < 3) {
+    const w = randInt(rng, min, max);
+    if (w !== correct) pool.add(w);
+  }
+  return shuffle(Array.from(pool), rng).slice(0, 3);
+}
+
+function makeQuestion(question: string, correct: number, rng: () => number, min: number, max: number, explanation: string) {
+  const wrongs = wrongOptions(correct, rng, min, max);
+  const allOptions = shuffle([correct, ...wrongs], rng);
+  return {
+    question,
+    options: allOptions.map(String),
+    correctIndex: allOptions.indexOf(correct),
+    explanation,
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Programmatic Math Question Generators — 100% correct, no AI drift
+// ─────────────────────────────────────────────────────────────────────────────
+
+function generateAdditionQ(difficulty: string, rng: () => number) {
+  if (difficulty === "easy") {
+    const a = randInt(rng, 1, 9);
+    const b = randInt(rng, 1, 9);
+    const correct = a + b;
+    return makeQuestion(`What is ${a} + ${b}?`, correct, rng, 1, 18,
+      `${a} + ${b} = ${correct}. Well done! ⭐`);
+  } else {
+    // medium: 50/50 between 3-number chain and 2-digit addition
+    if (rng() < 0.5) {
+      const a = randInt(rng, 1, 15);
+      const b = randInt(rng, 1, 15);
+      const c = randInt(rng, 1, 15);
+      const correct = a + b + c;
+      return makeQuestion(`What is ${a} + ${b} + ${c}?`, correct, rng, 3, 50,
+        `Add step by step: ${a} + ${b} = ${a + b}, then + ${c} = ${correct}. 🌟`);
+    } else {
+      const a = randInt(rng, 10, 35);
+      const b = randInt(rng, 10, 35);
+      const correct = a + b;
+      return makeQuestion(`What is ${a} + ${b}?`, correct, rng, 15, 75,
+        `${a} + ${b} = ${correct}. Great adding! 🌟`);
+    }
+  }
+}
+
+function generateSubtractionQ(difficulty: string, rng: () => number) {
+  if (difficulty === "easy") {
+    const b = randInt(rng, 1, 5);
+    const a = randInt(rng, b + 1, 9);
+    const correct = a - b;
+    return makeQuestion(`What is ${a} - ${b}?`, correct, rng, 0, 9,
+      `${a} - ${b} = ${correct}. Excellent! ⭐`);
+  } else {
+    if (rng() < 0.5) {
+      const a = randInt(rng, 20, 50);
+      const b = randInt(rng, 5, 19);
+      const correct = a - b;
+      return makeQuestion(`What is ${a} - ${b}?`, correct, rng, 1, 49,
+        `${a} - ${b} = ${correct}. Nice work! 🌟`);
+    } else {
+      const a = randInt(rng, 10, 30);
+      const b = randInt(rng, 1, 9);
+      const c = randInt(rng, 1, Math.min(5, a - b - 1));
+      const correct = a - b - c;
+      return makeQuestion(`What is ${a} - ${b} - ${c}?`, correct, rng, 0, 30,
+        `Subtract step by step: ${a} - ${b} = ${a - b}, then - ${c} = ${correct}. 🌟`);
+    }
+  }
+}
+
+function generateMultiplicationQ(difficulty: string, rng: () => number) {
+  if (difficulty === "easy") {
+    const a = randInt(rng, 1, 5);
+    const b = randInt(rng, 1, 5);
+    const correct = a * b;
+    return makeQuestion(`What is ${a} × ${b}?`, correct, rng, 1, 25,
+      `${a} × ${b} = ${correct}. That's the times table! ⭐`);
+  } else {
+    if (rng() < 0.5) {
+      const a = randInt(rng, 6, 9);
+      const b = randInt(rng, 6, 9);
+      const correct = a * b;
+      return makeQuestion(`What is ${a} × ${b}?`, correct, rng, 30, 90,
+        `${a} × ${b} = ${correct}. You know your times tables! 🌟`);
+    } else {
+      const a = randInt(rng, 2, 9);
+      const b = randInt(rng, 2, 6);
+      const c = randInt(rng, 2, 4);
+      const correct = a * b * c;
+      return makeQuestion(`What is ${a} × ${b} × ${c}?`, correct, rng, 4, 200,
+        `Multiply step by step: ${a} × ${b} = ${a * b}, then × ${c} = ${correct}. 🌟`);
+    }
+  }
+}
+
+function generateDivisionQ(difficulty: string, rng: () => number) {
+  if (difficulty === "easy") {
+    const b = randInt(rng, 2, 5);
+    const result = randInt(rng, 1, 5);
+    const a = b * result;
+    return makeQuestion(`What is ${a} ÷ ${b}?`, result, rng, 1, 9,
+      `${a} ÷ ${b} = ${result}. Division is sharing equally! ⭐`);
+  } else {
+    const b = randInt(rng, 2, 9);
+    const result = randInt(rng, 3, 9);
+    const a = b * result;
+    return makeQuestion(`What is ${a} ÷ ${b}?`, result, rng, 1, 20,
+      `${a} ÷ ${b} = ${result}. ${b} × ${result} = ${a}. 🌟`);
+  }
+}
+
+function generateFractionQ(difficulty: string, rng: () => number) {
+  const denominators = [2, 3, 4, 5, 8];
+  const denom = denominators[Math.floor(rng() * denominators.length)];
+  const numer = randInt(rng, 1, denom - 1);
+  if (difficulty === "easy") {
+    const items = ["🍕", "🎂", "🍎", "🌟", "📚"][Math.floor(rng() * 5)];
+    const parts = denom;
+    const shaded = numer;
+    return {
+      question: `A shape is split into ${parts} equal parts. ${shaded} part${shaded > 1 ? "s are" : " is"} coloured. What fraction is coloured?`,
+      options: shuffle([`${numer}/${denom}`, `${denom}/${numer}`, `1/${denom + 1}`, `${numer + 1}/${denom}`], rng),
+      correctIndex: 0,
+      explanation: `${shaded} out of ${parts} parts = ${numer}/${denom}. Great fractions! ⭐`,
+    };
+  } else {
+    const q2denom = denominators[Math.floor(rng() * denominators.length)];
+    const q2numer = randInt(rng, 1, q2denom - 1);
+    const bigger = numer / denom > q2numer / q2denom;
+    return {
+      question: `Which fraction is bigger: ${numer}/${denom} or ${q2numer}/${q2denom}?`,
+      options: shuffle([`${numer}/${denom}`, `${q2numer}/${q2denom}`, "They are equal", `${numer + q2numer}/${denom + q2denom}`], rng),
+      correctIndex: 0,
+      explanation: `${bigger ? `${numer}/${denom} > ${q2numer}/${q2denom}` : `${q2numer}/${q2denom} > ${numer}/${denom}`}. Compare by converting to decimals! 🌟`,
+    };
+  }
+}
+
+const MATH_TOPIC_MAP: { keywords: string[]; gen: (d: string, rng: () => number) => any }[] = [
+  { keywords: ["addition", "adding", "add "], gen: generateAdditionQ },
+  { keywords: ["subtraction", "subtract", "minus"], gen: generateSubtractionQ },
+  { keywords: ["multiplication", "multiply", "times table"], gen: generateMultiplicationQ },
+  { keywords: ["division", "divid", "sharing"], gen: generateDivisionQ },
+  { keywords: ["fraction"], gen: generateFractionQ },
 ];
 
-const MATH_TOPICS = ["addition", "subtraction", "multiplication", "division", "fractions", "mental math", "numbers"];
-
-function isMathTopic(topic: string): boolean {
+function tryProgrammaticMath(topic: string, difficulty: string, numQ: number, seed: number) {
   const t = topic.toLowerCase();
-  return MATH_TOPICS.some((m) => t.includes(m));
+  const entry = MATH_TOPIC_MAP.find((e) => e.keywords.some((k) => t.includes(k)));
+  if (!entry) return null;
+
+  const rng = mkRng(seed);
+  const questions = [];
+  for (let i = 0; i < numQ; i++) {
+    questions.push(entry.gen(difficulty, rng));
+  }
+  return { topic, questions };
 }
 
-function buildDifficultyGuide(topic: string, difficulty: string, seed: number): string {
+// ─────────────────────────────────────────────────────────────────────────────
+// AI Prompt builder — only for hard math + all non-math subjects
+// ─────────────────────────────────────────────────────────────────────────────
+function buildAIPrompt(topic: string, difficulty: string, numQ: number, seed: number): string {
   const t = topic.toLowerCase();
-  const ctx = FUN_CONTEXTS[seed % FUN_CONTEXTS.length];
 
-  if (isMathTopic(t)) {
-    if (t.includes("addition") || t.includes("adding")) {
-      if (difficulty === "easy") {
-        return `EASY ADDITION RULES (strictly follow):
-- Every question is a simple "What is A + B = ?" format where A and B are single-digit numbers (1-9)
-- Example questions: "What is 3 + 5?", "What is 7 + 2?", "What is 4 + 6?"
-- The answer must be between 2 and 18
-- Wrong options should be nearby numbers (correct ± 1, ± 2, ± 3)
-- Keep it super simple — this is for beginners
-- ${ctx}`;
-      } else if (difficulty === "medium") {
-        return `MEDIUM ADDITION RULES (strictly follow):
-- Every question adds THREE or MORE numbers together, e.g. "What is 4 + 7 + 3 = ?"
-- OR add two 2-digit numbers, e.g. "What is 14 + 23 = ?"
-- Mix both types across the 5 questions
-- Numbers should be between 1-30
-- Wrong options should be plausible nearby numbers
-- ${ctx}`;
-      } else {
-        return `HARD ADDITION RULES (strictly follow):
-- Questions are real-world WORD PROBLEMS requiring addition reasoning
-- Example: "Mia collected 34 stickers on Monday and 47 on Tuesday. How many does she have in total?"
-- OR conceptual: "Which of these equals 100?" with choices like "55+45", "60+30", "70+20", "80+30"
-- Use 2-3 digit numbers
-- Vary problem styles: combining groups, total cost, distance, scores
-- ${ctx}`;
-      }
-    }
+  const contexts = [
+    "toys, games, and playgrounds",
+    "animals and a jungle adventure",
+    "food, pizza, and ice cream",
+    "sports and a championship game",
+    "superheroes and their powers",
+    "a fun school trip",
+    "pets and a pet show",
+  ];
+  const ctx = contexts[seed % contexts.length];
 
-    if (t.includes("subtraction") || t.includes("subtract")) {
-      if (difficulty === "easy") {
-        return `EASY SUBTRACTION RULES:
-- Simple "What is A - B = ?" with single-digit numbers (result always positive, e.g. 8-3, 7-4)
-- Example: "What is 9 - 4?", "What is 6 - 2?"
-- Answer between 1 and 9, wrong options differ by 1-3
-- ${ctx}`;
-      } else if (difficulty === "medium") {
-        return `MEDIUM SUBTRACTION RULES:
-- Subtract from 2-digit numbers, or chain subtraction: e.g. "What is 30 - 7 - 5 = ?"
-- OR: "What is 45 - 18 = ?"
-- Numbers between 10-50, mix both styles
-- ${ctx}`;
-      } else {
-        return `HARD SUBTRACTION RULES:
-- Real-world word problems: "Jake had 82 marbles. He gave 37 to his friend. How many are left?"
-- OR find the missing number: "?? - 24 = 15. What is ???"
-- 2-3 digit numbers, varied contexts
-- ${ctx}`;
-      }
-    }
+  let specificRules = "";
 
-    if (t.includes("multiplication") || t.includes("multiply")) {
-      if (difficulty === "easy") {
-        return `EASY MULTIPLICATION RULES:
-- Simple "What is A × B?" with numbers 1-5 only (times tables 1-5)
-- Example: "What is 3 × 4?", "What is 2 × 5?"
-- Wrong options close to correct answer
-- ${ctx}`;
-      } else if (difficulty === "medium") {
-        return `MEDIUM MULTIPLICATION RULES:
-- Times tables 6-12, OR multi-step: "What is 3 × 4 × 2?"
-- Example: "What is 7 × 8?", "What is 3 × 4 × 2?"
-- ${ctx}`;
-      } else {
-        return `HARD MULTIPLICATION RULES:
-- Word problems: "A classroom has 6 rows of desks with 8 desks in each row. How many desks total?"
-- OR 2-digit × 1-digit: "What is 24 × 3?"
-- Varied problem styles
-- ${ctx}`;
-      }
-    }
-
-    if (t.includes("division") || t.includes("divid")) {
-      if (difficulty === "easy") {
-        return `EASY DIVISION RULES:
-- Simple "What is A ÷ B?" where result is a whole number, small numbers (e.g. 12÷4, 8÷2, 9÷3)
-- Example: "What is 10 ÷ 2?", "What is 6 ÷ 3?"
-- ${ctx}`;
-      } else if (difficulty === "medium") {
-        return `MEDIUM DIVISION RULES:
-- Larger dividends (20-80), e.g. "What is 48 ÷ 6?", "What is 56 ÷ 7?"
-- ${ctx}`;
-      } else {
-        return `HARD DIVISION RULES:
-- Word problems: "24 students are split into equal teams of 4. How many teams?"
-- OR remainder problems: "What is 17 ÷ 5? (think: how many groups of 5 fit?)"
-- ${ctx}`;
-      }
-    }
-
-    if (t.includes("fraction")) {
-      if (difficulty === "easy") {
-        return `EASY FRACTIONS RULES:
-- Identify simple fractions: "Which picture shows 1/2?", "What fraction is shaded if 1 of 4 parts is shaded?"
-- Use halves, quarters, thirds only
-- Very visual descriptions in questions
-- ${ctx}`;
-      } else if (difficulty === "medium") {
-        return `MEDIUM FRACTIONS RULES:
-- Compare or add simple fractions: "Which is bigger: 1/2 or 1/4?", "What is 1/4 + 1/4?"
-- Use halves, thirds, quarters, fifths
-- ${ctx}`;
-      } else {
-        return `HARD FRACTIONS RULES:
-- Word problems: "A pizza has 8 slices. You eat 3. What fraction is left?"
-- Mixed numbers or equivalence: "Which fraction equals 1/2? (2/4, 3/5, 2/3, 3/8)"
-- ${ctx}`;
-      }
-    }
-
-    // Generic math fallback
-    if (difficulty === "easy") {
-      return `EASY MATH RULES: Simple 1-step questions with small numbers (1-20). Single operation only. Very straightforward. ${ctx}`;
-    } else if (difficulty === "medium") {
-      return `MEDIUM MATH RULES: 2-step questions or larger numbers (20-100). Slightly more thinking required. ${ctx}`;
-    } else {
-      return `HARD MATH RULES: Word problems and real-world applications using multi-step reasoning. ${ctx}`;
-    }
+  if (t.includes("addition") || t.includes("adding")) {
+    specificRules = `HARD ADDITION — create real-world WORD PROBLEMS only:
+- Use ${ctx} as the story setting
+- Each question involves adding 2-3 numbers (2-3 digit range)
+- Example: "The school store sold 34 pencils on Monday and 47 on Tuesday. How many total?"
+- Vary: combining groups, total scores, total distances, total costs`;
+  } else if (t.includes("subtraction") || t.includes("subtract")) {
+    specificRules = `HARD SUBTRACTION — create real-world WORD PROBLEMS only:
+- Use ${ctx} as the story setting
+- Involve taking away, finding differences, or missing numbers
+- Example: "A bag had 82 marbles. 37 were lost. How many remain?"`;
+  } else if (t.includes("multiplication") || t.includes("multiply")) {
+    specificRules = `HARD MULTIPLICATION — create real-world WORD PROBLEMS only:
+- Use ${ctx} as the story setting
+- Involve groups, arrays, repeated addition
+- Example: "6 shelves each have 9 books. How many books total?"`;
+  } else if (t.includes("division") || t.includes("divid")) {
+    specificRules = `HARD DIVISION — create real-world WORD PROBLEMS only:
+- Use ${ctx} as the story setting
+- Involve fair sharing, grouping, splitting
+- Example: "48 cupcakes shared equally among 6 friends. How many each?"`;
+  } else if (t.includes("fraction")) {
+    specificRules = `HARD FRACTIONS — mix of word problems and concept questions:
+- Use ${ctx} as the story setting
+- Cover: equivalent fractions, ordering, adding simple fractions
+- Example: "A pizza has 8 slices. You ate 3. What fraction is left?"`;
+  } else if (t.includes("science") || t.includes("plant") || t.includes("animal") || t.includes("weather") || t.includes("body") || t.includes("water") || t.includes("solar")) {
+    const levels: Record<string, string> = {
+      easy: "Ask single basic facts with simple words. Age 7-8 level. Example: 'What do plants need to grow?'",
+      medium: "Apply a concept or cause-and-effect. One step of reasoning. Age 9-11 level. Example: 'What happens when ice is heated?'",
+      hard: "Ask WHY or HOW things work. Use scientific terms. Multi-step reasoning. Age 12-14 level.",
+    };
+    specificRules = `SCIENCE (${difficulty}): ${levels[difficulty] ?? levels.medium}`;
+  } else if (t.includes("geograph") || t.includes("continent") || t.includes("country") || t.includes("capital") || t.includes("ocean") || t.includes("map")) {
+    const levels: Record<string, string> = {
+      easy: "Famous capitals, major continents, very well-known countries. Example: 'What is the capital of France?'",
+      medium: "Landmarks, climate zones, major rivers, population facts.",
+      hard: "Border countries, comparative geography, lesser-known capitals, geopolitical facts.",
+    };
+    specificRules = `GEOGRAPHY (${difficulty}): ${levels[difficulty] ?? levels.medium}`;
+  } else if (t.includes("cod") || t.includes("program") || t.includes("algorithm") || t.includes("loop") || t.includes("variable")) {
+    const levels: Record<string, string> = {
+      easy: "Basic definitions: 'What is a variable?', 'What does a loop do?' Simple one-sentence answers.",
+      medium: "Read a short code snippet and predict the output. Or choose the right concept for a task.",
+      hard: "Debugging, algorithm logic, nested structures, or basic time-complexity.",
+    };
+    specificRules = `CODING (${difficulty}): ${levels[difficulty] ?? levels.medium}`;
+  } else if (t.includes("art") || t.includes("color") || t.includes("paint") || t.includes("draw")) {
+    const levels: Record<string, string> = {
+      easy: "Basic colour mixing, famous artists by first name, simple art materials. Example: 'What colours mix to make green?'",
+      medium: "Art techniques, styles, famous paintings matched to artists.",
+      hard: "Art movements, historical context, art theory, symbolism.",
+    };
+    specificRules = `ART (${difficulty}): ${levels[difficulty] ?? levels.medium}`;
+  } else if (t.includes("read") || t.includes("story") || t.includes("word") || t.includes("letter") || t.includes("spelling") || t.includes("grammar")) {
+    const levels: Record<string, string> = {
+      easy: "Simple vocabulary, rhyming words, basic comprehension, letter sounds. Age 7-8.",
+      medium: "Context clues, synonyms/antonyms, simple inference. Age 9-11.",
+      hard: "Literary devices, author's purpose, figurative language, complex inference. Age 12-14.",
+    };
+    specificRules = `READING/LANGUAGE (${difficulty}): ${levels[difficulty] ?? levels.medium}`;
+  } else {
+    const levels: Record<string, string> = {
+      easy: "Only the most basic, single-fact questions. Simple language. Age 7-8.",
+      medium: "One step of thinking or applying a known concept. Age 9-11.",
+      hard: "Multi-step reasoning or applying multiple concepts. Age 12-14.",
+    };
+    specificRules = `TOPIC: ${topic} (${difficulty}): ${levels[difficulty] ?? levels.medium}`;
   }
 
-  // ── Non-math subjects ──
-  if (t.includes("science") || t.includes("plant") || t.includes("animal") || t.includes("water") || t.includes("solar") || t.includes("weather") || t.includes("body")) {
-    if (difficulty === "easy") return `EASY SCIENCE RULES: Ask about single basic facts a young child would know (e.g. "What do plants need to grow?"). Simple vocabulary. 4 clear options. ${ctx}`;
-    if (difficulty === "medium") return `MEDIUM SCIENCE RULES: Apply a concept or identify cause-and-effect (e.g. "What happens when water is heated?"). One step of reasoning. ${ctx}`;
-    return `HARD SCIENCE RULES: Ask about WHY or HOW things work, comparisons, or multi-step reasoning. Use correct scientific terms. ${ctx}`;
-  }
+  return `You are making a quiz for a kids learning app. Session: ${seed}.
 
-  if (t.includes("geograph") || t.includes("continent") || t.includes("country") || t.includes("capital") || t.includes("ocean") || t.includes("map")) {
-    if (difficulty === "easy") return `EASY GEOGRAPHY RULES: Famous capitals, continents, or very well-known countries (e.g. "What is the capital of France?"). ${ctx}`;
-    if (difficulty === "medium") return `MEDIUM GEOGRAPHY RULES: Landmarks, climate zones, major rivers, population facts. ${ctx}`;
-    return `HARD GEOGRAPHY RULES: Geopolitical facts, border countries, comparative geography, lesser-known capitals. ${ctx}`;
-  }
+Topic: "${topic}" | Difficulty: ${difficulty.toUpperCase()} | Questions: ${numQ}
 
-  if (t.includes("cod") || t.includes("program") || t.includes("algorithm") || t.includes("loop") || t.includes("variable")) {
-    if (difficulty === "easy") return `EASY CODING RULES: Basic definitions only — "What is a variable?", "What does a loop do?". Simple one-sentence answers. ${ctx}`;
-    if (difficulty === "medium") return `MEDIUM CODING RULES: Read a simple code snippet and predict the output, or choose the right concept for a given task. ${ctx}`;
-    return `HARD CODING RULES: Debugging, algorithm logic, nested structures, or time-complexity basics. ${ctx}`;
-  }
+RULES YOU MUST FOLLOW:
+${specificRules}
 
-  if (t.includes("art") || t.includes("color") || t.includes("paint") || t.includes("draw")) {
-    if (difficulty === "easy") return `EASY ART RULES: Basic color mixing, famous artists, simple art materials (e.g. "What do you mix to get orange?"). ${ctx}`;
-    if (difficulty === "medium") return `MEDIUM ART RULES: Art techniques, styles, famous paintings and their artists. ${ctx}`;
-    return `HARD ART RULES: Art movements, historical context, art theory, symbolism. ${ctx}`;
-  }
+GENERAL RULES:
+- Keep language simple and friendly for kids
+- Each question has exactly 4 options
+- Wrong options must be plausible but wrong
+- Vary numbers, names, scenarios using seed ${seed}
+- Explanations: short, encouraging, educational
 
-  if (t.includes("read") || t.includes("story") || t.includes("word") || t.includes("letter") || t.includes("spelling") || t.includes("grammar")) {
-    if (difficulty === "easy") return `EASY READING RULES: Simple vocabulary, rhyming words, basic comprehension, letter recognition. ${ctx}`;
-    if (difficulty === "medium") return `MEDIUM READING RULES: Context clues, synonyms/antonyms, simple inference. ${ctx}`;
-    return `HARD READING RULES: Literary devices, author's purpose, complex inference, figurative language. ${ctx}`;
-  }
-
-  // Default generic guide
-  if (difficulty === "easy") return `EASY RULES: Ask only the most basic, single-fact questions a young child (age 7-8) could answer. Simple language, no complex reasoning. ${ctx}`;
-  if (difficulty === "medium") return `MEDIUM RULES: Questions require one step of thinking or applying a known concept. Suitable for age 9-11. ${ctx}`;
-  return `HARD RULES: Multi-step reasoning, analysis, or application of multiple concepts. Suitable for age 12-14. ${ctx}`;
+Return ONLY valid JSON:
+{
+  "topic": "${topic}",
+  "questions": [
+    {
+      "question": "...",
+      "options": ["A", "B", "C", "D"],
+      "correctIndex": 0,
+      "explanation": "..."
+    }
+  ]
+}`;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Quiz Route
+// ─────────────────────────────────────────────────────────────────────────────
 const quizRequestSchema = z.object({
   topic: z.string().min(1),
   numQuestions: z.number().int().min(1).max(10).default(5),
@@ -208,42 +345,24 @@ router.post("/quiz", authenticate, async (req: AuthRequest, res) => {
   }
 
   const { topic, numQuestions, difficulty, seed = Date.now() } = parsed.data;
-  const difficultyGuide = buildDifficultyGuide(topic, difficulty, seed);
 
-  const prompt = `You are a quiz creator for a kids' learning app. Generate a quiz for the topic: "${topic}".
-Difficulty: ${difficulty.toUpperCase()}
-Number of questions: ${numQuestions}
-Quiz session seed (use to vary questions): ${seed}
-
-=== STRICT DIFFICULTY RULES — YOU MUST FOLLOW THESE EXACTLY ===
-${difficultyGuide}
-=== END RULES ===
-
-IMPORTANT:
-- Every question MUST follow the difficulty rules above exactly
-- Use different numbers, names, and scenarios from session to session (seed: ${seed})
-- Wrong answer choices must be plausible but clearly wrong to someone who knows the topic
-- Keep language simple and friendly for kids
-- Explanations must be short, encouraging, and educational
-
-Respond ONLY with valid JSON in this exact format:
-{
-  "topic": "${topic}",
-  "questions": [
-    {
-      "question": "Question text here?",
-      "options": ["Option A", "Option B", "Option C", "Option D"],
-      "correctIndex": 0,
-      "explanation": "Brief explanation why this is correct."
+  // Use programmatic generation for easy and medium math — 100% reliable
+  if (difficulty !== "hard") {
+    const programmatic = tryProgrammaticMath(topic, difficulty, numQuestions, seed);
+    if (programmatic) {
+      res.json(programmatic);
+      return;
     }
-  ]
-}`;
+  }
+
+  // Fall through to AI for: hard math (word problems) + all non-math subjects
+  const prompt = buildAIPrompt(topic, difficulty, numQuestions, seed);
 
   const completion = await getClient().chat.completions.create({
     model: "gpt-4o-mini",
     messages: [{ role: "user", content: prompt }],
     response_format: { type: "json_object" },
-    temperature: 0.9,
+    temperature: 0.85,
   });
 
   const content = completion.choices[0]?.message?.content;
@@ -256,6 +375,9 @@ Respond ONLY with valid JSON in this exact format:
   res.json(quiz);
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Recommend Route
+// ─────────────────────────────────────────────────────────────────────────────
 router.get("/recommend", authenticate, async (req: AuthRequest, res) => {
   const userId = req.userId!;
 
