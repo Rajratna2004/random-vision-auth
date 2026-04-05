@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "eIE47CcMJervauMJMgfKL"
+uri = "file://seed-data.txt"
+type = "text"
+title = "KidoLearn Seed Data SQL"
