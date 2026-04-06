@@ -73,131 +73,162 @@ function makeQuestion(question: string, correct: number, rng: () => number, min:
 // Programmatic Math Question Generators — 100% correct, no AI drift
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Word problem context helpers
+const ADD_CONTEXTS = [
+  (a: number, b: number, c: number) => ({ q: `The school store sold ${a} pencils on Monday and ${b} on Tuesday. How many pencils were sold in total?`, c }),
+  (a: number, b: number, c: number) => ({ q: `A farmer had ${a} chickens and bought ${b} more. How many does the farmer have now?`, c }),
+  (a: number, b: number, c: number) => ({ q: `There were ${a} students in Class A and ${b} in Class B. How many students are there altogether?`, c }),
+  (a: number, b: number, c: number) => ({ q: `Sam collected ${a} stickers and got ${b} more from a friend. How many stickers does Sam have now?`, c }),
+  (a: number, b: number, c: number) => ({ q: `A bookshelf had ${a} books. ${b} more were added. How many books are on the shelf?`, c }),
+];
+const SUB_CONTEXTS = [
+  (a: number, b: number, c: number) => ({ q: `A jar had ${a} candies. ${b} were eaten. How many candies remain?`, c }),
+  (a: number, b: number, c: number) => ({ q: `The library had ${a} books. Students borrowed ${b}. How many books are left on the shelf?`, c }),
+  (a: number, b: number, c: number) => ({ q: `A bag had ${a} marbles. ${b} fell out. How many marbles are left?`, c }),
+  (a: number, b: number, c: number) => ({ q: `A tree had ${a} apples. ${b} fell to the ground. How many apples are still on the tree?`, c }),
+  (a: number, b: number, c: number) => ({ q: `${a} birds were sitting on a wire. ${b} flew away. How many are still sitting?`, c }),
+];
+const MUL_CONTEXTS = [
+  (a: number, b: number, c: number) => ({ q: `There are ${a} boxes, each containing ${b} chocolates. How many chocolates are there in total?`, c }),
+  (a: number, b: number, c: number) => ({ q: `A garden has ${a} rows of flowers. Each row has ${b} flowers. How many flowers are there?`, c }),
+  (a: number, b: number, c: number) => ({ q: `Each class has ${b} students. There are ${a} classes. How many students are there altogether?`, c }),
+  (a: number, b: number, c: number) => ({ q: `A spider has ${b} legs. How many legs do ${a} spiders have?`, c }),
+  (a: number, b: number, c: number) => ({ q: `A baker makes ${b} biscuits per tray. How many biscuits are on ${a} trays?`, c }),
+];
+const DIV_CONTEXTS = [
+  (a: number, b: number, c: number) => ({ q: `${a} biscuits are shared equally among ${b} friends. How many does each friend get?`, c }),
+  (a: number, b: number, c: number) => ({ q: `${a} apples are put equally into ${b} baskets. How many apples are in each basket?`, c }),
+  (a: number, b: number, c: number) => ({ q: `A teacher has ${a} stickers to give equally to ${b} students. How many stickers does each student get?`, c }),
+  (a: number, b: number, c: number) => ({ q: `${a} eggs are packed into boxes of ${b}. How many boxes are needed?`, c }),
+  (a: number, b: number, c: number) => ({ q: `${a} children sit in ${b} equal rows. How many children are in each row?`, c }),
+];
+
 function generateAdditionQ(difficulty: string, rng: () => number) {
   if (difficulty === "easy") {
-    const a = randInt(rng, 1, 9);
-    const b = randInt(rng, 1, 9);
-    const correct = a + b;
-    return makeQuestion(`What is ${a} + ${b}?`, correct, rng, 1, 18,
-      `${a} + ${b} = ${correct}. Well done! ⭐`);
-  } else {
-    // medium: 50/50 between 3-number chain and 2-digit addition
+    const a = randInt(rng, 1, 9), b = randInt(rng, 1, 9), correct = a + b;
+    return makeQuestion(`What is ${a} + ${b}?`, correct, rng, 1, 18, `${a} + ${b} = ${correct}. Well done! ⭐`);
+  } else if (difficulty === "medium") {
     if (rng() < 0.5) {
-      const a = randInt(rng, 1, 15);
-      const b = randInt(rng, 1, 15);
-      const c = randInt(rng, 1, 15);
-      const correct = a + b + c;
-      return makeQuestion(`What is ${a} + ${b} + ${c}?`, correct, rng, 3, 50,
-        `Add step by step: ${a} + ${b} = ${a + b}, then + ${c} = ${correct}. 🌟`);
+      const a = randInt(rng, 1, 15), b = randInt(rng, 1, 15), c = randInt(rng, 1, 15), correct = a + b + c;
+      return makeQuestion(`What is ${a} + ${b} + ${c}?`, correct, rng, 3, 50, `Add step by step: ${a}+${b}=${a+b}, then +${c}=${correct}. 🌟`);
     } else {
-      const a = randInt(rng, 10, 35);
-      const b = randInt(rng, 10, 35);
-      const correct = a + b;
-      return makeQuestion(`What is ${a} + ${b}?`, correct, rng, 15, 75,
-        `${a} + ${b} = ${correct}. Great adding! 🌟`);
+      const a = randInt(rng, 10, 35), b = randInt(rng, 10, 35), correct = a + b;
+      return makeQuestion(`What is ${a} + ${b}?`, correct, rng, 15, 75, `${a} + ${b} = ${correct}. Great adding! 🌟`);
     }
+  } else {
+    // Hard: word problems with 2-3 digit numbers
+    const a = randInt(rng, 25, 99), b = randInt(rng, 25, 99), correct = a + b;
+    const ctx = ADD_CONTEXTS[Math.floor(rng() * ADD_CONTEXTS.length)](a, b, correct);
+    const wrongs = wrongOptions(correct, rng, 40, 200);
+    const allOpts = shuffle([correct, ...wrongs], rng);
+    return { question: ctx.q, options: allOpts.map(String), correctIndex: allOpts.indexOf(correct), explanation: `${a} + ${b} = ${correct}. Add the tens first, then the ones! 🔢` };
   }
 }
 
 function generateSubtractionQ(difficulty: string, rng: () => number) {
   if (difficulty === "easy") {
-    const b = randInt(rng, 1, 5);
-    const a = randInt(rng, b + 1, 9);
-    const correct = a - b;
-    return makeQuestion(`What is ${a} - ${b}?`, correct, rng, 0, 9,
-      `${a} - ${b} = ${correct}. Excellent! ⭐`);
-  } else {
+    const b = randInt(rng, 1, 5), a = randInt(rng, b + 1, 9), correct = a - b;
+    return makeQuestion(`What is ${a} - ${b}?`, correct, rng, 0, 9, `${a} - ${b} = ${correct}. Excellent! ⭐`);
+  } else if (difficulty === "medium") {
     if (rng() < 0.5) {
-      const a = randInt(rng, 20, 50);
-      const b = randInt(rng, 5, 19);
-      const correct = a - b;
-      return makeQuestion(`What is ${a} - ${b}?`, correct, rng, 1, 49,
-        `${a} - ${b} = ${correct}. Nice work! 🌟`);
+      const a = randInt(rng, 20, 50), b = randInt(rng, 5, 19), correct = a - b;
+      return makeQuestion(`What is ${a} - ${b}?`, correct, rng, 1, 49, `${a} - ${b} = ${correct}. Nice work! 🌟`);
     } else {
-      const a = randInt(rng, 10, 30);
-      const b = randInt(rng, 1, 9);
-      const c = randInt(rng, 1, Math.min(5, a - b - 1));
-      const correct = a - b - c;
-      return makeQuestion(`What is ${a} - ${b} - ${c}?`, correct, rng, 0, 30,
-        `Subtract step by step: ${a} - ${b} = ${a - b}, then - ${c} = ${correct}. 🌟`);
+      const a = randInt(rng, 10, 30), b = randInt(rng, 1, 9), c = randInt(rng, 1, Math.max(1, a - b - 2)), correct = a - b - c;
+      return makeQuestion(`What is ${a} - ${b} - ${c}?`, correct, rng, 0, 30, `Subtract step by step: ${a}-${b}=${a-b}, then -${c}=${correct}. 🌟`);
     }
+  } else {
+    const b = randInt(rng, 20, 60), a = randInt(rng, b + 10, b + 80), correct = a - b;
+    const ctx = SUB_CONTEXTS[Math.floor(rng() * SUB_CONTEXTS.length)](a, b, correct);
+    const wrongs = wrongOptions(correct, rng, 1, 100);
+    const allOpts = shuffle([correct, ...wrongs], rng);
+    return { question: ctx.q, options: allOpts.map(String), correctIndex: allOpts.indexOf(correct), explanation: `${a} - ${b} = ${correct}. Count back from ${a}! 🔢` };
   }
 }
 
 function generateMultiplicationQ(difficulty: string, rng: () => number) {
   if (difficulty === "easy") {
-    const a = randInt(rng, 1, 5);
-    const b = randInt(rng, 1, 5);
-    const correct = a * b;
-    return makeQuestion(`What is ${a} × ${b}?`, correct, rng, 1, 25,
-      `${a} × ${b} = ${correct}. That's the times table! ⭐`);
-  } else {
+    const a = randInt(rng, 1, 5), b = randInt(rng, 1, 5), correct = a * b;
+    return makeQuestion(`What is ${a} × ${b}?`, correct, rng, 1, 25, `${a} × ${b} = ${correct}. That's the times table! ⭐`);
+  } else if (difficulty === "medium") {
     if (rng() < 0.5) {
-      const a = randInt(rng, 6, 9);
-      const b = randInt(rng, 6, 9);
-      const correct = a * b;
-      return makeQuestion(`What is ${a} × ${b}?`, correct, rng, 30, 90,
-        `${a} × ${b} = ${correct}. You know your times tables! 🌟`);
+      const a = randInt(rng, 6, 9), b = randInt(rng, 6, 9), correct = a * b;
+      return makeQuestion(`What is ${a} × ${b}?`, correct, rng, 30, 90, `${a} × ${b} = ${correct}. You know your times tables! 🌟`);
     } else {
-      const a = randInt(rng, 2, 9);
-      const b = randInt(rng, 2, 6);
-      const c = randInt(rng, 2, 4);
-      const correct = a * b * c;
-      return makeQuestion(`What is ${a} × ${b} × ${c}?`, correct, rng, 4, 200,
-        `Multiply step by step: ${a} × ${b} = ${a * b}, then × ${c} = ${correct}. 🌟`);
+      const a = randInt(rng, 2, 9), b = randInt(rng, 2, 6), c = randInt(rng, 2, 4), correct = a * b * c;
+      return makeQuestion(`What is ${a} × ${b} × ${c}?`, correct, rng, 4, 200, `Multiply step by step: ${a}×${b}=${a*b}, then ×${c}=${correct}. 🌟`);
     }
+  } else {
+    const a = randInt(rng, 4, 12), b = randInt(rng, 4, 12), correct = a * b;
+    const ctx = MUL_CONTEXTS[Math.floor(rng() * MUL_CONTEXTS.length)](a, b, correct);
+    const wrongs = wrongOptions(correct, rng, 10, 150);
+    const allOpts = shuffle([correct, ...wrongs], rng);
+    return { question: ctx.q, options: allOpts.map(String), correctIndex: allOpts.indexOf(correct), explanation: `${a} × ${b} = ${correct}. Multiply rows by columns! 🔢` };
   }
 }
 
 function generateDivisionQ(difficulty: string, rng: () => number) {
   if (difficulty === "easy") {
-    const b = randInt(rng, 2, 5);
-    const result = randInt(rng, 1, 5);
-    const a = b * result;
-    return makeQuestion(`What is ${a} ÷ ${b}?`, result, rng, 1, 9,
-      `${a} ÷ ${b} = ${result}. Division is sharing equally! ⭐`);
+    const b = randInt(rng, 2, 5), result = randInt(rng, 1, 5), a = b * result;
+    return makeQuestion(`What is ${a} ÷ ${b}?`, result, rng, 1, 9, `${a} ÷ ${b} = ${result}. Division is sharing equally! ⭐`);
+  } else if (difficulty === "medium") {
+    const b = randInt(rng, 2, 9), result = randInt(rng, 3, 9), a = b * result;
+    return makeQuestion(`What is ${a} ÷ ${b}?`, result, rng, 1, 20, `${a} ÷ ${b} = ${result}. ${b} × ${result} = ${a}. 🌟`);
   } else {
-    const b = randInt(rng, 2, 9);
-    const result = randInt(rng, 3, 9);
-    const a = b * result;
-    return makeQuestion(`What is ${a} ÷ ${b}?`, result, rng, 1, 20,
-      `${a} ÷ ${b} = ${result}. ${b} × ${result} = ${a}. 🌟`);
+    const b = randInt(rng, 3, 9), result = randInt(rng, 6, 15), a = b * result;
+    const ctx = DIV_CONTEXTS[Math.floor(rng() * DIV_CONTEXTS.length)](a, b, result);
+    const wrongs = wrongOptions(result, rng, 1, 25);
+    const allOpts = shuffle([result, ...wrongs], rng);
+    return { question: ctx.q, options: allOpts.map(String), correctIndex: allOpts.indexOf(result), explanation: `${a} ÷ ${b} = ${result}. Think: what × ${b} = ${a}? 🔢` };
   }
 }
 
 function generateFractionQ(difficulty: string, rng: () => number) {
-  const denominators = [2, 3, 4, 5, 8];
-  const denom = denominators[Math.floor(rng() * denominators.length)];
+  const denoms = [2, 3, 4, 5, 8, 10];
+  const denom = denoms[Math.floor(rng() * denoms.length)];
   const numer = randInt(rng, 1, denom - 1);
   if (difficulty === "easy") {
-    const items = ["🍕", "🎂", "🍎", "🌟", "📚"][Math.floor(rng() * 5)];
-    const parts = denom;
-    const shaded = numer;
     return {
-      question: `A shape is split into ${parts} equal parts. ${shaded} part${shaded > 1 ? "s are" : " is"} coloured. What fraction is coloured?`,
+      question: `A shape is split into ${denom} equal parts. ${numer} part${numer > 1 ? "s are" : " is"} coloured. What fraction is coloured?`,
       options: shuffle([`${numer}/${denom}`, `${denom}/${numer}`, `1/${denom + 1}`, `${numer + 1}/${denom}`], rng),
       correctIndex: 0,
-      explanation: `${shaded} out of ${parts} parts = ${numer}/${denom}. Great fractions! ⭐`,
+      explanation: `${numer} out of ${denom} parts = ${numer}/${denom}. Great fractions! ⭐`,
     };
+  } else if (difficulty === "medium") {
+    const d2 = denoms[Math.floor(rng() * denoms.length)], n2 = randInt(rng, 1, d2 - 1);
+    const bigger = numer / denom > n2 / d2;
+    const answer = bigger ? `${numer}/${denom}` : `${n2}/${d2}`;
+    const opts = shuffle([`${numer}/${denom}`, `${n2}/${d2}`, "They are equal", `${numer + n2}/${denom}`], rng);
+    return { question: `Which fraction is bigger: ${numer}/${denom} or ${n2}/${d2}?`, options: opts, correctIndex: opts.indexOf(answer), explanation: `${numer}/${denom} = ${(numer/denom).toFixed(2)}, ${n2}/${d2} = ${(n2/d2).toFixed(2)}. Convert to decimals to compare! 🌟` };
   } else {
-    const q2denom = denominators[Math.floor(rng() * denominators.length)];
-    const q2numer = randInt(rng, 1, q2denom - 1);
-    const bigger = numer / denom > q2numer / q2denom;
-    return {
-      question: `Which fraction is bigger: ${numer}/${denom} or ${q2numer}/${q2denom}?`,
-      options: shuffle([`${numer}/${denom}`, `${q2numer}/${q2denom}`, "They are equal", `${numer + q2numer}/${denom + q2denom}`], rng),
-      correctIndex: 0,
-      explanation: `${bigger ? `${numer}/${denom} > ${q2numer}/${q2denom}` : `${q2numer}/${q2denom} > ${numer}/${denom}`}. Compare by converting to decimals! 🌟`,
-    };
+    // Hard: fraction word problem
+    const items = ["slices of pizza", "pieces of cake", "sections of a chocolate bar", "equal parts of a ribbon"][Math.floor(rng() * 4)];
+    const total = denom;
+    const eaten = numer;
+    const left = total - eaten;
+    const leftFrac = `${left}/${total}`;
+    const opts = shuffle([leftFrac, `${eaten}/${total}`, `${left}/${total + 1}`, `${eaten - 1}/${total}`].filter((v, i, a) => a.indexOf(v) === i).slice(0, 4), rng);
+    if (!opts.includes(leftFrac)) opts[0] = leftFrac;
+    return { question: `A ${items.split(" ").pop()} was cut into ${total} equal ${items}. ${eaten} ${eaten === 1 ? "was" : "were"} eaten. What fraction is left?`, options: opts, correctIndex: opts.indexOf(leftFrac), explanation: `${eaten} out of ${total} eaten, so ${left} remain. That's ${leftFrac}! 🔢` };
   }
 }
 
+// General math question generator for topics that don't match specific subtopics
+function generateGeneralMathQ(difficulty: string, rng: () => number) {
+  const type = Math.floor(rng() * 4);
+  if (type === 0) return generateAdditionQ(difficulty, rng);
+  if (type === 1) return generateSubtractionQ(difficulty, rng);
+  if (type === 2) return generateMultiplicationQ(difficulty, rng);
+  return generateDivisionQ(difficulty, rng);
+}
+
 const MATH_TOPIC_MAP: { keywords: string[]; gen: (d: string, rng: () => number) => any }[] = [
-  { keywords: ["addition", "adding", "add "], gen: generateAdditionQ },
-  { keywords: ["subtraction", "subtract", "minus"], gen: generateSubtractionQ },
-  { keywords: ["multiplication", "multiply", "times table"], gen: generateMultiplicationQ },
-  { keywords: ["division", "divid", "sharing"], gen: generateDivisionQ },
-  { keywords: ["fraction"], gen: generateFractionQ },
+  { keywords: ["addition", "adding", "add"], gen: generateAdditionQ },
+  { keywords: ["subtraction", "subtract", "minus", "take away"], gen: generateSubtractionQ },
+  { keywords: ["multiplication", "multiply", "times table", "product"], gen: generateMultiplicationQ },
+  { keywords: ["division", "divid", "sharing", "quotient"], gen: generateDivisionQ },
+  { keywords: ["fraction", "numerator", "denominator", "half", "quarter", "third"], gen: generateFractionQ },
+  { keywords: ["math", "number", "count", "calculat", "arithmetic", "algebra", "geometry", "shape", "measure", "angle", "percent", "decimal", "place value"], gen: generateGeneralMathQ },
 ];
 
 function tryProgrammaticMath(topic: string, difficulty: string, numQ: number, seed: number) {
@@ -206,7 +237,7 @@ function tryProgrammaticMath(topic: string, difficulty: string, numQ: number, se
   if (!entry) return null;
 
   const rng = mkRng(seed);
-  const questions = [];
+  const questions: any[] = [];
   for (let i = 0; i < numQ; i++) {
     questions.push(entry.gen(difficulty, rng));
   }
@@ -609,50 +640,29 @@ router.post("/quiz", authenticate, async (req: AuthRequest, res) => {
 
   const { topic, numQuestions, difficulty, seed = Date.now() } = parsed.data;
 
-  // Use programmatic generation for easy and medium math — 100% reliable
-  if (difficulty !== "hard") {
-    const mathResult = tryProgrammaticMath(topic, difficulty, numQuestions, seed);
-    if (mathResult) {
-      res.json(mathResult);
-      return;
-    }
+  // 1. Try math (covers all math sub-topics at all difficulty levels, including hard word problems)
+  const mathResult = tryProgrammaticMath(topic, difficulty, numQuestions, seed);
+  if (mathResult) {
+    res.json(mathResult);
+    return;
   }
 
-  // Use OpenAI for all remaining topics (non-math + hard math word problems)
-  const prompt = buildAIPrompt(topic, difficulty, numQuestions, seed);
-
-  try {
-    const completion = await getClient().chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }],
-      response_format: { type: "json_object" },
-      temperature: 0.85,
-    });
-
-    const content = completion.choices[0]?.message?.content;
-    if (!content) {
-      throw new Error("No content returned from AI");
-    }
-
-    const quiz = JSON.parse(content);
-    res.json(quiz);
-  } catch (err: any) {
-    // Silent fallback to static question banks if OpenAI fails
-    const staticResult = tryProgrammaticNonMath(topic, difficulty, numQuestions, seed);
-    if (staticResult) {
-      res.json(staticResult);
-      return;
-    }
-
-    const msg = err?.message ?? "Unknown AI error";
-    const isKeyError = msg.includes("API key") || msg.includes("Incorrect API key") || msg.includes("401") || msg.includes("invalid_api_key");
-    res.status(500).json({
-      error: "AIError",
-      message: isKeyError
-        ? "OpenAI API key is missing or invalid. Please set OPENAI_API_KEY in your environment."
-        : `AI quiz generation failed: ${msg}`,
-    });
+  // 2. Try static banks for all other subjects (Science, Geography, Coding, Art, Reading & Writing)
+  const staticResult = tryProgrammaticNonMath(topic, difficulty, numQuestions, seed);
+  if (staticResult) {
+    res.json(staticResult);
+    return;
   }
+
+  // 3. Fallback: generate general knowledge questions using the best matching bank
+  // Use the science bank as a generic fallback so the quiz is never blank
+  const fallback = tryProgrammaticNonMath("science", difficulty, numQuestions, seed);
+  if (fallback) {
+    res.json({ ...fallback, topic });
+    return;
+  }
+
+  res.status(404).json({ error: "TopicNotFound", message: `No quiz available for topic: ${topic}` });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
