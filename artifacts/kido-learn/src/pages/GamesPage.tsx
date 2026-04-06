@@ -7,9 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import confetti from "canvas-confetti";
 import AirDraw from "./camera-games/AirDraw";
 import HandPainter from "./camera-games/HandPainter";
-import AirFruitNinja from "./camera-games/AirFruitNinja";
 import AirPiano from "./camera-games/AirPiano";
-import MagicSpell from "./camera-games/MagicSpell";
 
 function fireConfetti() {
   confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
@@ -707,11 +705,9 @@ const BRAIN_GAMES = [
 ];
 
 const CAMERA_GAMES = [
-  { id: "air-draw",       title: "Air Draw",        emoji: "✍️", desc: "Draw with your finger in the air! Pinch to lift pen.",          color: "from-[#FF6B6B] to-[#FF8E53]", badge: "📷 Camera" },
-  { id: "color-fill",     title: "Hand Painter",     emoji: "🎨", desc: "Use hand gestures to draw, erase, and change colors!",          color: "from-[#4CAF50] to-[#0DA2E7]", badge: "📷 Camera" },
-  { id: "air-fruit-ninja",title: "Air Fruit Ninja",  emoji: "🍉", desc: "Slice fruits with your hand! Avoid bombs to survive!",           color: "from-[#FF4E91] to-[#FF6B6B]", badge: "📷 Camera" },
-  { id: "air-piano",      title: "Air Piano",         emoji: "🎹", desc: "Play piano in the air! Flick your finger down on a key.",       color: "from-[#9B59B6] to-[#0DA2E7]", badge: "📷 Camera" },
-  { id: "magic-spell",    title: "Magic Spell",       emoji: "🧙", desc: "Draw shapes in the air to cast magic spells!",                  color: "from-[#5B2D8E] to-[#FF4E91]", badge: "📷 Camera" },
+  { id: "air-draw",   title: "Air Draw",     emoji: "✍️", desc: "Draw with your finger in the air! Pinch to lift pen.",        color: "from-[#FF6B6B] to-[#FF8E53]", badge: "📷 Camera" },
+  { id: "color-fill", title: "Hand Painter", emoji: "🎨", desc: "Use hand gestures to draw, erase, and change colors!",        color: "from-[#4CAF50] to-[#0DA2E7]", badge: "📷 Camera" },
+  { id: "air-piano",  title: "Air Piano",    emoji: "🎹", desc: "Play piano in the air! Flick your finger down on a key.",     color: "from-[#9B59B6] to-[#0DA2E7]", badge: "📷 Camera" },
 ];
 
 export default function GamesPage() {
@@ -797,11 +793,9 @@ export default function GamesPage() {
                   {activeGame === "quiz-race"           && <QuizRaceGame onBack={goBack} />}
                   {activeGame === "word-builder"        && <WordBuilderGame onBack={goBack} />}
                   {activeGame === "spell-it"            && <SpellItGame onBack={goBack} />}
-                  {activeGame === "air-draw"        && <AirDraw onBack={goBack} />}
-                  {activeGame === "color-fill"      && <HandPainter onBack={goBack} />}
-                  {activeGame === "air-fruit-ninja" && <AirFruitNinja onBack={goBack} />}
-                  {activeGame === "air-piano"       && <AirPiano onBack={goBack} />}
-                  {activeGame === "magic-spell"     && <MagicSpell onBack={goBack} />}
+                  {activeGame === "air-draw"   && <AirDraw onBack={goBack} />}
+                  {activeGame === "color-fill" && <HandPainter onBack={goBack} />}
+                  {activeGame === "air-piano"  && <AirPiano onBack={goBack} />}
                 </motion.div>
               </AnimatePresence>
             </CardContent>
