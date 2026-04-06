@@ -325,11 +325,11 @@ function MemoryMatchGame({ onBack }: { onBack: () => void }) {
 /* ─────────── WORD BUILDER ─────────── */
 function WordBuilderGame({ onBack }: { onBack: () => void }) {
   const challenges = [
-    { letters: ["C", "A", "T", "R", "S"], words: ["CAT", "CAR", "RAT", "RATS", "CATS", "STAR", "CART", "CARS"] },
-    { letters: ["S", "T", "O", "P", "E"], words: ["STOP", "TOPS", "POET", "POTS", "STEP", "SPOT", "TOES", "POSE"] },
-    { letters: ["L", "O", "V", "E", "R"], words: ["LOVE", "OVER", "ROLE", "LORE", "ROVE", "LOVER", "LOVER"] },
-    { letters: ["B", "A", "N", "G", "S"], words: ["BANG", "NABS", "BAGS", "SANG", "BANS", "SNAG", "BANGS"] },
-    { letters: ["H", "A", "P", "Y", "S"], words: ["HAPPY", "PAYS", "HAPS", "YAPS", "ASHY", "HASP"] },
+    { letters: ["C", "A", "T", "R", "S"], words: ["ARC", "ART", "CAR", "CAT", "RAT", "SAT", "TAR", "ARCS", "ARTS", "CARS", "CART", "CAST", "CATS", "RATS", "SCAR", "STAR", "TARS", "CARTS"] },
+    { letters: ["S", "T", "O", "P", "E"], words: ["OPT", "POT", "SET", "TOP", "TOE", "PET", "SOT", "OPTS", "POTS", "POET", "POSE", "POST", "SPOT", "STEP", "STOP", "TOES", "TOPS", "PESTO", "POETS", "STOPE", "TOPES"] },
+    { letters: ["L", "O", "V", "E", "R"], words: ["ORE", "ROE", "OLE", "LOVE", "LORE", "OVER", "ROLE", "ROVE", "VOLE", "LOVER"] },
+    { letters: ["B", "A", "N", "G", "S"], words: ["BAG", "BAN", "GAB", "GAS", "NAB", "NAG", "SAG", "BAGS", "BANG", "BANS", "GABS", "NABS", "NAGS", "SANG", "SNAG", "BANGS"] },
+    { letters: ["H", "A", "P", "Y", "S"], words: ["HAP", "HAS", "HAY", "PAY", "SAP", "SAY", "SPA", "YAP", "ASHY", "HASP", "HAPS", "HAYS", "PAYS", "SPAY", "YAPS"] },
   ];
 
   const [challenge] = useState(() => challenges[Math.floor(Math.random() * challenges.length)]);
