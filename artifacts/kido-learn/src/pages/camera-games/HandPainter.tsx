@@ -41,11 +41,11 @@ const SCENES: { name: string; emoji: string; regions: Omit<Region, "filled" | "c
     name: "Rainbow Fish",
     emoji: "🐟",
     regions: [
-      { id: 0, path: "M60,100 Q130,40 200,100 Q130,160 60,100 Z", targetColor: "#48DBFB", colorName: "Blue", emoji: "🔵" },
-      { id: 1, path: "M20,65 L60,80 L60,120 L20,135 Z", targetColor: "#FF6B6B", colorName: "Red", emoji: "🔴" },
-      { id: 2, path: "M200,100 Q220,75 240,100 Q220,125 200,100 Z", targetColor: "#FECA57", colorName: "Yellow", emoji: "🟡" },
-      { id: 3, path: "M110,72 Q140,55 165,72 Q140,90 110,72 Z", targetColor: "#FF9F43", colorName: "Orange", emoji: "🟠" },
-      { id: 4, path: "M170,88 Q185,75 200,88 Q185,101 170,88 Z", targetColor: "#fd79a8", colorName: "Pink", emoji: "🩷" },
+      { id: 0, path: "M88,110 Q110,68 175,80 Q215,90 215,110 Q215,130 175,140 Q110,152 88,110 Z", targetColor: "#48DBFB", colorName: "Blue", emoji: "🔵" },
+      { id: 1, path: "M88,110 L38,78 L62,110 L38,142 Z", targetColor: "#FF6B6B", colorName: "Red", emoji: "🔴" },
+      { id: 2, path: "M118,76 Q140,45 168,76 Q148,84 118,76 Z", targetColor: "#FF9F43", colorName: "Orange", emoji: "🟠" },
+      { id: 3, path: "M100,106 Q138,97 170,106 Q138,118 100,106 Z", targetColor: "#FECA57", colorName: "Yellow", emoji: "🟡" },
+      { id: 4, path: "M183,100 Q194,90 205,100 Q194,112 183,100 Z", targetColor: "#fd79a8", colorName: "Pink", emoji: "🩷" },
     ]
   },
   {
