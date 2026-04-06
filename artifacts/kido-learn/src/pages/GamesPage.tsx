@@ -589,21 +589,39 @@ function SpellItGame({ onBack }: { onBack: () => void }) {
     { word: "TRIANGLE", hint: "A shape with 3 sides 🔺" },
   ];
 
-  const [challenge] = useState(() => {
-    const w = words[Math.floor(Math.random() * words.length)];
+  function makeChallenge(excludeWord?: string) {
+    let w = words[Math.floor(Math.random() * words.length)];
+    if (excludeWord && words.length > 1) {
+      let attempts = 0;
+      while (w.word === excludeWord && attempts < 10) {
+        w = words[Math.floor(Math.random() * words.length)];
+        attempts++;
+      }
+    }
     return {
       ...w,
       blanks: w.word.split("").map((l, i) => (Math.random() > 0.5 && i !== 0 ? "_" : l)),
     };
-  });
+  }
 
+  const [challenge, setChallenge] = useState(() => makeChallenge());
   const [inputs, setInputs] = useState<string[]>(
     challenge.blanks.map(b => b === "_" ? "" : b)
   );
   const [checked, setChecked] = useState(false);
   const [correct, setCorrect] = useState(false);
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const blankIndices = challenge.blanks.reduce<number[]>((acc, b, i) => b === "_" ? [...acc, i] : acc, []);
+
+  function tryAnother() {
+    const next = makeChallenge(challenge.word);
+    setChallenge(next);
+    setInputs(next.blanks.map(b => b === "_" ? "" : b));
+    setChecked(false);
+    setCorrect(false);
+    inputRefs.current = [];
+  }
 
   function handleInput(i: number, val: string) {
     if (checked && correct) return;
@@ -611,6 +629,14 @@ function SpellItGame({ onBack }: { onBack: () => void }) {
     newInputs[i] = val.toUpperCase().slice(-1);
     setInputs(newInputs);
     setChecked(false);
+
+    if (val) {
+      const currentPos = blankIndices.indexOf(i);
+      const nextBlank = blankIndices[currentPos + 1];
+      if (nextBlank !== undefined && inputRefs.current[nextBlank]) {
+        inputRefs.current[nextBlank]?.focus();
+      }
+    }
   }
 
   function handleCheck() {
@@ -626,7 +652,7 @@ function SpellItGame({ onBack }: { onBack: () => void }) {
       <div className="flex items-center justify-between">
         <Button variant="ghost" size="sm" onClick={onBack}>← Back</Button>
         <h2 className="text-xl font-extrabold">🔤 Spell It Right</h2>
-        <div />
+        <Button variant="outline" size="sm" onClick={tryAnother}>🔄 Try Another</Button>
       </div>
 
       <div className="text-center space-y-2">
@@ -639,7 +665,8 @@ function SpellItGame({ onBack }: { onBack: () => void }) {
         {challenge.blanks.map((b, i) => (
           b === "_" ? (
             <input
-              key={i}
+              key={`${challenge.word}-${i}`}
+              ref={el => { inputRefs.current[i] = el; }}
               maxLength={1}
               value={inputs[i] || ""}
               onChange={e => handleInput(i, e.target.value)}
@@ -649,7 +676,7 @@ function SpellItGame({ onBack }: { onBack: () => void }) {
               }`}
             />
           ) : (
-            <div key={i} className="w-10 h-10 flex items-center justify-center text-xl font-bold bg-secondary rounded-lg">
+            <div key={`${challenge.word}-${i}`} className="w-10 h-10 flex items-center justify-center text-xl font-bold bg-secondary rounded-lg">
               {b}
             </div>
           )
@@ -670,7 +697,8 @@ function SpellItGame({ onBack }: { onBack: () => void }) {
 
       {checked && correct && (
         <div className="flex justify-center gap-3">
-          <Button onClick={onBack} className="kid-gradient text-white font-bold">Back to Games</Button>
+          <Button onClick={tryAnother} className="kid-gradient text-white font-bold">Try Another Word!</Button>
+          <Button variant="outline" onClick={onBack}>Back to Games</Button>
         </div>
       )}
     </div>
