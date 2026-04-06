@@ -4,6 +4,7 @@ export type GestureType =
   | "pointing"
   | "open_palm"
   | "peace"
+  | "three_fingers"
   | "fist"
   | "thumbs_up"
   | "none";
@@ -38,7 +39,8 @@ function classifyGesture(landmarks: Array<{ x: number; y: number; z: number }>):
   if (extendedCount === 0) return "fist";
   if (isExtended[0] && extendedCount === 1) return "thumbs_up";
   if (!isExtended[0] && isExtended[1] && !isExtended[2] && !isExtended[3] && !isExtended[4]) return "pointing";
-  if (isExtended[1] && isExtended[2] && !isExtended[3] && !isExtended[4]) return "peace";
+  if (!isExtended[0] && isExtended[1] && isExtended[2] && !isExtended[3] && !isExtended[4]) return "peace";
+  if (!isExtended[0] && isExtended[1] && isExtended[2] && isExtended[3] && !isExtended[4]) return "three_fingers";
   if (extendedCount >= 4) return "open_palm";
 
   return "none";
