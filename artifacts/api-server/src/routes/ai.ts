@@ -9,10 +9,13 @@ import OpenAI from "openai";
 const router: IRouter = Router();
 
 function getClient() {
-  return new OpenAI({
+  const config: ConstructorParameters<typeof OpenAI>[0] = {
     apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.OPENAI_API_KEY || "placeholder",
-    baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-  });
+  };
+  if (process.env.AI_INTEGRATIONS_OPENAI_BASE_URL) {
+    config.baseURL = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
+  }
+  return new OpenAI(config);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -358,21 +361,32 @@ router.post("/quiz", authenticate, async (req: AuthRequest, res) => {
   // Fall through to AI for: hard math (word problems) + all non-math subjects
   const prompt = buildAIPrompt(topic, difficulty, numQuestions, seed);
 
-  const completion = await getClient().chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [{ role: "user", content: prompt }],
-    response_format: { type: "json_object" },
-    temperature: 0.85,
-  });
+  try {
+    const completion = await getClient().chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" },
+      temperature: 0.85,
+    });
 
-  const content = completion.choices[0]?.message?.content;
-  if (!content) {
-    res.status(500).json({ error: "AIError", message: "Failed to generate quiz" });
-    return;
+    const content = completion.choices[0]?.message?.content;
+    if (!content) {
+      res.status(500).json({ error: "AIError", message: "Failed to generate quiz — no content returned" });
+      return;
+    }
+
+    const quiz = JSON.parse(content);
+    res.json(quiz);
+  } catch (err: any) {
+    const msg = err?.message ?? "Unknown AI error";
+    const isKeyError = msg.includes("API key") || msg.includes("Incorrect API key") || msg.includes("401") || msg.includes("invalid_api_key");
+    res.status(500).json({
+      error: "AIError",
+      message: isKeyError
+        ? "OpenAI API key is missing or invalid. Please set OPENAI_API_KEY in your environment."
+        : `AI quiz generation failed: ${msg}`,
+    });
   }
-
-  const quiz = JSON.parse(content);
-  res.json(quiz);
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

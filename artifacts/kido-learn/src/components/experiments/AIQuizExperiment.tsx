@@ -64,13 +64,14 @@ export default function AIQuizExperiment({ topic }: AIQuizProps) {
   const [done, setDone] = useState(false);
   const [quizSeed, setQuizSeed] = useState(() => Date.now());
 
-  const { data: quiz, isLoading } = useQuery({
+  const { data: quiz, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["quiz", topic, chosenDifficulty, quizSeed],
     queryFn: () =>
       api.ai.quiz({ topic, numQuestions: 5, difficulty: chosenDifficulty, seed: quizSeed }),
     enabled: step === "quiz" && chosenDifficulty !== null,
     staleTime: Infinity,
     gcTime: 0,
+    retry: 1,
   });
 
   function handlePickDifficulty(d: Difficulty) {
@@ -212,8 +213,27 @@ export default function AIQuizExperiment({ topic }: AIQuizProps) {
                 </div>
               )}
 
+              {/* Error state */}
+              {isError && (
+                <div className="text-center py-10 space-y-4">
+                  <div className="text-5xl">😕</div>
+                  <div>
+                    <p className="font-bold text-foreground text-base">Quiz generation failed</p>
+                    <p className="text-sm text-muted-foreground mt-1 max-w-xs mx-auto">
+                      {(error as any)?.message ?? "Could not connect to the AI. Make sure your API server is running with a valid OPENAI_API_KEY."}
+                    </p>
+                  </div>
+                  <div className="flex gap-2 justify-center">
+                    <Button size="sm" onClick={() => refetch()}>Try Again</Button>
+                    <Button size="sm" variant="outline" onClick={() => { setStep("pick"); setChosenDifficulty(null); }}>
+                      Back
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               {/* Active question */}
-              {!isLoading && !done && q && (
+              {!isLoading && !isError && !done && q && (
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={currentQ}
