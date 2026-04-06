@@ -151,13 +151,12 @@ export default function HandPainter({ onBack }: { onBack: () => void }) {
   }, []);
 
   const getRegionUnderCursor = useCallback((handX: number, handY: number): number | null => {
-    if (!svgRef.current) return null;
-    const rect = svgRef.current.getBoundingClientRect();
-    const svgX = ((handX * window.innerWidth - rect.left) / rect.width) * 250;
-    const svgY = ((handY * window.innerHeight - rect.top) / rect.height) * 220;
+    // Use elementFromPoint — the browser handles z-order correctly,
+    // so overlapping background regions won't block foreground ones.
+    const px = handX * window.innerWidth;
+    const py = handY * window.innerHeight;
 
-    // Check the exact point AND nearby points in a radius to handle small regions
-    const probeRadius = 12;
+    const probeRadius = 14;
     const probeOffsets = [
       [0, 0],
       [probeRadius, 0], [-probeRadius, 0],
@@ -168,21 +167,14 @@ export default function HandPainter({ onBack }: { onBack: () => void }) {
       [-probeRadius * 0.7, -probeRadius * 0.7],
     ];
 
-    for (const region of regions) {
-      const path = document.getElementById(`region-${region.id}`);
-      if (path instanceof SVGPathElement) {
-        for (const [dx, dy] of probeOffsets) {
-          const pt = svgRef.current.createSVGPoint();
-          pt.x = svgX + dx;
-          pt.y = svgY + dy;
-          try {
-            if (path.isPointInFill?.(pt)) return region.id;
-          } catch {}
-        }
+    for (const [dx, dy] of probeOffsets) {
+      const el = document.elementFromPoint(px + dx, py + dy);
+      if (el instanceof SVGPathElement && el.id.startsWith("region-")) {
+        return parseInt(el.id.replace("region-", ""), 10);
       }
     }
     return null;
-  }, [regions]);
+  }, []);
 
   useEffect(() => {
     gestureCallbackRef.current = (g: string) => {
