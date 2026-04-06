@@ -21,6 +21,7 @@ const PALETTE = [
   "#FF6B6B", "#FF9F43", "#FECA57", "#48DBFB",
   "#1DD1A1", "#5F27CD", "#A29BFE", "#fd79a8",
   "#FDCB6E", "#00B894", "#2ecc71", "#e17055",
+  "#FFFFFF", "#888888",
 ];
 
 const SCENES: { name: string; emoji: string; regions: Omit<Region, "filled" | "currentColor">[] }[] = [
@@ -40,11 +41,11 @@ const SCENES: { name: string; emoji: string; regions: Omit<Region, "filled" | "c
     name: "Rainbow Fish",
     emoji: "🐟",
     regions: [
-      { id: 0, path: "M80,100 Q160,40 230,100 Q160,160 80,100 Z", targetColor: "#48DBFB", colorName: "Blue", emoji: "🔵" },
-      { id: 1, path: "M30,80 L80,70 L80,130 L30,120 Z", targetColor: "#FF6B6B", colorName: "Red", emoji: "🔴" },
-      { id: 2, path: "M180,60 Q220,80 220,100 Q220,120 180,140 Q200,100 180,60 Z", targetColor: "#FECA57", colorName: "Yellow", emoji: "🟡" },
-      { id: 3, path: "M130,80 Q160,70 175,100 Q160,130 130,120 Q145,100 130,80 Z", targetColor: "#FF9F43", colorName: "Orange", emoji: "🟠" },
-      { id: 4, path: "M210,95 Q228,98 225,102 Q212,105 213,100 Z", targetColor: "#fd79a8", colorName: "Pink", emoji: "🩷" },
+      { id: 0, path: "M60,100 Q130,40 200,100 Q130,160 60,100 Z", targetColor: "#48DBFB", colorName: "Blue", emoji: "🔵" },
+      { id: 1, path: "M20,65 L60,80 L60,120 L20,135 Z", targetColor: "#FF6B6B", colorName: "Red", emoji: "🔴" },
+      { id: 2, path: "M200,100 Q220,75 240,100 Q220,125 200,100 Z", targetColor: "#FECA57", colorName: "Yellow", emoji: "🟡" },
+      { id: 3, path: "M110,72 Q140,55 165,72 Q140,90 110,72 Z", targetColor: "#FF9F43", colorName: "Orange", emoji: "🟠" },
+      { id: 4, path: "M170,88 Q185,75 200,88 Q185,101 170,88 Z", targetColor: "#fd79a8", colorName: "Pink", emoji: "🩷" },
     ]
   },
   {
@@ -71,15 +72,16 @@ const SCENES: { name: string; emoji: string; regions: Omit<Region, "filled" | "c
     ]
   },
   {
-    name: "Ocean Scene",
-    emoji: "🌊",
+    name: "Boat & Sky",
+    emoji: "⛵",
     regions: [
-      { id: 0, path: "M0,0 L250,0 L250,80 L0,80 Z", targetColor: "#48DBFB", colorName: "Blue", emoji: "🔵" },
-      { id: 1, path: "M0,80 L250,80 L250,220 L0,220 Z", targetColor: "#1DD1A1", colorName: "Green", emoji: "🟢" },
-      { id: 2, path: "M60,120 Q100,80 140,120 Q100,160 60,120 Z", targetColor: "#FF9F43", colorName: "Orange", emoji: "🟠" },
-      { id: 3, path: "M140,100 L170,85 L165,120 L140,110 Z", targetColor: "#FF6B6B", colorName: "Red", emoji: "🔴" },
-      { id: 4, path: "M30,160 Q55,145 80,160 Q55,175 30,160 Z", targetColor: "#fd79a8", colorName: "Pink", emoji: "🩷" },
-      { id: 5, path: "M180,150 Q200,135 220,150 Q200,165 180,150 Z", targetColor: "#FECA57", colorName: "Yellow", emoji: "🟡" },
+      { id: 0, path: "M0,0 L250,0 L250,145 L0,145 Z", targetColor: "#48DBFB", colorName: "Blue", emoji: "🔵" },
+      { id: 1, path: "M0,145 L250,145 L250,220 L0,220 Z", targetColor: "#1DD1A1", colorName: "Green", emoji: "🟢" },
+      { id: 2, path: "M195,10 C208,10 220,22 220,35 C220,48 208,60 195,60 C182,60 170,48 170,35 C170,22 182,10 195,10 Z", targetColor: "#FECA57", colorName: "Yellow", emoji: "🟡" },
+      { id: 3, path: "M20,20 Q35,5 55,12 Q70,2 88,12 Q105,5 112,20 Q100,32 65,27 Q40,35 20,20 Z", targetColor: "#FFFFFF", colorName: "White", emoji: "⬜" },
+      { id: 4, path: "M45,145 Q125,132 205,145 L190,178 L60,178 Z", targetColor: "#FF9F43", colorName: "Orange", emoji: "🟠" },
+      { id: 5, path: "M125,55 L125,145 L75,138 Z", targetColor: "#FF6B6B", colorName: "Red", emoji: "🔴" },
+      { id: 6, path: "M125,55 L125,145 L180,138 Z", targetColor: "#A29BFE", colorName: "Purple", emoji: "🟣" },
     ]
   },
   {
@@ -153,15 +155,30 @@ export default function HandPainter({ onBack }: { onBack: () => void }) {
     const rect = svgRef.current.getBoundingClientRect();
     const svgX = ((handX * window.innerWidth - rect.left) / rect.width) * 250;
     const svgY = ((handY * window.innerHeight - rect.top) / rect.height) * 220;
+
+    // Check the exact point AND nearby points in a radius to handle small regions
+    const probeRadius = 12;
+    const probeOffsets = [
+      [0, 0],
+      [probeRadius, 0], [-probeRadius, 0],
+      [0, probeRadius], [0, -probeRadius],
+      [probeRadius * 0.7, probeRadius * 0.7],
+      [-probeRadius * 0.7, probeRadius * 0.7],
+      [probeRadius * 0.7, -probeRadius * 0.7],
+      [-probeRadius * 0.7, -probeRadius * 0.7],
+    ];
+
     for (const region of regions) {
       const path = document.getElementById(`region-${region.id}`);
       if (path instanceof SVGPathElement) {
-        const pt = svgRef.current.createSVGPoint();
-        pt.x = svgX;
-        pt.y = svgY;
-        try {
-          if (path.isPointInFill?.(pt)) return region.id;
-        } catch {}
+        for (const [dx, dy] of probeOffsets) {
+          const pt = svgRef.current.createSVGPoint();
+          pt.x = svgX + dx;
+          pt.y = svgY + dy;
+          try {
+            if (path.isPointInFill?.(pt)) return region.id;
+          } catch {}
+        }
       }
     }
     return null;
@@ -297,7 +314,7 @@ export default function HandPainter({ onBack }: { onBack: () => void }) {
           <div className="flex flex-wrap justify-center gap-2">
             {PALETTE.map(c => (
               <motion.button key={c} whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.8 }} onClick={() => setSelectedColor(c)}
-                className={`w-8 h-8 rounded-full border-2 transition-all ${selectedColor === c ? "border-gray-800 scale-110 ring-2 ring-[#0DA2E7]" : "border-gray-300"}`}
+                className={`w-8 h-8 rounded-full border-2 transition-all ${selectedColor === c ? "border-gray-800 scale-110 ring-2 ring-[#0DA2E7]" : c === "#FFFFFF" ? "border-gray-400" : "border-gray-300"}`}
                 style={{ backgroundColor: c }}
               />
             ))}
