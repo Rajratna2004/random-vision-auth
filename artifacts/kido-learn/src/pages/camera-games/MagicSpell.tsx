@@ -91,7 +91,7 @@ export default function MagicSpell({ onBack }: { onBack: () => void }) {
   const [challengeResult, setChallengeResult] = useState<"success" | "fail" | null>(null);
   const [particles, setParticles] = useState<{ id: number; x: number; y: number; emoji: string }[]>([]);
 
-  const { videoRef, currentHand, isLoading, error, cameraActive, startGestureDetection } =
+  const { videoRef, canvasRef: gestureCanvasRef, currentHand, isLoading, error, cameraActive, startGestureDetection } =
     useGestureDetection({ enabled: true });
 
   useEffect(() => {
@@ -254,11 +254,26 @@ export default function MagicSpell({ onBack }: { onBack: () => void }) {
           <div className="relative rounded-2xl overflow-hidden bg-black" style={{ aspectRatio: "4/3" }}>
             <video ref={videoDisplayRef} className="absolute inset-0 w-full h-full object-cover scale-x-[-1] opacity-55" autoPlay playsInline muted />
             <canvas ref={trailCanvasRef} width={640} height={480} className="absolute inset-0 w-full h-full" />
+            {/* Hand landmark skeleton overlay */}
+            <canvas ref={gestureCanvasRef} width={640} height={480} className="absolute inset-0 w-full h-full pointer-events-none opacity-80" />
 
-            {/* Finger cursor */}
+            {/* Arrow / pencil cursor when drawing */}
             {cameraActive && currentHand.gesture === "pointing" && (
               <div
-                className="absolute w-5 h-5 rounded-full bg-white/80 pointer-events-none -translate-x-1/2 -translate-y-1/2 ring-2 ring-[#0DA2E7]"
+                className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2 select-none"
+                style={{ left: `${currentHand.x * 100}%`, top: `${currentHand.y * 100}%` }}
+              >
+                {/* Arrow tip with glow */}
+                <div className="relative">
+                  <span className="text-2xl drop-shadow-[0_0_8px_rgba(13,162,231,0.9)] leading-none">✏️</span>
+                  <div className="absolute inset-0 rounded-full bg-[#0DA2E7]/30 blur-sm scale-150" />
+                </div>
+              </div>
+            )}
+            {/* Non-drawing cursor */}
+            {cameraActive && currentHand.gesture !== "pointing" && currentHand.landmarks && (
+              <div
+                className="absolute w-4 h-4 rounded-full border-2 border-white/60 bg-white/20 pointer-events-none -translate-x-1/2 -translate-y-1/2"
                 style={{ left: `${currentHand.x * 100}%`, top: `${currentHand.y * 100}%` }}
               />
             )}

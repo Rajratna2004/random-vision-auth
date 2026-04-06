@@ -47,7 +47,7 @@ export default function AirFruitNinja({ onBack }: { onBack: () => void }) {
   const [gameState, setGameState] = useState<"idle" | "playing" | "over">("idle");
   const [showBursts, setShowBursts] = useState<Burst[]>([]);
 
-  const { videoRef, currentHand, isLoading, error, cameraActive, startGestureDetection } =
+  const { videoRef, canvasRef: gestureCanvasRef, currentHand, isLoading, error, cameraActive, startGestureDetection } =
     useGestureDetection({ enabled: true });
 
   // Mirror video stream to display element
@@ -252,6 +252,8 @@ export default function AirFruitNinja({ onBack }: { onBack: () => void }) {
         <div className="relative rounded-2xl overflow-hidden bg-black" style={{ aspectRatio: "4/3" }}>
           <video ref={videoDisplayRef} className="absolute inset-0 w-full h-full object-cover scale-x-[-1] opacity-55" autoPlay playsInline muted />
           <canvas ref={gameCanvasRef} width={640} height={480} className="absolute inset-0 w-full h-full" />
+          {/* Hand landmark skeleton overlay */}
+          <canvas ref={gestureCanvasRef} width={640} height={480} className="absolute inset-0 w-full h-full pointer-events-none opacity-80" />
 
           {/* Combo badge */}
           {combo > 1 && gameState === "playing" && (
