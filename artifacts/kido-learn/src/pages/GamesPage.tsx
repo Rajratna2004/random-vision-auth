@@ -5,19 +5,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import confetti from "canvas-confetti";
-import FingerCount from "./camera-games/FingerCount";
-import ColorHuntGame from "./camera-games/ColorHunt";
-import ThumbsQuizCam from "./camera-games/ThumbsQuizCam";
 import AirDraw from "./camera-games/AirDraw";
 import HandPainter from "./camera-games/HandPainter";
-import GestureMatch from "./camera-games/GestureMatch";
 
-const FingerCountingCameraGame = FingerCount;
-const ColorHuntCameraGame = ColorHuntGame;
-const ThumbsQuizGame = ThumbsQuizCam;
 const AirDrawGame = AirDraw;
 const ColorFillGame = HandPainter;
-const GestureMatchGame = GestureMatch;
 
 function fireConfetti() {
   confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
@@ -715,12 +707,8 @@ const BRAIN_GAMES = [
 ];
 
 const CAMERA_GAMES = [
-  { id: "finger-counting-cam", title: "Finger Count",   emoji: "✋", desc: "Hold up the right number of fingers!",              color: "from-[#5B2D8E] to-[#9B59B6]",   badge: "📷 Camera" },
-  { id: "color-hunt-cam",      title: "Color Hunt",      emoji: "🎨", desc: "Find objects matching the shown color!",             color: "from-[#FF4E91] to-[#FF8E53]",   badge: "📷 Camera" },
-  { id: "thumbs-quiz-cam",     title: "Thumbs Quiz",     emoji: "👍", desc: "Answer questions with thumbs up/down!",              color: "from-[#0DA2E7] to-[#26d0ce]",   badge: "📷 Camera" },
-  { id: "air-draw",            title: "Air Draw",        emoji: "✍️", desc: "Draw with your finger in the air! Pinch to lift pen.", color: "from-[#FF6B6B] to-[#FF8E53]", badge: "📷 Camera" },
-  { id: "color-fill",          title: "Hand Painter",    emoji: "🎨", desc: "Use hand gestures to draw, erase, and change colors!", color: "from-[#4CAF50] to-[#0DA2E7]",   badge: "📷 Camera" },
-  { id: "gesture-match",       title: "Gesture Match",   emoji: "🖐️", desc: "Match the hand gesture on screen — hold to score!", color: "from-[#9B59B6] to-[#8E44AD]",   badge: "📷 Camera" },
+  { id: "air-draw",   title: "Air Draw",     emoji: "✍️", desc: "Draw with your finger in the air! Pinch to lift pen.",          color: "from-[#FF6B6B] to-[#FF8E53]", badge: "📷 Camera" },
+  { id: "color-fill", title: "Hand Painter", emoji: "🎨", desc: "Use hand gestures to draw, erase, and change colors!", color: "from-[#4CAF50] to-[#0DA2E7]",   badge: "📷 Camera" },
 ];
 
 export default function GamesPage() {
@@ -806,12 +794,8 @@ export default function GamesPage() {
                   {activeGame === "quiz-race"           && <QuizRaceGame onBack={goBack} />}
                   {activeGame === "word-builder"        && <WordBuilderGame onBack={goBack} />}
                   {activeGame === "spell-it"            && <SpellItGame onBack={goBack} />}
-                  {activeGame === "finger-counting-cam" && <FingerCountingCameraGame onBack={goBack} />}
-                  {activeGame === "color-hunt-cam"      && <ColorHuntCameraGame onBack={goBack} />}
-                  {activeGame === "thumbs-quiz-cam"     && <ThumbsQuizGame onBack={goBack} />}
-                  {activeGame === "air-draw"            && <AirDrawGame onBack={goBack} />}
-                  {activeGame === "color-fill"          && <ColorFillGame onBack={goBack} />}
-                  {activeGame === "gesture-match"       && <GestureMatchGame onBack={goBack} />}
+                  {activeGame === "air-draw"   && <AirDrawGame onBack={goBack} />}
+                  {activeGame === "color-fill" && <ColorFillGame onBack={goBack} />}
                 </motion.div>
               </AnimatePresence>
             </CardContent>
