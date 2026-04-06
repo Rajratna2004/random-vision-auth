@@ -618,14 +618,7 @@ router.post("/quiz", authenticate, async (req: AuthRequest, res) => {
     }
   }
 
-  // Use static question banks for non-math subjects — works without any API key
-  const staticResult = tryProgrammaticNonMath(topic, difficulty, numQuestions, seed);
-  if (staticResult) {
-    res.json(staticResult);
-    return;
-  }
-
-  // Fall through to AI only for: hard math word problems + unrecognised topics
+  // Use OpenAI for all remaining topics (non-math + hard math word problems)
   const prompt = buildAIPrompt(topic, difficulty, numQuestions, seed);
 
   try {
@@ -638,13 +631,19 @@ router.post("/quiz", authenticate, async (req: AuthRequest, res) => {
 
     const content = completion.choices[0]?.message?.content;
     if (!content) {
-      res.status(500).json({ error: "AIError", message: "Failed to generate quiz — no content returned" });
-      return;
+      throw new Error("No content returned from AI");
     }
 
     const quiz = JSON.parse(content);
     res.json(quiz);
   } catch (err: any) {
+    // Silent fallback to static question banks if OpenAI fails
+    const staticResult = tryProgrammaticNonMath(topic, difficulty, numQuestions, seed);
+    if (staticResult) {
+      res.json(staticResult);
+      return;
+    }
+
     const msg = err?.message ?? "Unknown AI error";
     const isKeyError = msg.includes("API key") || msg.includes("Incorrect API key") || msg.includes("401") || msg.includes("invalid_api_key");
     res.status(500).json({
