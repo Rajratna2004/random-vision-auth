@@ -23,8 +23,8 @@ const SIZES = [4, 8, 14, 22];
 const DRAWING_GESTURES = [
   { emoji: "☝️", label: "Point", description: "Draw in the air" },
   { emoji: "✌️", label: "Peace", description: "Change color" },
-  { emoji: "✋", label: "Open Palm", description: "Clear canvas" },
-  { emoji: "🤟", label: "Three Fingers", description: "Toggle eraser on/off" },
+  { emoji: "👍", label: "Thumbs Up", description: "Clear canvas" },
+  { emoji: "✋", label: "Open Palm", description: "Toggle eraser on/off" },
   { emoji: "✊", label: "Fist", description: "Pause drawing" },
 ];
 
@@ -115,12 +115,12 @@ export default function AirDraw({ onBack }: { onBack: () => void }) {
           const idx = COLORS.indexOf(prev);
           return COLORS[(idx + 1) % COLORS.length];
         });
-      } else if (g === "open_palm") {
+      } else if (g === "thumbs_up") {
         playClear();
         const canvas = drawCanvasRef.current;
         const ctx = canvas?.getContext("2d");
         if (ctx && canvas) ctx.clearRect(0, 0, canvas.width, canvas.height);
-      } else if (g === "three_fingers") {
+      } else if (g === "open_palm") {
         playSwoosh();
         setIsEraser(prev => !prev);
       }
@@ -227,7 +227,7 @@ export default function AirDraw({ onBack }: { onBack: () => void }) {
         <h2 className="text-xl font-display text-foreground">🎨 {cameraActive ? "Air Canvas" : "Drawing Canvas"}</h2>
         {cameraActive && (
           <span className="ml-auto text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-bold">
-            ☝️ Draw · ✌️ Color · ✋ Clear · 🤟 Eraser · ✊ Pause
+            ☝️ Draw · ✌️ Color · 👍 Clear · ✋ Eraser · ✊ Pause
           </span>
         )}
       </div>
