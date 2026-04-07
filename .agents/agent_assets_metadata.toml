@@ -48,3 +48,9 @@ id = "G3NWxPdjicF4xWK_f7qb6"
 uri = "file://screenshots/diagram-state.jpg"
 type = "image"
 title = "6. State Diagram"
+
+[[outputs]]
+id = "y8stxabZHOpIrBZOuWVG8"
+uri = "file://screenshots/diagram-context-dfd.jpg"
+type = "image"
+title = "KidoLearn — Context DFD (Level 0)"

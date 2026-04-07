@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="280" viewBox="0 0 820 280" font-family="Arial, sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0,10 3.5,0 7" fill="#333"/>
+    </marker>
+  </defs>
+
+  <rect width="820" height="280" fill="white"/>
+
+  <!-- ── STICK FIGURE (User) ── -->
+  <circle cx="68" cy="108" r="18" fill="none" stroke="#333" stroke-width="1.8"/>
+  <line x1="68" y1="126" x2="68" y2="170" stroke="#333" stroke-width="1.8"/>
+  <line x1="68" y1="142" x2="44" y2="158" stroke="#333" stroke-width="1.8"/>
+  <line x1="68" y1="142" x2="92" y2="158" stroke="#333" stroke-width="1.8"/>
+  <line x1="68" y1="170" x2="50" y2="196" stroke="#333" stroke-width="1.8"/>
+  <line x1="68" y1="170" x2="86" y2="196" stroke="#333" stroke-width="1.8"/>
+  <text x="68" y="215" text-anchor="middle" font-size="13" fill="#333">User</text>
+
+  <!-- Arrow: User → System (Inputs / Requests) -->
+  <line x1="100" y1="128" x2="238" y2="128" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="168" y="120" text-anchor="middle" font-size="12" fill="#333">Inputs / Requests</text>
+
+  <!-- Arrow: System → User (Responses / Results) -->
+  <line x1="238" y1="148" x2="100" y2="148" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="168" y="166" text-anchor="middle" font-size="12" fill="#333">Responses / Results</text>
+
+  <!-- ── P0 KidoLearn System (central box) ── -->
+  <rect x="240" y="100" width="200" height="76" rx="2" fill="white" stroke="#333" stroke-width="2"/>
+  <text x="340" y="132" text-anchor="middle" font-size="13" font-weight="bold" fill="#333">P0 KidoLearn</text>
+  <text x="340" y="152" text-anchor="middle" font-size="13" font-weight="bold" fill="#333">System</text>
+
+  <!-- Arrow: System → MediaPipe CDN (Data Requests) -->
+  <line x1="440" y1="118" x2="580" y2="88" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="522" y="90" text-anchor="middle" font-size="12" fill="#333">Model Requests</text>
+
+  <!-- Arrow: MediaPipe CDN → System (Data Responses) -->
+  <line x1="580" y1="108" x2="440" y2="130" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="522" y="132" text-anchor="middle" font-size="12" fill="#333">WASM / Model Data</text>
+
+  <!-- Arrow: System → DB (Store/Read User Data) -->
+  <line x1="440" y1="158" x2="586" y2="200" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="530" y="196" text-anchor="middle" font-size="12" fill="#333">Store / Read User Data</text>
+
+  <!-- ── CLOUD (MediaPipe CDN) ── -->
+  <!-- Cloud shape made of overlapping circles -->
+  <circle cx="634" cy="72" r="22" fill="white" stroke="#333" stroke-width="1.8"/>
+  <circle cx="658" cy="62" r="18" fill="white" stroke="#333" stroke-width="1.8"/>
+  <circle cx="680" cy="68" r="20" fill="white" stroke="#333" stroke-width="1.8"/>
+  <circle cx="700" cy="76" r="16" fill="white" stroke="#333" stroke-width="1.8"/>
+  <circle cx="686" cy="88" r="18" fill="white" stroke="#333" stroke-width="1.8"/>
+  <circle cx="660" cy="90" r="20" fill="white" stroke="#333" stroke-width="1.8"/>
+  <circle cx="636" cy="86" r="16" fill="white" stroke="#333" stroke-width="1.8"/>
+  <!-- White fill to clean up interior -->
+  <rect x="632" y="70" width="88" height="26" fill="white"/>
+  <text x="668" y="80" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">MediaPipe</text>
+  <text x="668" y="94" text-anchor="middle" font-size="10" fill="#555">CDN / WASM</text>
+
+  <!-- ── CYLINDER (PostgreSQL DB) ── -->
+  <ellipse cx="648" cy="218" rx="52" ry="14" fill="white" stroke="#333" stroke-width="1.8"/>
+  <rect x="596" y="218" width="104" height="44" fill="white" stroke="none"/>
+  <line x1="596" y1="218" x2="596" y2="262" stroke="#333" stroke-width="1.8"/>
+  <line x1="700" y1="218" x2="700" y2="262" stroke="#333" stroke-width="1.8"/>
+  <ellipse cx="648" cy="262" rx="52" ry="14" fill="white" stroke="#333" stroke-width="1.8"/>
+  <text x="648" y="243" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">User / Result</text>
+  <text x="648" y="259" text-anchor="middle" font-size="10" fill="#555">Data (PostgreSQL)</text>
+
+</svg>
