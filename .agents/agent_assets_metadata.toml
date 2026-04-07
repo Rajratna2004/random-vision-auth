@@ -6,3 +6,9 @@ id = "eIE47CcMJervauMJMgfKL"
 uri = "file://seed-data.txt"
 type = "text"
 title = "KidoLearn Complete Seed Data (with Practice Challenges)"
+
+[[outputs]]
+id = "ZKjAA9V-zW1_svN0kHgHf"
+uri = "file://screenshots/kido-learn-system-architecture.jpg"
+type = "image"
+title = "KidoLearn System Architecture Diagram"
