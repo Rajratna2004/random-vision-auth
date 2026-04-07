@@ -1,0 +1,135 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="580" viewBox="0 0 960 580" font-family="Arial, sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0,10 3.5,0 7" fill="#444"/>
+    </marker>
+    <marker id="open" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polyline points="0 0,10 3.5,0 7" fill="none" stroke="#444" stroke-width="1.5"/>
+    </marker>
+  </defs>
+  <rect width="960" height="580" fill="white"/>
+  <text x="480" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#222">KidoLearn — Sequence Diagram</text>
+  <text x="480" y="46" text-anchor="middle" font-size="11" fill="#666">User Login → View Lesson → Take Quiz → Save Progress</text>
+
+  <!-- ── LIFELINE HEADERS ── -->
+  <!-- User -->
+  <rect x="50" y="60" width="100" height="36" rx="3" fill="#0DA2E7" stroke="#0a80b8" stroke-width="1.5"/>
+  <text x="100" y="83" text-anchor="middle" font-size="11" font-weight="bold" fill="white">Child User</text>
+  <!-- Browser UI -->
+  <rect x="220" y="60" width="100" height="36" rx="3" fill="#0DA2E7" stroke="#0a80b8" stroke-width="1.5"/>
+  <text x="270" y="83" text-anchor="middle" font-size="11" font-weight="bold" fill="white">Browser UI</text>
+  <!-- Express API -->
+  <rect x="390" y="60" width="110" height="36" rx="3" fill="#4caf50" stroke="#388e3c" stroke-width="1.5"/>
+  <text x="445" y="83" text-anchor="middle" font-size="11" font-weight="bold" fill="white">Express API</text>
+  <!-- Auth Module -->
+  <rect x="560" y="60" width="110" height="36" rx="3" fill="#f9a825" stroke="#c87f00" stroke-width="1.5"/>
+  <text x="615" y="83" text-anchor="middle" font-size="11" font-weight="bold" fill="white">Auth Module</text>
+  <!-- PostgreSQL -->
+  <rect x="740" y="60" width="110" height="36" rx="3" fill="#e57373" stroke="#c62828" stroke-width="1.5"/>
+  <text x="795" y="83" text-anchor="middle" font-size="11" font-weight="bold" fill="white">PostgreSQL</text>
+
+  <!-- ── LIFELINES ── -->
+  <line x1="100" y1="96" x2="100" y2="560" stroke="#999" stroke-width="1" stroke-dasharray="5,4"/>
+  <line x1="270" y1="96" x2="270" y2="560" stroke="#999" stroke-width="1" stroke-dasharray="5,4"/>
+  <line x1="445" y1="96" x2="445" y2="560" stroke="#999" stroke-width="1" stroke-dasharray="5,4"/>
+  <line x1="615" y1="96" x2="615" y2="560" stroke="#999" stroke-width="1" stroke-dasharray="5,4"/>
+  <line x1="795" y1="96" x2="795" y2="560" stroke="#999" stroke-width="1" stroke-dasharray="5,4"/>
+
+  <!-- ── ACTIVATION BOXES ── -->
+  <rect x="266" y="118" width="8" height="360" fill="#cde" stroke="#99b" stroke-width="1"/>
+  <rect x="441" y="130" width="8" height="330" fill="#c8e6c9" stroke="#a5d6a7" stroke-width="1"/>
+  <rect x="611" y="142" width="8" height="100" fill="#fff9c4" stroke="#f9e08a" stroke-width="1"/>
+  <rect x="791" y="154" width="8" height="72" fill="#ffcdd2" stroke="#ef9a9a" stroke-width="1"/>
+
+  <!-- ── MESSAGES ── -->
+  <!-- 1. User enters credentials -->
+  <line x1="100" y1="120" x2="264" y2="120" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="182" y="114" text-anchor="middle" font-size="10" fill="#333">1. Enter credentials</text>
+
+  <!-- 2. POST /api/auth/login -->
+  <line x1="274" y1="140" x2="440" y2="140" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="357" y="134" text-anchor="middle" font-size="10" fill="#333">2. POST /api/auth/login</text>
+
+  <!-- 3. Validate password -->
+  <line x1="449" y1="155" x2="610" y2="155" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="530" y="149" text-anchor="middle" font-size="10" fill="#333">3. Validate password</text>
+
+  <!-- 4. Query user record -->
+  <line x1="619" y1="168" x2="790" y2="168" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="705" y="162" text-anchor="middle" font-size="10" fill="#333">4. SELECT * FROM users</text>
+
+  <!-- 5. Return user record -->
+  <line x1="790" y1="182" x2="620" y2="182" stroke="#444" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+  <text x="705" y="196" text-anchor="middle" font-size="10" fill="#888">5. User record</text>
+
+  <!-- 6. Issue JWT -->
+  <line x1="610" y1="210" x2="450" y2="210" stroke="#444" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+  <text x="530" y="204" text-anchor="middle" font-size="10" fill="#888">6. JWT Token issued</text>
+
+  <!-- 7. Return JWT to UI -->
+  <line x1="440" y1="228" x2="275" y2="228" stroke="#444" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+  <text x="357" y="222" text-anchor="middle" font-size="10" fill="#888">7. 200 OK + JWT</text>
+
+  <!-- 8. Load Dashboard -->
+  <line x1="270" y1="248" x2="100" y2="248" stroke="#444" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+  <text x="182" y="242" text-anchor="middle" font-size="10" fill="#888">8. Render dashboard</text>
+
+  <!-- Divider label -->
+  <line x1="80" y1="265" x2="880" y2="265" stroke="#ddd" stroke-width="1" stroke-dasharray="4,4"/>
+  <text x="480" y="260" text-anchor="middle" font-size="9" fill="#aaa">── Lesson Flow ──</text>
+
+  <!-- 9. Select lesson -->
+  <line x1="100" y1="278" x2="264" y2="278" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="182" y="272" text-anchor="middle" font-size="10" fill="#333">9. Select lesson</text>
+
+  <!-- 10. GET /api/lessons/:id -->
+  <line x1="274" y1="296" x2="440" y2="296" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="357" y="290" text-anchor="middle" font-size="10" fill="#333">10. GET /api/lessons/:id</text>
+
+  <!-- 11. Query lesson -->
+  <line x1="449" y1="312" x2="790" y2="312" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="620" y="306" text-anchor="middle" font-size="10" fill="#333">11. SELECT lesson content</text>
+
+  <!-- 12. Return lesson -->
+  <line x1="790" y1="328" x2="450" y2="328" stroke="#444" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+  <text x="620" y="342" text-anchor="middle" font-size="10" fill="#888">12. Lesson data</text>
+
+  <!-- 13. Render lesson -->
+  <line x1="440" y1="355" x2="275" y2="355" stroke="#444" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+  <text x="357" y="349" text-anchor="middle" font-size="10" fill="#888">13. Render lesson + quiz</text>
+
+  <!-- Divider label -->
+  <line x1="80" y1="372" x2="880" y2="372" stroke="#ddd" stroke-width="1" stroke-dasharray="4,4"/>
+  <text x="480" y="368" text-anchor="middle" font-size="9" fill="#aaa">── Quiz Flow ──</text>
+
+  <!-- 14. Submit answers -->
+  <line x1="100" y1="385" x2="264" y2="385" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="182" y="379" text-anchor="middle" font-size="10" fill="#333">14. Submit quiz answers</text>
+
+  <!-- 15. POST /api/quiz/submit -->
+  <line x1="274" y1="403" x2="440" y2="403" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="357" y="397" text-anchor="middle" font-size="10" fill="#333">15. POST /api/quiz/submit</text>
+
+  <!-- 16. Evaluate + save score -->
+  <line x1="449" y1="420" x2="790" y2="420" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="620" y="414" text-anchor="middle" font-size="10" fill="#333">16. INSERT progress record</text>
+
+  <!-- 17. DB confirm -->
+  <line x1="790" y1="436" x2="450" y2="436" stroke="#444" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+  <text x="620" y="450" text-anchor="middle" font-size="10" fill="#888">17. Saved OK</text>
+
+  <!-- 18. Return score -->
+  <line x1="440" y1="462" x2="275" y2="462" stroke="#444" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+  <text x="357" y="456" text-anchor="middle" font-size="10" fill="#888">18. Score + result</text>
+
+  <!-- 19. Show result -->
+  <line x1="270" y1="480" x2="100" y2="480" stroke="#444" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+  <text x="182" y="474" text-anchor="middle" font-size="10" fill="#888">19. Display score screen</text>
+
+  <!-- Legend -->
+  <line x1="830" y1="108" x2="870" y2="108" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="878" y="112" font-size="9" fill="#555">Request</text>
+  <line x1="830" y1="125" x2="870" y2="125" stroke="#444" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+  <text x="878" y="129" font-size="9" fill="#555">Response</text>
+
+</svg>

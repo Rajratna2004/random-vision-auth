@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="560" viewBox="0 0 860 560" font-family="Arial, sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0,10 3.5,0 7" fill="#444"/>
+    </marker>
+  </defs>
+  <rect width="860" height="560" fill="white"/>
+  <text x="430" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#222">KidoLearn — State Diagram (User Session)</text>
+
+  <!-- START -->
+  <circle cx="100" cy="80" r="14" fill="#333"/>
+  <line x1="100" y1="94" x2="100" y2="118" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- STATE: Unauthenticated -->
+  <rect x="40" y="120" width="160" height="54" rx="10" fill="#EAF6FD" stroke="#0DA2E7" stroke-width="2"/>
+  <text x="120" y="143" text-anchor="middle" font-size="12" font-weight="bold" fill="#333">Unauthenticated</text>
+  <text x="120" y="162" text-anchor="middle" font-size="10" fill="#555">Awaiting login</text>
+
+  <!-- → Authenticating -->
+  <line x1="200" y1="147" x2="280" y2="147" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="240" y="140" text-anchor="middle" font-size="10" fill="#555">Submit Credentials</text>
+
+  <!-- STATE: Authenticating -->
+  <rect x="282" y="120" width="160" height="54" rx="10" fill="#FFF9C4" stroke="#f9a825" stroke-width="2"/>
+  <text x="362" y="143" text-anchor="middle" font-size="12" font-weight="bold" fill="#333">Authenticating</text>
+  <text x="362" y="162" text-anchor="middle" font-size="10" fill="#555">Validating JWT / Face</text>
+
+  <!-- → Auth Failed → back to Unauthenticated -->
+  <line x1="362" y1="120" x2="362" y2="92" stroke="#444" stroke-width="1.5"/>
+  <line x1="362" y1="92" x2="120" y2="92" stroke="#444" stroke-width="1.5"/>
+  <line x1="120" y1="92" x2="120" y2="120" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="240" y="86" text-anchor="middle" font-size="10" fill="#e53935">Auth Failed</text>
+
+  <!-- → Authenticated -->
+  <line x1="442" y1="147" x2="520" y2="147" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="481" y="140" text-anchor="middle" font-size="10" fill="#555">JWT Issued</text>
+
+  <!-- STATE: Authenticated / Dashboard -->
+  <rect x="522" y="120" width="160" height="54" rx="10" fill="#E8F5E9" stroke="#4caf50" stroke-width="2"/>
+  <text x="602" y="143" text-anchor="middle" font-size="12" font-weight="bold" fill="#333">Authenticated</text>
+  <text x="602" y="162" text-anchor="middle" font-size="10" fill="#555">Dashboard loaded</text>
+
+  <!-- → Learning -->
+  <line x1="602" y1="174" x2="602" y2="238" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="616" y="210" font-size="10" fill="#555">Select Lesson</text>
+
+  <!-- STATE: Learning -->
+  <rect x="522" y="240" width="160" height="54" rx="10" fill="#EAF6FD" stroke="#0DA2E7" stroke-width="2"/>
+  <text x="602" y="263" text-anchor="middle" font-size="12" font-weight="bold" fill="#333">Learning</text>
+  <text x="602" y="282" text-anchor="middle" font-size="10" fill="#555">Viewing lesson content</text>
+
+  <!-- → Quiz Taking -->
+  <line x1="602" y1="294" x2="602" y2="358" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="616" y="330" font-size="10" fill="#555">Start Quiz</text>
+
+  <!-- STATE: Quiz Taking -->
+  <rect x="522" y="360" width="160" height="54" rx="10" fill="#FFF9C4" stroke="#f9a825" stroke-width="2"/>
+  <text x="602" y="383" text-anchor="middle" font-size="12" font-weight="bold" fill="#333">Quiz Taking</text>
+  <text x="602" y="402" text-anchor="middle" font-size="10" fill="#555">Answering questions</text>
+
+  <!-- → Progress Updated -->
+  <line x1="602" y1="414" x2="602" y2="478" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="616" y="450" font-size="10" fill="#555">Submit Answers</text>
+
+  <!-- STATE: Progress Updated -->
+  <rect x="522" y="480" width="160" height="54" rx="10" fill="#E8F5E9" stroke="#4caf50" stroke-width="2"/>
+  <text x="602" y="503" text-anchor="middle" font-size="12" font-weight="bold" fill="#333">Progress Updated</text>
+  <text x="602" y="522" text-anchor="middle" font-size="10" fill="#555">Score saved to DB</text>
+
+  <!-- → back to Authenticated -->
+  <line x1="522" y1="507" x2="460" y2="507" stroke="#444" stroke-width="1.5"/>
+  <line x1="460" y1="507" x2="460" y2="147" stroke="#444" stroke-width="1.5"/>
+  <line x1="460" y1="147" x2="522" y2="147" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="448" y="340" text-anchor="middle" font-size="10" fill="#555" transform="rotate(-90,448,340)">Next Course / Dashboard</text>
+
+  <!-- STATE: Game Playing -->
+  <rect x="200" y="360" width="160" height="54" rx="10" fill="#FCE4EC" stroke="#e57373" stroke-width="2"/>
+  <text x="280" y="383" text-anchor="middle" font-size="12" font-weight="bold" fill="#333">Game Playing</text>
+  <text x="280" y="402" text-anchor="middle" font-size="10" fill="#555">Gesture game active</text>
+
+  <!-- Authenticated → Game Playing -->
+  <line x1="522" y1="165" x2="380" y2="365" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="430" y="270" text-anchor="middle" font-size="10" fill="#555">Open Game</text>
+
+  <!-- Game → Authenticated -->
+  <line x1="200" y1="380" x2="100" y2="380" stroke="#444" stroke-width="1.5"/>
+  <line x1="100" y1="380" x2="100" y2="147" stroke="#444" stroke-width="1.5"/>
+  <line x1="100" y1="147" x2="120" y2="147" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="60" y="270" text-anchor="middle" font-size="10" fill="#555" transform="rotate(-90,60,270)">Exit Game</text>
+
+  <!-- STATE: Logged Out -->
+  <rect x="282" y="480" width="160" height="54" rx="10" fill="#FFEBEE" stroke="#e57373" stroke-width="2"/>
+  <text x="362" y="503" text-anchor="middle" font-size="12" font-weight="bold" fill="#333">Logged Out</text>
+  <text x="362" y="522" text-anchor="middle" font-size="10" fill="#555">Session terminated</text>
+
+  <!-- Authenticated → Logged Out -->
+  <line x1="522" y1="174" x2="442" y2="484" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="498" y="330" font-size="10" fill="#555">Logout</text>
+
+  <!-- Logged Out → END -->
+  <line x1="362" y1="534" x2="362" y2="546" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <circle cx="362" cy="548" r="8" fill="none" stroke="#333" stroke-width="2"/>
+  <circle cx="362" cy="548" r="5" fill="#333"/>
+
+</svg>

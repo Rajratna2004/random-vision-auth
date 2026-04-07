@@ -12,3 +12,39 @@ id = "ZKjAA9V-zW1_svN0kHgHf"
 uri = "file://screenshots/kido-learn-system-architecture.jpg"
 type = "image"
 title = "KidoLearn System Architecture Diagram"
+
+[[outputs]]
+id = "vBqsnRjHEnTYbMwFUqeLT"
+uri = "file://screenshots/diagram-dataflow.jpg"
+type = "image"
+title = "1. Data Flow Diagram (DFD Level 1)"
+
+[[outputs]]
+id = "RbD61bES_3N2CeRfjtsTd"
+uri = "file://screenshots/diagram-class.jpg"
+type = "image"
+title = "2. Class Diagram"
+
+[[outputs]]
+id = "U9SjLe3q2jM9No70I8nV9"
+uri = "file://screenshots/diagram-usecase.jpg"
+type = "image"
+title = "3. Use Case Diagram"
+
+[[outputs]]
+id = "6pFukAVP1O94XnnuU6I98"
+uri = "file://screenshots/diagram-sequence.jpg"
+type = "image"
+title = "4. Sequence Diagram"
+
+[[outputs]]
+id = "GpdAW9P7Mlnxafjhk3so7"
+uri = "file://screenshots/diagram-activity.jpg"
+type = "image"
+title = "5. Activity Diagram"
+
+[[outputs]]
+id = "G3NWxPdjicF4xWK_f7qb6"
+uri = "file://screenshots/diagram-state.jpg"
+type = "image"
+title = "6. State Diagram"

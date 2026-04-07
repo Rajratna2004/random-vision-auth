@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="560" viewBox="0 0 1000 560" font-family="Arial, sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0,10 3.5,0 7" fill="#444"/>
+    </marker>
+    <marker id="open" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polyline points="0 0,10 3.5,0 7" fill="none" stroke="#444" stroke-width="1.2"/>
+    </marker>
+    <marker id="diamond" markerWidth="12" markerHeight="8" refX="1" refY="4" orient="auto">
+      <polygon points="1 4,5 1,9 4,5 7" fill="#444"/>
+    </marker>
+  </defs>
+  <rect width="1000" height="560" fill="white"/>
+  <text x="500" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#222">KidoLearn — Class Diagram</text>
+
+  <!-- ── User ── -->
+  <rect x="20" y="50" width="175" height="175" rx="2" fill="#EAF6FD" stroke="#0DA2E7" stroke-width="2"/>
+  <rect x="20" y="50" width="175" height="26" rx="2" fill="#0DA2E7"/>
+  <text x="107" y="68" text-anchor="middle" font-size="12" font-weight="bold" fill="white">User</text>
+  <line x1="20" y1="76" x2="195" y2="76" stroke="#0DA2E7" stroke-width="1.5"/>
+  <text x="30" y="94" font-size="10" fill="#333">+ id: int</text>
+  <text x="30" y="110" font-size="10" fill="#333">+ username: string</text>
+  <text x="30" y="126" font-size="10" fill="#333">+ email: string</text>
+  <text x="30" y="142" font-size="10" fill="#333">+ passwordHash: string</text>
+  <text x="30" y="158" font-size="10" fill="#333">+ faceData: string</text>
+  <line x1="20" y1="167" x2="195" y2="167" stroke="#0DA2E7" stroke-width="1"/>
+  <text x="30" y="182" font-size="10" fill="#333">+ login(): JWT</text>
+  <text x="30" y="198" font-size="10" fill="#333">+ register(): void</text>
+  <text x="30" y="214" font-size="10" fill="#333">+ faceLogin(): JWT</text>
+
+  <!-- ── Course ── -->
+  <rect x="230" y="50" width="175" height="160" rx="2" fill="#EAF6FD" stroke="#0DA2E7" stroke-width="2"/>
+  <rect x="230" y="50" width="175" height="26" rx="2" fill="#0DA2E7"/>
+  <text x="317" y="68" text-anchor="middle" font-size="12" font-weight="bold" fill="white">Course</text>
+  <line x1="230" y1="76" x2="405" y2="76" stroke="#0DA2E7" stroke-width="1.5"/>
+  <text x="240" y="94" font-size="10" fill="#333">+ id: int</text>
+  <text x="240" y="110" font-size="10" fill="#333">+ title: string</text>
+  <text x="240" y="126" font-size="10" fill="#333">+ subject: string</text>
+  <text x="240" y="142" font-size="10" fill="#333">+ description: string</text>
+  <text x="240" y="158" font-size="10" fill="#333">+ iconUrl: string</text>
+  <line x1="230" y1="167" x2="405" y2="167" stroke="#0DA2E7" stroke-width="1"/>
+  <text x="240" y="182" font-size="10" fill="#333">+ getLessons(): Lesson[]</text>
+  <text x="240" y="198" font-size="10" fill="#333">+ getProgress(): float</text>
+
+  <!-- ── Lesson ── -->
+  <rect x="440" y="50" width="185" height="175" rx="2" fill="#EAF6FD" stroke="#0DA2E7" stroke-width="2"/>
+  <rect x="440" y="50" width="185" height="26" rx="2" fill="#0DA2E7"/>
+  <text x="532" y="68" text-anchor="middle" font-size="12" font-weight="bold" fill="white">Lesson</text>
+  <line x1="440" y1="76" x2="625" y2="76" stroke="#0DA2E7" stroke-width="1.5"/>
+  <text x="450" y="94" font-size="10" fill="#333">+ id: int</text>
+  <text x="450" y="110" font-size="10" fill="#333">+ courseId: int</text>
+  <text x="450" y="126" font-size="10" fill="#333">+ title: string</text>
+  <text x="450" y="142" font-size="10" fill="#333">+ content: string</text>
+  <text x="450" y="158" font-size="10" fill="#333">+ order: int</text>
+  <text x="450" y="174" font-size="10" fill="#333">+ animationType: string</text>
+  <line x1="440" y1="183" x2="625" y2="183" stroke="#0DA2E7" stroke-width="1"/>
+  <text x="450" y="198" font-size="10" fill="#333">+ getQuiz(): Quiz</text>
+  <text x="450" y="214" font-size="10" fill="#333">+ markComplete(): void</text>
+
+  <!-- ── Quiz ── -->
+  <rect x="660" y="50" width="175" height="160" rx="2" fill="#EAF6FD" stroke="#0DA2E7" stroke-width="2"/>
+  <rect x="660" y="50" width="175" height="26" rx="2" fill="#0DA2E7"/>
+  <text x="747" y="68" text-anchor="middle" font-size="12" font-weight="bold" fill="white">Quiz</text>
+  <line x1="660" y1="76" x2="835" y2="76" stroke="#0DA2E7" stroke-width="1.5"/>
+  <text x="670" y="94" font-size="10" fill="#333">+ id: int</text>
+  <text x="670" y="110" font-size="10" fill="#333">+ lessonId: int</text>
+  <text x="670" y="126" font-size="10" fill="#333">+ totalQuestions: int</text>
+  <text x="670" y="142" font-size="10" fill="#333">+ passMark: int</text>
+  <line x1="660" y1="151" x2="835" y2="151" stroke="#0DA2E7" stroke-width="1"/>
+  <text x="670" y="166" font-size="10" fill="#333">+ generate(): Question[]</text>
+  <text x="670" y="182" font-size="10" fill="#333">+ evaluate(): Score</text>
+  <text x="670" y="198" font-size="10" fill="#333">+ getResult(): string</text>
+
+  <!-- ── Question ── -->
+  <rect x="660" y="280" width="175" height="160" rx="2" fill="#EAF6FD" stroke="#0DA2E7" stroke-width="2"/>
+  <rect x="660" y="280" width="175" height="26" rx="2" fill="#0DA2E7"/>
+  <text x="747" y="298" text-anchor="middle" font-size="12" font-weight="bold" fill="white">Question</text>
+  <line x1="660" y1="306" x2="835" y2="306" stroke="#0DA2E7" stroke-width="1.5"/>
+  <text x="670" y="324" font-size="10" fill="#333">+ id: int</text>
+  <text x="670" y="340" font-size="10" fill="#333">+ quizId: int</text>
+  <text x="670" y="356" font-size="10" fill="#333">+ text: string</text>
+  <text x="670" y="372" font-size="10" fill="#333">+ options: string[]</text>
+  <text x="670" y="388" font-size="10" fill="#333">+ correctAnswer: int</text>
+  <line x1="660" y1="397" x2="835" y2="397" stroke="#0DA2E7" stroke-width="1"/>
+  <text x="670" y="413" font-size="10" fill="#333">+ validate(): boolean</text>
+  <text x="670" y="429" font-size="10" fill="#333">+ getOptions(): string[]</text>
+
+  <!-- ── Progress ── -->
+  <rect x="230" y="280" width="185" height="175" rx="2" fill="#EAF6FD" stroke="#0DA2E7" stroke-width="2"/>
+  <rect x="230" y="280" width="185" height="26" rx="2" fill="#0DA2E7"/>
+  <text x="322" y="298" text-anchor="middle" font-size="12" font-weight="bold" fill="white">Progress</text>
+  <line x1="230" y1="306" x2="415" y2="306" stroke="#0DA2E7" stroke-width="1.5"/>
+  <text x="240" y="324" font-size="10" fill="#333">+ id: int</text>
+  <text x="240" y="340" font-size="10" fill="#333">+ userId: int</text>
+  <text x="240" y="356" font-size="10" fill="#333">+ courseId: int</text>
+  <text x="240" y="372" font-size="10" fill="#333">+ lessonId: int</text>
+  <text x="240" y="388" font-size="10" fill="#333">+ completed: boolean</text>
+  <text x="240" y="404" font-size="10" fill="#333">+ score: int</text>
+  <line x1="230" y1="413" x2="415" y2="413" stroke="#0DA2E7" stroke-width="1"/>
+  <text x="240" y="428" font-size="10" fill="#333">+ update(): void</text>
+  <text x="240" y="444" font-size="10" fill="#333">+ getPercentage(): float</text>
+
+  <!-- ── GestureGame ── -->
+  <rect x="20" y="280" width="175" height="175" rx="2" fill="#EAF6FD" stroke="#0DA2E7" stroke-width="2"/>
+  <rect x="20" y="280" width="175" height="26" rx="2" fill="#0DA2E7"/>
+  <text x="107" y="298" text-anchor="middle" font-size="12" font-weight="bold" fill="white">GestureGame</text>
+  <line x1="20" y1="306" x2="195" y2="306" stroke="#0DA2E7" stroke-width="1.5"/>
+  <text x="30" y="324" font-size="10" fill="#333">+ id: int</text>
+  <text x="30" y="340" font-size="10" fill="#333">+ name: string</text>
+  <text x="30" y="356" font-size="10" fill="#333">+ type: string</text>
+  <text x="30" y="372" font-size="10" fill="#333">+ gesture: GestureType</text>
+  <text x="30" y="388" font-size="10" fill="#333">+ mode: string</text>
+  <line x1="20" y1="397" x2="195" y2="397" stroke="#0DA2E7" stroke-width="1"/>
+  <text x="30" y="412" font-size="10" fill="#333">+ detectGesture(): string</text>
+  <text x="30" y="428" font-size="10" fill="#333">+ startGame(): void</text>
+  <text x="30" y="444" font-size="10" fill="#333">+ resetCanvas(): void</text>
+
+  <!-- ── RELATIONSHIPS ── -->
+  <!-- User → Progress (1 to many) -->
+  <line x1="107" y1="225" x2="322" y2="280" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="190" y="256" font-size="9" fill="#555">1..*</text>
+
+  <!-- Course → Lesson (1 to many) -->
+  <line x1="405" y1="140" x2="440" y2="140" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="415" y="135" font-size="9" fill="#555">1..*</text>
+
+  <!-- Lesson → Quiz (1 to 1) -->
+  <line x1="625" y1="140" x2="660" y2="140" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="635" y="135" font-size="9" fill="#555">1..1</text>
+
+  <!-- Quiz → Question (1 to many) -->
+  <line x1="747" y1="210" x2="747" y2="280" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="752" y="248" font-size="9" fill="#555">1..*</text>
+
+  <!-- Progress → Course -->
+  <line x1="322" y1="280" x2="317" y2="210" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="328" y="248" font-size="9" fill="#555">ref</text>
+
+  <!-- User → GestureGame -->
+  <line x1="107" y1="225" x2="107" y2="280" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="115" y="256" font-size="9" fill="#555">plays</text>
+
+</svg>

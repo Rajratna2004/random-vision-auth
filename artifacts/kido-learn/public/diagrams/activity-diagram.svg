@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="820" viewBox="0 0 520 820" font-family="Arial, sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0,10 3.5,0 7" fill="#444"/>
+    </marker>
+  </defs>
+  <rect width="520" height="820" fill="white"/>
+  <text x="260" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#222">KidoLearn — Activity Diagram</text>
+
+  <!-- START -->
+  <circle cx="260" cy="58" r="14" fill="#333"/>
+  <line x1="260" y1="72" x2="260" y2="95" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- Open App -->
+  <rect x="170" y="98" width="180" height="36" rx="18" fill="#0DA2E7" stroke="#0a80b8" stroke-width="1.5"/>
+  <text x="260" y="121" text-anchor="middle" font-size="11" font-weight="bold" fill="white">Open App</text>
+  <line x1="260" y1="134" x2="260" y2="156" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- Decision: Registered? -->
+  <polygon points="260,158 340,186 260,214 180,186" fill="#fff9c4" stroke="#f9a825" stroke-width="1.8"/>
+  <text x="260" y="182" text-anchor="middle" font-size="10" fill="#333">Registered</text>
+  <text x="260" y="196" text-anchor="middle" font-size="10" fill="#333">User?</text>
+  <!-- Yes branch -->
+  <line x1="260" y1="214" x2="260" y2="236" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="270" y="228" font-size="10" fill="#555">Yes</text>
+  <!-- No branch -->
+  <line x1="340" y1="186" x2="430" y2="186" stroke="#444" stroke-width="1.5"/>
+  <line x1="430" y1="186" x2="430" y2="256" stroke="#444" stroke-width="1.5"/>
+  <line x1="430" y1="256" x2="350" y2="256" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="380" y="179" text-anchor="middle" font-size="10" fill="#555">No</text>
+
+  <!-- Register Account -->
+  <rect x="170" y="238" width="180" height="36" rx="18" fill="#4caf50" stroke="#388e3c" stroke-width="1.5"/>
+  <text x="260" y="261" text-anchor="middle" font-size="11" font-weight="bold" fill="white">Register Account</text>
+  <line x1="260" y1="274" x2="260" y2="296" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- Decision: Login method -->
+  <polygon points="260,298 340,326 260,354 180,326" fill="#fff9c4" stroke="#f9a825" stroke-width="1.8"/>
+  <text x="260" y="322" text-anchor="middle" font-size="10" fill="#333">Login</text>
+  <text x="260" y="336" text-anchor="middle" font-size="10" fill="#333">Method?</text>
+  <!-- Password -->
+  <line x1="180" y1="326" x2="100" y2="326" stroke="#444" stroke-width="1.5"/>
+  <line x1="100" y1="326" x2="100" y2="378" stroke="#444" stroke-width="1.5"/>
+  <line x1="100" y1="378" x2="170" y2="378" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="132" y="318" text-anchor="middle" font-size="10" fill="#555">Password</text>
+  <!-- Face -->
+  <line x1="340" y1="326" x2="420" y2="326" stroke="#444" stroke-width="1.5"/>
+  <line x1="420" y1="326" x2="420" y2="378" stroke="#444" stroke-width="1.5"/>
+  <line x1="420" y1="378" x2="350" y2="378" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="388" y="318" text-anchor="middle" font-size="10" fill="#555">Face</text>
+
+  <!-- Login with Password -->
+  <rect x="80" y="360" width="130" height="36" rx="18" fill="#0DA2E7" stroke="#0a80b8" stroke-width="1.5"/>
+  <text x="145" y="383" text-anchor="middle" font-size="10" font-weight="bold" fill="white">Password Login</text>
+  <line x1="145" y1="396" x2="145" y2="418" stroke="#444" stroke-width="1.5"/>
+  <line x1="145" y1="418" x2="230" y2="418" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- Face Login -->
+  <rect x="310" y="360" width="120" height="36" rx="18" fill="#0DA2E7" stroke="#0a80b8" stroke-width="1.5"/>
+  <text x="370" y="383" text-anchor="middle" font-size="10" font-weight="bold" fill="white">Face Login</text>
+  <line x1="370" y1="396" x2="370" y2="418" stroke="#444" stroke-width="1.5"/>
+  <line x1="370" y1="418" x2="290" y2="418" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- Authenticate and Load Dashboard -->
+  <rect x="170" y="420" width="180" height="36" rx="18" fill="#4caf50" stroke="#388e3c" stroke-width="1.5"/>
+  <text x="260" y="443" text-anchor="middle" font-size="11" font-weight="bold" fill="white">Load Dashboard</text>
+  <line x1="260" y1="456" x2="260" y2="478" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- Select Course -->
+  <rect x="170" y="480" width="180" height="36" rx="18" fill="#0DA2E7" stroke="#0a80b8" stroke-width="1.5"/>
+  <text x="260" y="503" text-anchor="middle" font-size="11" font-weight="bold" fill="white">Select Course &amp; Lesson</text>
+  <line x1="260" y1="516" x2="260" y2="538" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- View Lesson -->
+  <rect x="170" y="540" width="180" height="36" rx="18" fill="#0DA2E7" stroke="#0a80b8" stroke-width="1.5"/>
+  <text x="260" y="563" text-anchor="middle" font-size="11" font-weight="bold" fill="white">View Animated Lesson</text>
+  <line x1="260" y1="576" x2="260" y2="598" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- Take Quiz -->
+  <rect x="170" y="600" width="180" height="36" rx="18" fill="#0DA2E7" stroke="#0a80b8" stroke-width="1.5"/>
+  <text x="260" y="623" text-anchor="middle" font-size="11" font-weight="bold" fill="white">Take AI Quiz</text>
+  <line x1="260" y1="636" x2="260" y2="658" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- Decision: Pass? -->
+  <polygon points="260,660 340,688 260,716 180,688" fill="#fff9c4" stroke="#f9a825" stroke-width="1.8"/>
+  <text x="260" y="684" text-anchor="middle" font-size="10" fill="#333">Pass</text>
+  <text x="260" y="698" text-anchor="middle" font-size="10" fill="#333">Quiz?</text>
+
+  <!-- Yes: Update Progress -->
+  <line x1="260" y1="716" x2="260" y2="738" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="270" y="730" font-size="10" fill="#555">Yes</text>
+  <!-- No: Retry -->
+  <line x1="340" y1="688" x2="430" y2="688" stroke="#444" stroke-width="1.5"/>
+  <line x1="430" y1="688" x2="430" y2="618" stroke="#444" stroke-width="1.5"/>
+  <line x1="430" y1="618" x2="350" y2="618" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="438" y="660" font-size="10" fill="#555">No</text>
+  <text x="438" y="672" font-size="10" fill="#555">Retry</text>
+
+  <!-- Update Progress -->
+  <rect x="170" y="740" width="180" height="36" rx="18" fill="#4caf50" stroke="#388e3c" stroke-width="1.5"/>
+  <text x="260" y="763" text-anchor="middle" font-size="11" font-weight="bold" fill="white">Save Progress to DB</text>
+  <line x1="260" y1="776" x2="260" y2="796" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- END -->
+  <circle cx="260" cy="806" r="10" fill="none" stroke="#333" stroke-width="2"/>
+  <circle cx="260" cy="806" r="6" fill="#333"/>
+
+</svg>
