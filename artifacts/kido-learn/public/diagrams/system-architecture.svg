@@ -1,117 +1,162 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="960" height="430" viewBox="0 0 960 430" font-family="Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="500" viewBox="0 0 1100 500" font-family="Arial, sans-serif">
   <defs>
     <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+      <polygon points="0 0, 10 3.5, 0 7" fill="#444"/>
     </marker>
   </defs>
 
-  <rect width="960" height="430" fill="white"/>
+  <rect width="1100" height="500" fill="white"/>
 
-  <!-- ── STICK FIGURE (Child User) ── -->
-  <circle cx="44" cy="58" r="14" fill="none" stroke="#333" stroke-width="1.8"/>
-  <line x1="44" y1="72" x2="44" y2="114" stroke="#333" stroke-width="1.8"/>
-  <line x1="44" y1="86" x2="24" y2="102" stroke="#333" stroke-width="1.8"/>
-  <line x1="44" y1="86" x2="64" y2="102" stroke="#333" stroke-width="1.8"/>
-  <line x1="44" y1="114" x2="28" y2="138" stroke="#333" stroke-width="1.8"/>
-  <line x1="44" y1="114" x2="60" y2="138" stroke="#333" stroke-width="1.8"/>
-  <text x="44" y="155" text-anchor="middle" font-size="12" fill="#333">Child User</text>
+  <!-- ─────────────────────────── TIER LABELS ─────────────────────────── -->
+  <text x="10" y="168" font-size="11" fill="#888" font-style="italic" transform="rotate(-90,10,168)">Presentation Layer</text>
+  <text x="10" y="340" font-size="11" fill="#888" font-style="italic" transform="rotate(-90,10,340)">Application Layer</text>
+  <text x="10" y="468" font-size="11" fill="#888" font-style="italic" transform="rotate(-90,10,468)">Data Layer</text>
 
-  <!-- Arrow: User → Client -->
-  <line x1="68" y1="96" x2="88" y2="96" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+  <!-- Divider lines -->
+  <line x1="28" y1="258" x2="1090" y2="258" stroke="#ccc" stroke-width="1" stroke-dasharray="6,4"/>
+  <line x1="28" y1="378" x2="1090" y2="378" stroke="#ccc" stroke-width="1" stroke-dasharray="6,4"/>
 
-  <!-- ══ CLIENT BOX ══ -->
-  <rect x="90" y="38" width="175" height="165" rx="3" fill="#f7f7f7" stroke="#444" stroke-width="2"/>
-  <polyline points="265,38 275,28 275,193 265,183" fill="#e0e0e0" stroke="#444" stroke-width="1.5"/>
-  <polyline points="90,38 100,28 275,28 265,38" fill="#eaeaea" stroke="#444" stroke-width="1.5"/>
-  <text x="177" y="56" text-anchor="middle" font-size="13" font-weight="bold" fill="#222">Client</text>
+  <!-- ─────────────────────────── STICK FIGURE ─────────────────────────── -->
+  <circle cx="62" cy="52" r="15" fill="none" stroke="#333" stroke-width="1.8"/>
+  <line x1="62" y1="67" x2="62" y2="112" stroke="#333" stroke-width="1.8"/>
+  <line x1="62" y1="82" x2="42" y2="99" stroke="#333" stroke-width="1.8"/>
+  <line x1="62" y1="82" x2="82" y2="99" stroke="#333" stroke-width="1.8"/>
+  <line x1="62" y1="112" x2="46" y2="136" stroke="#333" stroke-width="1.8"/>
+  <line x1="62" y1="112" x2="78" y2="136" stroke="#333" stroke-width="1.8"/>
+  <text x="62" y="152" text-anchor="middle" font-size="11" fill="#333">Child User</text>
 
-  <!-- Browser UI component -->
-  <rect x="108" y="63" width="138" height="46" rx="2" fill="white" stroke="#888" stroke-width="1.3"/>
-  <rect x="237" y="70" width="13" height="9" rx="1" fill="white" stroke="#888" stroke-width="1"/>
-  <rect x="235" y="72" width="7" height="5" fill="none" stroke="#888" stroke-width="1"/>
-  <text x="172" y="81" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Browser UI</text>
-  <text x="172" y="97" text-anchor="middle" font-size="10" fill="#666">React + Vite</text>
+  <!-- Arrow: User → Presentation -->
+  <line x1="85" y1="90" x2="108" y2="90" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
 
-  <!-- MediaPipe component -->
-  <rect x="108" y="118" width="138" height="46" rx="2" fill="white" stroke="#888" stroke-width="1.3"/>
-  <rect x="237" y="125" width="13" height="9" rx="1" fill="white" stroke="#888" stroke-width="1"/>
-  <rect x="235" y="127" width="7" height="5" fill="none" stroke="#888" stroke-width="1"/>
-  <text x="172" y="136" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">MediaPipe</text>
-  <text x="172" y="152" text-anchor="middle" font-size="10" fill="#666">Hand Tracking (WASM)</text>
+  <!-- ═══════════════ PRESENTATION LAYER ═══════════════ -->
+  <rect x="110" y="20" width="800" height="230" rx="4" fill="#EAF6FD" stroke="#0DA2E7" stroke-width="2"/>
+  <text x="510" y="42" text-anchor="middle" font-size="13" font-weight="bold" fill="#0a7ab0">Presentation Layer — Client (Browser)</text>
 
-  <!-- Arrow: Client → Server (Express) -->
-  <line x1="275" y1="126" x2="298" y2="126" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+  <!-- Browser UI box -->
+  <rect x="135" y="55" width="185" height="80" rx="3" fill="white" stroke="#0DA2E7" stroke-width="1.5"/>
+  <rect x="296" y="62" width="14" height="10" rx="1" fill="white" stroke="#0DA2E7" stroke-width="1"/>
+  <rect x="294" y="64" width="8" height="6" fill="none" stroke="#0DA2E7" stroke-width="1"/>
+  <text x="222" y="78" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Browser UI</text>
+  <text x="222" y="96" text-anchor="middle" font-size="10" fill="#555">React + Vite</text>
+  <text x="222" y="111" text-anchor="middle" font-size="10" fill="#555">Tailwind CSS · React Query</text>
 
-  <!-- ══ SERVER BOX ══ -->
-  <rect x="300" y="18" width="490" height="380" rx="3" fill="#f0f0f0" stroke="#444" stroke-width="2"/>
-  <polyline points="790,18 800,8 800,388 790,378" fill="#ddd" stroke="#444" stroke-width="1.5"/>
-  <polyline points="300,18 310,8 800,8 790,18" fill="#e6e6e6" stroke="#444" stroke-width="1.5"/>
-  <text x="545" y="38" text-anchor="middle" font-size="14" font-weight="bold" fill="#222">Server</text>
+  <!-- Dashboard box -->
+  <rect x="345" y="55" width="155" height="80" rx="3" fill="white" stroke="#0DA2E7" stroke-width="1.5"/>
+  <rect x="486" y="62" width="14" height="10" rx="1" fill="white" stroke="#0DA2E7" stroke-width="1"/>
+  <text x="422" y="78" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Dashboard</text>
+  <text x="422" y="96" text-anchor="middle" font-size="10" fill="#555">Courses · Progress</text>
+  <text x="422" y="111" text-anchor="middle" font-size="10" fill="#555">User Profile</text>
 
-  <!-- Express API box -->
-  <rect x="318" y="50" width="148" height="52" rx="2" fill="white" stroke="#888" stroke-width="1.3"/>
-  <rect x="457" y="57" width="13" height="9" rx="1" fill="white" stroke="#888" stroke-width="1"/>
-  <rect x="455" y="59" width="7" height="5" fill="none" stroke="#888" stroke-width="1"/>
-  <text x="392" y="70" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Express API Server</text>
-  <text x="392" y="88" text-anchor="middle" font-size="10" fill="#666">Node.js · REST Routes</text>
+  <!-- Lesson + Quiz box -->
+  <rect x="525" y="55" width="155" height="80" rx="3" fill="white" stroke="#0DA2E7" stroke-width="1.5"/>
+  <rect x="666" y="62" width="14" height="10" rx="1" fill="white" stroke="#0DA2E7" stroke-width="1"/>
+  <text x="602" y="78" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Lesson Viewer</text>
+  <text x="602" y="96" text-anchor="middle" font-size="10" fill="#555">60 Lessons · Animated</text>
+  <text x="602" y="111" text-anchor="middle" font-size="10" fill="#555">AI Quiz Engine</text>
 
-  <!-- Arrow: Express → Auth -->
-  <line x1="466" y1="68" x2="500" y2="68" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+  <!-- Gesture Games box -->
+  <rect x="705" y="55" width="185" height="80" rx="3" fill="white" stroke="#0DA2E7" stroke-width="1.5"/>
+  <rect x="866" y="62" width="14" height="10" rx="1" fill="white" stroke="#0DA2E7" stroke-width="1"/>
+  <text x="792" y="78" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Gesture Games</text>
+  <text x="792" y="96" text-anchor="middle" font-size="10" fill="#555">Air Draw · Hand Painter</text>
+  <text x="792" y="111" text-anchor="middle" font-size="10" fill="#555">Air Piano · MediaPipe WASM</text>
 
-  <!-- Arrow: Express → Lesson Engine (elbow) -->
-  <polyline points="466,82 484,82 484,190 500,190" fill="none" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+  <!-- MediaPipe note -->
+  <rect x="705" y="152" width="185" height="80" rx="3" fill="#FFF8E1" stroke="#f0ad00" stroke-width="1.5"/>
+  <text x="792" y="174" text-anchor="middle" font-size="11" font-weight="bold" fill="#7a5900">MediaPipe HandLandmarker</text>
+  <text x="792" y="192" text-anchor="middle" font-size="10" fill="#7a5900">WebAssembly (Client-Side)</text>
+  <text x="792" y="207" text-anchor="middle" font-size="10" fill="#7a5900">Real-time Gesture Detection</text>
+  <text x="792" y="222" text-anchor="middle" font-size="10" fill="#7a5900">No server round-trip</text>
 
-  <!-- Arrow: Express → Flask (down) -->
-  <line x1="392" y1="102" x2="392" y2="288" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+  <!-- Arrow: Gesture Games → MediaPipe -->
+  <line x1="792" y1="135" x2="792" y2="150" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
 
-  <!-- AUTH box -->
-  <rect x="500" y="46" width="160" height="64" rx="2" fill="white" stroke="#888" stroke-width="1.3"/>
-  <rect x="651" y="53" width="13" height="9" rx="1" fill="white" stroke="#888" stroke-width="1"/>
-  <rect x="649" y="55" width="7" height="5" fill="none" stroke="#888" stroke-width="1"/>
-  <text x="580" y="65" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Auth Module</text>
-  <text x="580" y="81" text-anchor="middle" font-size="10" fill="#666">JWT Authentication</text>
-  <text x="580" y="96" text-anchor="middle" font-size="10" fill="#666">Face Login · Password Validation</text>
+  <!-- ─── REST API arrows (Presentation → Application) ─── -->
+  <line x1="222" y1="135" x2="222" y2="288" stroke="#444" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+  <line x1="422" y1="135" x2="422" y2="288" stroke="#444" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+  <line x1="602" y1="135" x2="602" y2="288" stroke="#444" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+  <text x="380" y="272" text-anchor="middle" font-size="10" fill="#666" font-style="italic">REST API (JWT)</text>
 
-  <!-- LESSON ENGINE box -->
-  <rect x="500" y="162" width="160" height="88" rx="2" fill="white" stroke="#888" stroke-width="1.3"/>
-  <rect x="651" y="169" width="13" height="9" rx="1" fill="white" stroke="#888" stroke-width="1"/>
-  <rect x="649" y="171" width="7" height="5" fill="none" stroke="#888" stroke-width="1"/>
-  <text x="580" y="182" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Core Services</text>
-  <text x="580" y="198" text-anchor="middle" font-size="10" fill="#666">Lesson Engine (60 Lessons)</text>
-  <text x="580" y="213" text-anchor="middle" font-size="10" fill="#666">AI Quiz Generator</text>
-  <text x="580" y="228" text-anchor="middle" font-size="10" fill="#666">Progress Tracker</text>
+  <!-- ═══════════════ APPLICATION LAYER ═══════════════ -->
+  <rect x="110" y="265" width="800" height="105" rx="4" fill="#F0F9F0" stroke="#4caf50" stroke-width="2"/>
+  <text x="510" y="283" text-anchor="middle" font-size="13" font-weight="bold" fill="#2e7d32">Application Layer — Node.js Express Server</text>
 
-  <!-- FLASK SERVICE box -->
-  <rect x="318" y="290" width="148" height="64" rx="2" fill="white" stroke="#888" stroke-width="1.3"/>
-  <rect x="457" y="297" width="13" height="9" rx="1" fill="white" stroke="#888" stroke-width="1"/>
-  <rect x="455" y="299" width="7" height="5" fill="none" stroke="#888" stroke-width="1"/>
-  <text x="392" y="310" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Flask Service</text>
-  <text x="392" y="326" text-anchor="middle" font-size="10" fill="#666">Python · Hand Detection</text>
-  <text x="392" y="341" text-anchor="middle" font-size="10" fill="#666">MediaPipe Server-Side</text>
+  <!-- Auth Module -->
+  <rect x="130" y="292" width="148" height="64" rx="3" fill="white" stroke="#4caf50" stroke-width="1.3"/>
+  <text x="204" y="313" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Auth Module</text>
+  <text x="204" y="329" text-anchor="middle" font-size="10" fill="#555">JWT · Face Login</text>
+  <text x="204" y="344" text-anchor="middle" font-size="10" fill="#555">Password Validation</text>
 
-  <!-- Arrow: Auth → PostgreSQL DB -->
-  <line x1="660" y1="72" x2="808" y2="118" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+  <!-- Lesson Engine -->
+  <rect x="298" y="292" width="148" height="64" rx="3" fill="white" stroke="#4caf50" stroke-width="1.3"/>
+  <text x="372" y="313" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Lesson Engine</text>
+  <text x="372" y="329" text-anchor="middle" font-size="10" fill="#555">6 Courses · 60 Lessons</text>
+  <text x="372" y="344" text-anchor="middle" font-size="10" fill="#555">REST Routes</text>
 
-  <!-- Arrow: Lesson Engine → PostgreSQL DB -->
-  <line x1="660" y1="196" x2="808" y2="165" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+  <!-- Quiz Engine -->
+  <rect x="466" y="292" width="148" height="64" rx="3" fill="white" stroke="#4caf50" stroke-width="1.3"/>
+  <text x="540" y="313" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Quiz Engine</text>
+  <text x="540" y="329" text-anchor="middle" font-size="10" fill="#555">Static AI Generator</text>
+  <text x="540" y="344" text-anchor="middle" font-size="10" fill="#555">Score Evaluation</text>
 
-  <!-- Arrow: Flask → MediaPipe CDN -->
-  <line x1="466" y1="318" x2="808" y2="318" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+  <!-- Progress Tracker -->
+  <rect x="634" y="292" width="148" height="64" rx="3" fill="white" stroke="#4caf50" stroke-width="1.3"/>
+  <text x="708" y="313" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Progress Tracker</text>
+  <text x="708" y="329" text-anchor="middle" font-size="10" fill="#555">Completion Records</text>
+  <text x="708" y="344" text-anchor="middle" font-size="10" fill="#555">User Stats</text>
 
-  <!-- ══ PostgreSQL DB (cylinder) ══ -->
-  <ellipse cx="855" cy="130" rx="48" ry="14" fill="#f5f5f5" stroke="#555" stroke-width="1.5"/>
-  <rect x="807" y="130" width="96" height="58" fill="#f5f5f5" stroke="none"/>
-  <line x1="807" y1="130" x2="807" y2="188" stroke="#555" stroke-width="1.5"/>
-  <line x1="903" y1="130" x2="903" y2="188" stroke="#555" stroke-width="1.5"/>
-  <ellipse cx="855" cy="188" rx="48" ry="14" fill="#f5f5f5" stroke="#555" stroke-width="1.5"/>
-  <text x="855" y="155" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">PostgreSQL</text>
-  <text x="855" y="172" text-anchor="middle" font-size="10" fill="#666">Database</text>
+  <!-- Flask Microservice -->
+  <rect x="798" y="292" width="100" height="64" rx="3" fill="white" stroke="#4caf50" stroke-width="1.3"/>
+  <text x="848" y="313" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Flask</text>
+  <text x="848" y="329" text-anchor="middle" font-size="10" fill="#555">Python Service</text>
+  <text x="848" y="344" text-anchor="middle" font-size="10" fill="#555">Hand Detection</text>
 
-  <!-- ══ MediaPipe CDN (document / page shape) ══ -->
-  <rect x="808" y="290" width="94" height="58" rx="2" fill="#f5f5f5" stroke="#555" stroke-width="1.5"/>
-  <polygon points="878,290 902,290 902,312 878,312" fill="#e0e0e0" stroke="#555" stroke-width="1.2"/>
-  <line x1="878" y1="290" x2="902" y2="312" stroke="#555" stroke-width="1.2"/>
-  <text x="851" y="316" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">MediaPipe</text>
-  <text x="851" y="332" text-anchor="middle" font-size="10" fill="#666">CDN / WASM</text>
+  <!-- ─── DB arrows (Application → Data) ─── -->
+  <line x1="204" y1="356" x2="204" y2="395" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="372" y1="356" x2="372" y2="395" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="540" y1="356" x2="540" y2="395" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="708" y1="356" x2="708" y2="395" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ═══════════════ DATA LAYER ═══════════════ -->
+  <rect x="110" y="385" width="800" height="100" rx="4" fill="#FDF0F0" stroke="#e57373" stroke-width="2"/>
+  <text x="510" y="403" text-anchor="middle" font-size="13" font-weight="bold" fill="#c62828">Data Layer — PostgreSQL Database</text>
+
+  <!-- Users table -->
+  <rect x="130" y="413" width="148" height="55" rx="3" fill="white" stroke="#e57373" stroke-width="1.3"/>
+  <text x="204" y="432" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Users Table</text>
+  <text x="204" y="449" text-anchor="middle" font-size="10" fill="#555">Profiles · Sessions</text>
+  <text x="204" y="462" text-anchor="middle" font-size="10" fill="#555">Credentials</text>
+
+  <!-- Courses table -->
+  <rect x="298" y="413" width="148" height="55" rx="3" fill="white" stroke="#e57373" stroke-width="1.3"/>
+  <text x="372" y="432" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Courses Table</text>
+  <text x="372" y="449" text-anchor="middle" font-size="10" fill="#555">6 Subjects</text>
+  <text x="372" y="462" text-anchor="middle" font-size="10" fill="#555">60 Lessons</text>
+
+  <!-- Quiz table -->
+  <rect x="466" y="413" width="148" height="55" rx="3" fill="white" stroke="#e57373" stroke-width="1.3"/>
+  <text x="540" y="432" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Quiz Records</text>
+  <text x="540" y="449" text-anchor="middle" font-size="10" fill="#555">Questions · Answers</text>
+  <text x="540" y="462" text-anchor="middle" font-size="10" fill="#555">Scores</text>
+
+  <!-- Progress table -->
+  <rect x="634" y="413" width="260" height="55" rx="3" fill="white" stroke="#e57373" stroke-width="1.3"/>
+  <text x="764" y="432" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Progress Table</text>
+  <text x="764" y="449" text-anchor="middle" font-size="10" fill="#555">Lesson Completion · Course Progress</text>
+  <text x="764" y="462" text-anchor="middle" font-size="10" fill="#555">User Statistics</text>
+
+  <!-- Legend -->
+  <rect x="936" y="20" width="150" height="115" rx="3" fill="#f9f9f9" stroke="#ccc" stroke-width="1"/>
+  <text x="1011" y="38" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Legend</text>
+  <line x1="950" y1="52" x2="980" y2="52" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="1030" y="56" font-size="10" fill="#555">Data Flow</text>
+  <line x1="950" y1="72" x2="980" y2="72" stroke="#444" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+  <text x="1030" y="76" font-size="10" fill="#555">REST API Call</text>
+  <rect x="950" y="88" width="14" height="10" rx="1" fill="#EAF6FD" stroke="#0DA2E7" stroke-width="1.2"/>
+  <text x="1030" y="97" font-size="10" fill="#555">Client Layer</text>
+  <rect x="950" y="106" width="14" height="10" rx="1" fill="#F0F9F0" stroke="#4caf50" stroke-width="1.2"/>
+  <text x="1030" y="115" font-size="10" fill="#555">Server Layer</text>
+  <rect x="950" y="124" width="14" height="10" rx="1" fill="#FDF0F0" stroke="#e57373" stroke-width="1.2"/>
+  <text x="1030" y="133" font-size="10" fill="#555">Data Layer</text>
 
 </svg>
