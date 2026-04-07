@@ -60,3 +60,9 @@ id = "pQO1AkzzWsIQI4W_1jYNH"
 uri = "file://screenshots/diagram-level1-dfd.jpg"
 type = "image"
 title = "KidoLearn — Level 1 Data Flow Diagram"
+
+[[outputs]]
+id = "6jlfKY841wHKov9J35JLu"
+uri = "file://screenshots/diagram-level2-dfd.jpg"
+type = "image"
+title = "KidoLearn — Level 2 DFD (Quiz Engine Process 3.0)"

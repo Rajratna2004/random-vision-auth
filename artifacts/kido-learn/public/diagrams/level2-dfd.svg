@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="380" viewBox="0 0 980 380" font-family="Arial, sans-serif" font-size="11">
+  <defs>
+    <marker id="arr" markerWidth="9" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0,9 3,0 6" fill="#333"/>
+    </marker>
+  </defs>
+  <rect width="980" height="380" fill="white"/>
+  <text x="490" y="22" text-anchor="middle" font-size="14" font-weight="bold" fill="#222">KidoLearn — Level 2 DFD (Process 3.0: Quiz Engine)</text>
+
+  <!-- ══ USER (circle) ══ -->
+  <circle cx="46" cy="240" r="26" fill="white" stroke="#333" stroke-width="1.8"/>
+  <text x="46" y="237" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">User</text>
+
+  <!-- ── User → 3.1 (Quiz / Lesson Input) ── -->
+  <line x1="72" y1="228" x2="128" y2="210" stroke="#333" stroke-width="1.3" marker-end="url(#arr)"/>
+  <text x="100" y="206" text-anchor="middle" font-size="10" fill="#333">Lesson Complete</text>
+  <text x="100" y="218" text-anchor="middle" font-size="10" fill="#333">/ Quiz Request</text>
+
+  <!-- ══ 3.1 Validate Request ══ -->
+  <rect x="130" y="178" width="138" height="46" rx="4" fill="white" stroke="#333" stroke-width="1.8"/>
+  <text x="199" y="198" text-anchor="middle" font-weight="bold" fill="#333">3.1 Validate</text>
+  <text x="199" y="214" text-anchor="middle" font-weight="bold" fill="#333">Request</text>
+
+  <!-- 3.1 → 3.2 (Verified Request) -->
+  <line x1="268" y1="201" x2="328" y2="201" stroke="#333" stroke-width="1.3" marker-end="url(#arr)"/>
+  <text x="298" y="194" text-anchor="middle" font-size="10" fill="#333">Verified Request</text>
+
+  <!-- ══ 3.2 Generate Questions ══ -->
+  <rect x="330" y="178" width="138" height="46" rx="4" fill="white" stroke="#333" stroke-width="1.8"/>
+  <text x="399" y="198" text-anchor="middle" font-weight="bold" fill="#333">3.2 Generate</text>
+  <text x="399" y="214" text-anchor="middle" font-weight="bold" fill="#333">Questions</text>
+
+  <!-- 3.2 → D2 Courses (Fetch Lesson Data) -->
+  <path d="M399,178 C399,148 630,130 690,130" fill="none" stroke="#333" stroke-width="1.3" marker-end="url(#arr)"/>
+  <text x="540" y="126" text-anchor="middle" font-size="10" fill="#333">Fetch Lesson Data</text>
+
+  <!-- D2 → 3.2 (Lesson Content) -->
+  <path d="M690,142 C630,148 399,160 399,178" fill="none" stroke="#333" stroke-width="1.3" marker-end="url(#arr)"/>
+  <text x="540" y="158" text-anchor="middle" font-size="10" fill="#555">Lesson Content</text>
+
+  <!-- 3.2 → 3.3 (Questions Set) -->
+  <line x1="468" y1="201" x2="528" y2="201" stroke="#333" stroke-width="1.3" marker-end="url(#arr)"/>
+  <text x="498" y="194" text-anchor="middle" font-size="10" fill="#333">Questions Set</text>
+
+  <!-- ══ 3.3 Evaluate Answers ══ -->
+  <rect x="530" y="178" width="138" height="46" rx="4" fill="white" stroke="#333" stroke-width="1.8"/>
+  <text x="599" y="198" text-anchor="middle" font-weight="bold" fill="#333">3.3 Evaluate</text>
+  <text x="599" y="214" text-anchor="middle" font-weight="bold" fill="#333">Answers</text>
+
+  <!-- User → 3.3 (Submit Answers — curved below) -->
+  <path d="M72,252 C200,310 450,300 530,218" fill="none" stroke="#333" stroke-width="1.3" marker-end="url(#arr)"/>
+  <text x="296" y="308" text-anchor="middle" font-size="10" fill="#333">Submit Answers</text>
+
+  <!-- 3.3 → 3.4 (Raw Score) -->
+  <line x1="668" y1="201" x2="728" y2="201" stroke="#333" stroke-width="1.3" marker-end="url(#arr)"/>
+  <text x="698" y="194" text-anchor="middle" font-size="10" fill="#333">Raw Score</text>
+
+  <!-- ══ 3.4 Format Result ══ -->
+  <rect x="730" y="178" width="138" height="46" rx="4" fill="white" stroke="#333" stroke-width="1.8"/>
+  <text x="799" y="198" text-anchor="middle" font-weight="bold" fill="#333">3.4 Format</text>
+  <text x="799" y="214" text-anchor="middle" font-weight="bold" fill="#333">Result</text>
+
+  <!-- 3.4 → User (Final Score / Feedback) -->
+  <path d="M799,224 C799,270 200,290 72,256" fill="none" stroke="#333" stroke-width="1.3" marker-end="url(#arr)"/>
+  <text x="440" y="284" text-anchor="middle" font-size="10" fill="#333">Final Score / Feedback</text>
+
+  <!-- 3.4 → 3.5 (Success Event) -->
+  <line x1="799" y1="224" x2="799" y2="275" stroke="#333" stroke-width="1.3" marker-end="url(#arr)"/>
+  <text x="816" y="255" font-size="10" fill="#333">Success Event</text>
+
+  <!-- ══ 3.5 Save Progress ══ -->
+  <rect x="730" y="278" width="138" height="46" rx="4" fill="white" stroke="#333" stroke-width="1.8"/>
+  <text x="799" y="298" text-anchor="middle" font-weight="bold" fill="#333">3.5 Save</text>
+  <text x="799" y="314" text-anchor="middle" font-weight="bold" fill="#333">Progress</text>
+
+  <!-- 3.5 → D3 Progress DB (Store Record) -->
+  <line x1="868" y1="301" x2="908" y2="301" stroke="#333" stroke-width="1.3" marker-end="url(#arr)"/>
+  <text x="888" y="294" text-anchor="middle" font-size="10" fill="#333">Store Record</text>
+
+  <!-- ══ D2 Courses/Lessons (top right) ══ -->
+  <line x1="692" y1="108" x2="692" y2="152" stroke="#333" stroke-width="1.8"/>
+  <line x1="692" y1="108" x2="870" y2="108" stroke="#333" stroke-width="1.8"/>
+  <line x1="870" y1="108" x2="870" y2="152" stroke="#333" stroke-width="1.8"/>
+  <line x1="692" y1="152" x2="870" y2="152" stroke="#333" stroke-width="1.8"/>
+  <line x1="716" y1="108" x2="716" y2="152" stroke="#333" stroke-width="1.8"/>
+  <text x="714" y="135" text-anchor="middle" font-weight="bold" fill="#333">D2</text>
+  <text x="792" y="126" text-anchor="middle" font-weight="bold" fill="#333">Courses / Lessons</text>
+  <text x="792" y="142" text-anchor="middle" fill="#555">Content · Quiz Data</text>
+
+  <!-- ══ D3 Progress DB (right, cylinder style) ══ -->
+  <line x1="910" y1="278" x2="910" y2="328" stroke="#333" stroke-width="1.8"/>
+  <line x1="910" y1="278" x2="960" y2="278" stroke="#333" stroke-width="1.8"/>
+  <line x1="960" y1="278" x2="960" y2="328" stroke="#333" stroke-width="1.8"/>
+  <line x1="910" y1="328" x2="960" y2="328" stroke="#333" stroke-width="1.8"/>
+  <line x1="930" y1="278" x2="930" y2="328" stroke="#333" stroke-width="1.8"/>
+  <text x="927" y="305" text-anchor="middle" font-weight="bold" font-size="10" fill="#333">D3</text>
+  <text x="948" y="298" text-anchor="middle" font-size="10" font-weight="bold" fill="#333">Progress</text>
+  <text x="948" y="312" text-anchor="middle" font-size="10" fill="#555">DB</text>
+
+  <!-- D3 → 3.2 (Prior Scores — long curved arrow) -->
+  <path d="M910,285 C890,260 700,240 468,210" fill="none" stroke="#333" stroke-width="1.1" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+  <text x="688" y="240" text-anchor="middle" font-size="10" fill="#999">Prior Score History</text>
+
+</svg>
