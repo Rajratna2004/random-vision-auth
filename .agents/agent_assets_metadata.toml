@@ -54,3 +54,9 @@ id = "y8stxabZHOpIrBZOuWVG8"
 uri = "file://screenshots/diagram-context-dfd.jpg"
 type = "image"
 title = "KidoLearn — Context DFD (Level 0)"
+
+[[outputs]]
+id = "pQO1AkzzWsIQI4W_1jYNH"
+uri = "file://screenshots/diagram-level1-dfd.jpg"
+type = "image"
+title = "KidoLearn — Level 1 Data Flow Diagram"
