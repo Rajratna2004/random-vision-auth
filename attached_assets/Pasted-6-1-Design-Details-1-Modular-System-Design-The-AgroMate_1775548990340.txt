@@ -1,0 +1,21 @@
+6.1 Design Details 
+ 
+1.	Modular System Design: 
+ 
+The AgroMate system is designed using a modular approach where the application is divided into different modules such as crop recommendation, disease detection, market analysis, and digital logbook. Each module performs a specific function, which improves system organization and clarity. This structure allows easy development and testing of individual components. 
+ 
+The modular design also enhances scalability and maintainability. New features can be added without affecting the entire system, and errors can be easily identified and fixed within specific modules. This makes the system flexible and suitable for future enhancements. 
+ 
+2.	Client-Server Architecture: 
+ 
+The system follows a client-server architecture where the frontend acts as the client and communicates with the backend server. The frontend is developed using HTML, CSS, and JavaScript, providing a simple and user-friendly interface for farmers. 
+ 
+The backend is implemented using Flask, which handles all processing tasks such as request handling, data processing, and model integration. This separation improves performance and allows independent development of frontend and backend components. 
+ 
+3.	Integration of Machine Learning Models: 
+ 
+AgroMate integrates machine learning and deep learning models to provide intelligent outputs. The crop recommendation module uses a Random Forest model to suggest suitable crops based on soil parameters. The disease detection module uses a deep learning model to analyze leaf images and identify diseases. These models are integrated into the backend, enabling fast and accurate predictions for users. 
+ 
+5.  Use of UML Diagrams: 
+ 
+UML diagrams are used to represent the system structure and workflow. These include Use Case, Activity, Sequence, and Class diagrams, which help in understanding system functionality and interactions.These diagrams provide clear visualization of data flow and communication between components, making system design easier to understand and implement. 
