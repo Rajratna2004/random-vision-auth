@@ -1,0 +1,21 @@
+4.2 Overall Architecture 
+ 
+The AgroMate system is designed using a three-tier web application architecture, which ensures modularity, scalability, and efficient interaction between different components of the system. This architecture separates the application into three main layers, namely the client layer, server layer, and data and storage layer. Each layer performs a specific function and communicates with the others to ensure smooth operation of the system. 
+1.	Client Layer (Frontend): 
+The client layer represents the user interface of the system, which is accessed through a web browser. It provides a responsive and user-friendly interface that allows farmers to interact with the application easily. This layer handles all user interactions such as form submission, image uploads, and navigation across different modules of the system. The frontend communicates with the backend server through HTTP requests, ensuring seamless data exchange and real- time response generation. 
+ 
+2.	Server Layer (Backend - Flask Application): 
+The server layer acts as the core processing unit of the system and is implemented using a Flask-based web application. It is responsible for handling all incoming requests from the client layer and routing them to the appropriate modules for processing. The Flask application serves as a central controller that manages communication between different services and ensures proper execution of system functionalities. 
+ 
+The authentication module within this layer is responsible for validating user credentials during login and registration processes. It ensures secure access to the system by implementing authentication and authorization mechanisms. Session management is handled using token- based techniques, which help maintain user sessions and restrict access to authorized users only. 
+ 
+The core services layer contains the main business logic of the system. It includes the prediction service, which is responsible for crop recommendation using machine learning models such as Random Forest. The insights service provides valuable information related to market prices, weather conditions, and farmer-specific analytics. The artificial intelligence service is used for disease detection through advanced deep learning models and also supports chatbot functionality for user assistance and guidance. 
+ 
+3.	Data and Storage Layer: 
+ 
+The data and storage layer is responsible for managing all persistent data required by the system. It uses a relational database to store user information, login credentials, prediction history, and farmer profiles. This ensures that all user-related data is securely stored and can be retrieved whenever required. 
+ 
+In addition to the database, this layer also includes pre-trained machine learning and deep learning models. These models are used for performing tasks such as crop recommendation and disease detection. By storing these models separately, the system ensures efficient execution and easy updates whenever improvements are made. 
+4.	External Integration: 
+The AgroMate system integrates with various external services to enhance its functionality and provide real-time data. Weather APIs are used to fetch current and forecasted weather information, which is essential for agricultural decision-making. Market price databases provide updated pricing information for crops, helping farmers plan their sales effectively. Translation services are integrated to support multiple languages, making the system accessible to a wider audience. Additionally, chatbot APIs are used to provide interactive assistance and improve user experience. 
+ 
