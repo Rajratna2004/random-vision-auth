@@ -62,6 +62,9 @@ export default defineConfig({
     port,
     host: "0.0.0.0",
     allowedHosts: true,
+    hmr: process.env.REPL_ID
+      ? false
+      : true,
     proxy: process.env.REPL_ID
       ? undefined
       : {

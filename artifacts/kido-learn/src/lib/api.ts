@@ -12,8 +12,11 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const res = await fetch(`${BASE}${path}`, { ...options, headers });
 
   if (res.status === 401) {
+    const hadToken = !!getAuthHeader().Authorization;
     clearAuth();
-    window.location.href = "/";
+    if (hadToken) {
+      window.location.href = "/";
+    }
     throw new Error("Session expired. Please log in again.");
   }
 
