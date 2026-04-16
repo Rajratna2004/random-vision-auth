@@ -95,11 +95,21 @@ export default function MazeNavigator({ onBack }: { onBack: () => void }) {
   gcbRef.current = (g) => setGesture(g);
 
   /* ── Camera stream mirror ──────────────────── */
+  /* Depends on both cameraActive AND status so it re-runs when the
+     video element mounts (status → "playing") even if cameraActive
+     was already true from a previous startGestureDetection() call */
   useEffect(() => {
-    const vd = videoDRef.current, vs = videoRef.current;
-    if (cameraActive && vs?.srcObject && vd) { vd.srcObject = vs.srcObject; vd.play().catch(()=>{}); }
-    else if (!cameraActive && vd)            { vd.srcObject = null; }
-  }, [cameraActive]);
+    const vd = videoDRef.current;
+    if (!cameraActive || !vd) return;
+    const tryAttach = () => {
+      const vs = videoRef.current;
+      if (vs?.srcObject) { vd.srcObject = vs.srcObject; vd.play().catch(() => {}); }
+    };
+    tryAttach();
+    const t1 = setTimeout(tryAttach, 300);
+    const t2 = setTimeout(tryAttach, 900);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [cameraActive, status]);
 
   /* ── Keyboard ──────────────────────────────── */
   useEffect(() => {
@@ -406,6 +416,11 @@ export default function MazeNavigator({ onBack }: { onBack: () => void }) {
             <Button variant="outline" size="sm" onClick={()=>setFog(f=>!f)}>
               {fog?"🔆 Clear":"🌫️ Fog"}
             </Button>
+            {!cameraActive && (
+              <Button variant="outline" size="sm" onClick={()=>startGestureDetection()}>
+                📷 Camera
+              </Button>
+            )}
             {cameraActive && (
               <Badge className="ml-auto bg-green-100 text-green-700 text-xs">
                 📷 {gesture!=="none"?gesture.replace("_"," "):"—"}
