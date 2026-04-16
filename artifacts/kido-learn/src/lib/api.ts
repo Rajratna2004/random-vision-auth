@@ -1,4 +1,4 @@
-import { getAuthHeader } from "./store";
+import { getAuthHeader, clearAuth } from "./store";
 
 const BASE = "/api";
 
@@ -10,6 +10,12 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   };
 
   const res = await fetch(`${BASE}${path}`, { ...options, headers });
+
+  if (res.status === 401) {
+    clearAuth();
+    window.location.href = "/";
+    throw new Error("Session expired. Please log in again.");
+  }
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({ message: res.statusText }));
