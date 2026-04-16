@@ -18,13 +18,13 @@ type GameStatus = "menu" | "playing" | "won" | "paused";
 
 /* ────────────────────────── Themes ─────────────────────────── */
 const THEMES = [
-  { wall: "#1a237e", path: "#e8eaf6", ball: "#f44336", end: "#4caf50", fog: "rgba(232,234,246,0.92)" },
-  { wall: "#004d40", path: "#e0f7fa", ball: "#ff5722", end: "#ffd600", fog: "rgba(224,247,250,0.92)" },
-  { wall: "#4a148c", path: "#fce4ec", ball: "#00bcd4", end: "#ff9800", fog: "rgba(252,228,236,0.92)" },
-  { wall: "#bf360c", path: "#fff8e1", ball: "#3f51b5", end: "#4caf50", fog: "rgba(255,248,225,0.92)" },
-  { wall: "#0d47a1", path: "#e3f2fd", ball: "#e91e63", end: "#4caf50", fog: "rgba(227,242,253,0.92)" },
-  { wall: "#1b5e20", path: "#f1f8e9", ball: "#ff5722", end: "#03a9f4", fog: "rgba(241,248,233,0.92)" },
-  { wall: "#311b92", path: "#ede7f6", ball: "#ff6f00", end: "#76ff03", fog: "rgba(237,231,246,0.92)" },
+  { wall: "#1a237e", path: "#e8eaf6", ball: "#f44336", end: "#4caf50", fog: "rgba(232,234,246,0.94)" },
+  { wall: "#004d40", path: "#e0f7fa", ball: "#ff5722", end: "#ffd600", fog: "rgba(224,247,250,0.94)" },
+  { wall: "#4a148c", path: "#fce4ec", ball: "#00bcd4", end: "#ff9800", fog: "rgba(252,228,236,0.94)" },
+  { wall: "#bf360c", path: "#fff8e1", ball: "#3f51b5", end: "#4caf50", fog: "rgba(255,248,225,0.94)" },
+  { wall: "#0d47a1", path: "#e3f2fd", ball: "#e91e63", end: "#4caf50", fog: "rgba(227,242,253,0.94)" },
+  { wall: "#1b5e20", path: "#f1f8e9", ball: "#ff5722", end: "#03a9f4", fog: "rgba(241,248,233,0.94)" },
+  { wall: "#311b92", path: "#ede7f6", ball: "#ff6f00", end: "#76ff03", fog: "rgba(237,231,246,0.94)" },
 ];
 
 /* ─────────────────── Maze generation (DFS) ─────────────────── */
@@ -46,10 +46,10 @@ function generateMaze(rows: number, cols: number): Cell[][] {
     const { row: r, col: c } = curr;
 
     const neighbors: { cell: Cell; dir: Direction }[] = [];
-    if (r > 0 && !grid[r - 1][c].visited)       neighbors.push({ cell: grid[r - 1][c], dir: "up" });
-    if (c < cols - 1 && !grid[r][c + 1].visited) neighbors.push({ cell: grid[r][c + 1], dir: "right" });
-    if (r < rows - 1 && !grid[r + 1][c].visited) neighbors.push({ cell: grid[r + 1][c], dir: "down" });
-    if (c > 0 && !grid[r][c - 1].visited)        neighbors.push({ cell: grid[r][c - 1], dir: "left" });
+    if (r > 0       && !grid[r - 1][c].visited) neighbors.push({ cell: grid[r - 1][c], dir: "up"    });
+    if (c < cols-1  && !grid[r][c + 1].visited) neighbors.push({ cell: grid[r][c + 1], dir: "right" });
+    if (r < rows-1  && !grid[r + 1][c].visited) neighbors.push({ cell: grid[r + 1][c], dir: "down"  });
+    if (c > 0       && !grid[r][c - 1].visited) neighbors.push({ cell: grid[r][c - 1], dir: "left"  });
 
     if (neighbors.length > 0) {
       const { cell: next, dir } = neighbors[Math.floor(Math.random() * neighbors.length)];
@@ -66,33 +66,26 @@ function generateMaze(rows: number, cols: number): Cell[][] {
   return grid;
 }
 
-/* ─────────────── Level configuration ───────────────────────── */
 function getLevelConfig(lv: number) {
   if (lv === 1) return { rows: 11, cols: 11, label: "Easy",   speed: 5 };
   if (lv === 2) return { rows: 15, cols: 15, label: "Medium", speed: 4 };
   return             { rows: 19, cols: 19, label: "Hard",   speed: 3 };
 }
 
-const GESTURE_TIPS = [
-  { emoji: "☝️", label: "Point", description: "Aim finger to steer the ball" },
-  { emoji: "✊", label: "Fist",  description: "Pause / Resume" },
-  { emoji: "✌️", label: "Peace", description: "Restart level" },
-];
-
 /* ══════════════════════════════════════════════════════════════
    Main Component
 ═══════════════════════════════════════════════════════════════ */
 export default function MazeNavigator({ onBack }: { onBack: () => void }) {
-  /* ── State ─────────────────────────────────── */
-  const [level,       setLevel]       = useState(1);
-  const [status,      setStatus]      = useState<GameStatus>("menu");
-  const [steps,       setSteps]       = useState(0);
-  const [elapsed,     setElapsed]     = useState(0);
-  const [fogMode,     setFogMode]     = useState(false);
-  const [showCam,     setShowCam]     = useState(true);
-  const [gesture,     setGesture]     = useState<string>("none");
+  /* ── UI State ─────────────────────────────── */
+  const [level,   setLevel]   = useState(1);
+  const [status,  setStatus]  = useState<GameStatus>("menu");
+  const [steps,   setSteps]   = useState(0);
+  const [elapsed, setElapsed] = useState(0);
+  const [fogMode, setFogMode] = useState(false);
+  const [showCam, setShowCam] = useState(true);
+  const [gesture, setGesture] = useState<string>("none");
 
-  /* ── Refs ──────────────────────────────────── */
+  /* ── Stable refs (no re-render needed) ────── */
   const mazeCanvasRef   = useRef<HTMLCanvasElement>(null);
   const videoDisplayRef = useRef<HTMLVideoElement>(null);
 
@@ -102,27 +95,26 @@ export default function MazeNavigator({ onBack }: { onBack: () => void }) {
   const fogRef     = useRef(false);
   const animRef    = useRef<number>(0);
   const timerRef   = useRef<ReturnType<typeof setInterval> | null>(null);
+  const cellSizeRef  = useRef(30);
+  const speedRef     = useRef(5);
+  const levelRef     = useRef(1);
 
-  const cellSizeRef = useRef(30);
-  const speedRef    = useRef(5);
+  /* pending flag: canvas setup runs in useEffect after render */
+  const pendingStart = useRef(false);
 
-  /* ball state in ref to avoid re-renders inside loop */
-  const ball = useRef({
-    row: 0, col: 0,
-    px: 0, py: 0,
-    targetRow: 0, targetCol: 0,
-    moving: false,
-  });
-  const dirRef  = useRef<Direction | null>(null);
-  const stepsCountRef = useRef(0);
+  const ball = useRef({ row: 0, col: 0, px: 0, py: 0, targetRow: 0, targetCol: 0, moving: false });
+  const dirRef    = useRef<Direction | null>(null);
+  const stepsRef  = useRef(0);
 
-  /* ── Gesture detection ─────────────────────── */
+  /* ── Gesture hook ──────────────────────────── */
   const gestureCallbackRef = useRef<((g: string) => void) | null>(null);
   const {
     videoRef, canvasRef: gestureCanvasRef,
-    currentHand, isLoading, isReady, error,
+    currentHand, isLoading,
     cameraActive, startGestureDetection, stopCamera,
   } = useGestureDetection({ onGesture: (g) => gestureCallbackRef.current?.(g) });
+
+  gestureCallbackRef.current = (g) => setGesture(g);
 
   /* ── Mirror camera to visible video ────────── */
   useEffect(() => {
@@ -137,149 +129,122 @@ export default function MazeNavigator({ onBack }: { onBack: () => void }) {
   /* ── Keyboard controls ─────────────────────── */
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (statusRef.current !== "playing") {
-        if (e.key === "Escape") { statusRef.current = "menu"; setStatus("menu"); }
-        return;
+      if (statusRef.current === "playing") {
+        if (e.key === "ArrowUp"    || e.key === "w") { e.preventDefault(); dirRef.current = "up";    }
+        if (e.key === "ArrowDown"  || e.key === "s") { e.preventDefault(); dirRef.current = "down";  }
+        if (e.key === "ArrowLeft"  || e.key === "a") { e.preventDefault(); dirRef.current = "left";  }
+        if (e.key === "ArrowRight" || e.key === "d") { e.preventDefault(); dirRef.current = "right"; }
+        if (e.key === "Escape") togglePause();
+      } else if (statusRef.current === "paused" && e.key === "Escape") {
+        togglePause();
       }
-      if (e.key === "ArrowUp"    || e.key === "w") { e.preventDefault(); dirRef.current = "up";    }
-      if (e.key === "ArrowDown"  || e.key === "s") { e.preventDefault(); dirRef.current = "down";  }
-      if (e.key === "ArrowLeft"  || e.key === "a") { e.preventDefault(); dirRef.current = "left";  }
-      if (e.key === "ArrowRight" || e.key === "d") { e.preventDefault(); dirRef.current = "right"; }
-      if (e.key === "Escape") { togglePause(); }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  /* ── Map hand position → direction ─────────── */
+  /* ── Hand → direction ─────────────────────── */
   useEffect(() => {
     if (!currentHand || statusRef.current !== "playing") return;
-
     const { gesture: g, landmarks } = currentHand;
     setGesture(g);
 
-    if (g === "fist") {
-      togglePause();
-      return;
-    }
-    if (g === "peace") {
-      handleRestart();
-      return;
-    }
+    if (g === "fist") { togglePause(); return; }
+    if (g === "peace") { triggerRestart(); return; }
 
-    if (g === "pointing" && landmarks && landmarks[8]) {
-      // Index fingertip position (normalized 0–1, mirrored: x=0 is right)
-      const fx = 1 - landmarks[8].x; // un-mirror
+    if (g === "pointing" && landmarks?.[8]) {
+      const fx = 1 - landmarks[8].x;
       const fy = landmarks[8].y;
-      const cx = 0.5, cy = 0.5;
-      const dx = fx - cx;
-      const dy = fy - cy;
-
+      const dx = fx - 0.5, dy = fy - 0.5;
       if (Math.abs(dx) > 0.12 || Math.abs(dy) > 0.12) {
-        if (Math.abs(dx) >= Math.abs(dy)) {
-          dirRef.current = dx > 0 ? "right" : "left";
-        } else {
-          dirRef.current = dy > 0 ? "down" : "up";
-        }
+        dirRef.current = Math.abs(dx) >= Math.abs(dy)
+          ? (dx > 0 ? "right" : "left")
+          : (dy > 0 ? "down"  : "up");
       }
     }
   }, [currentHand]);
 
-  /* ── Gesture event callback ─────────────────── */
-  gestureCallbackRef.current = (g) => {
-    setGesture(g);
-  };
-
-  /* ── Draw maze ──────────────────────────────── */
+  /* ── Draw maze onto canvas ─────────────────── */
   function drawMaze(ctx: CanvasRenderingContext2D) {
     const maze = mazeRef.current;
     if (!maze) return;
     const theme = themeRef.current;
     const cs = cellSizeRef.current;
-    const rows = maze.length;
-    const cols = maze[0].length;
-    const bx = ball.current.px;
-    const by = ball.current.py;
+    const rows = maze.length, cols = maze[0].length;
+    const { px: bx, py: by } = ball.current;
 
-    /* background */
     ctx.fillStyle = theme.path;
     ctx.fillRect(0, 0, cols * cs, rows * cs);
 
-    /* end cell highlight */
+    /* end cell tint */
     ctx.fillStyle = "#c8e6c9";
-    ctx.fillRect((cols - 1) * cs + 1, (rows - 1) * cs + 1, cs - 2, cs - 2);
+    ctx.fillRect((cols-1)*cs+1, (rows-1)*cs+1, cs-2, cs-2);
 
     /* walls */
     ctx.strokeStyle = theme.wall;
-    ctx.lineWidth = Math.max(2, cs * 0.08);
+    ctx.lineWidth = Math.max(2, cs * 0.09);
     ctx.lineCap = "square";
-
+    ctx.beginPath();
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
-        const cell = maze[r][c];
+        const { walls } = maze[r][c];
         const x = c * cs, y = r * cs;
-        ctx.beginPath();
-        if (cell.walls.top)    { ctx.moveTo(x,      y);      ctx.lineTo(x + cs, y);      }
-        if (cell.walls.right)  { ctx.moveTo(x + cs, y);      ctx.lineTo(x + cs, y + cs); }
-        if (cell.walls.bottom) { ctx.moveTo(x,      y + cs); ctx.lineTo(x + cs, y + cs); }
-        if (cell.walls.left)   { ctx.moveTo(x,      y);      ctx.lineTo(x,      y + cs); }
-        ctx.stroke();
+        if (walls.top)    { ctx.moveTo(x,    y);    ctx.lineTo(x+cs, y);    }
+        if (walls.right)  { ctx.moveTo(x+cs, y);    ctx.lineTo(x+cs, y+cs); }
+        if (walls.bottom) { ctx.moveTo(x,    y+cs); ctx.lineTo(x+cs, y+cs); }
+        if (walls.left)   { ctx.moveTo(x,    y);    ctx.lineTo(x,    y+cs); }
       }
     }
+    ctx.stroke();
 
-    /* end flag emoji */
+    /* flag emoji at end */
     ctx.font = `${cs * 0.6}px sans-serif`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("🏁", (cols - 0.5) * cs, (rows - 0.5) * cs);
+    ctx.fillText("🏁", (cols-0.5)*cs, (rows-0.5)*cs);
 
     /* ball */
     const br = cs * 0.34;
-    const grad = ctx.createRadialGradient(bx - br * 0.3, by - br * 0.3, br * 0.08, bx, by, br);
+    const grad = ctx.createRadialGradient(bx-br*0.3, by-br*0.3, br*0.08, bx, by, br);
     grad.addColorStop(0, "#fff");
     grad.addColorStop(1, theme.ball);
     ctx.beginPath();
-    ctx.arc(bx, by, br, 0, Math.PI * 2);
+    ctx.arc(bx, by, br, 0, Math.PI*2);
     ctx.fillStyle = grad;
     ctx.fill();
     ctx.strokeStyle = "rgba(0,0,0,0.25)";
     ctx.lineWidth = 1;
     ctx.stroke();
 
-    /* ── Fog of war ─────────────────────────── */
+    /* fog of war */
     if (fogRef.current) {
+      const fogR = cs * 2.6;
       ctx.save();
-      const fogRadius = cs * 2.5;
-      const fog = ctx.createRadialGradient(bx, by, fogRadius * 0.6, bx, by, fogRadius);
-      fog.addColorStop(0, "transparent");
-      fog.addColorStop(1, theme.fog);
-
-      // Fill full canvas with fog color, then cut out visible circle
       ctx.fillStyle = theme.fog;
-      ctx.fillRect(0, 0, cols * cs, rows * cs);
+      ctx.fillRect(0, 0, cols*cs, rows*cs);
       ctx.globalCompositeOperation = "destination-out";
       ctx.beginPath();
-      ctx.arc(bx, by, fogRadius, 0, Math.PI * 2);
+      ctx.arc(bx, by, fogR, 0, Math.PI*2);
       ctx.fillStyle = "rgba(0,0,0,1)";
       ctx.fill();
       ctx.restore();
     }
   }
 
-  /* ── Attempt ball move ─────────────────────── */
+  /* ── Try moving ball ───────────────────────── */
   function tryMove(dir: Direction | null) {
     if (!dir || ball.current.moving) return;
     const maze = mazeRef.current;
     if (!maze) return;
 
     const { row: r, col: c } = ball.current;
-    const cell = maze[r][c];
-
+    const { walls } = maze[r][c];
     let nr = r, nc = c;
-    if (dir === "up"    && !cell.walls.top)    nr--;
-    else if (dir === "down"  && !cell.walls.bottom) nr++;
-    else if (dir === "left"  && !cell.walls.left)   nc--;
-    else if (dir === "right" && !cell.walls.right)  nc++;
+
+    if      (dir === "up"    && !walls.top)    nr--;
+    else if (dir === "down"  && !walls.bottom) nr++;
+    else if (dir === "left"  && !walls.left)   nc--;
+    else if (dir === "right" && !walls.right)  nc++;
     else return;
 
     const rows = maze.length, cols = maze[0].length;
@@ -288,7 +253,7 @@ export default function MazeNavigator({ onBack }: { onBack: () => void }) {
     ball.current.targetRow = nr;
     ball.current.targetCol = nc;
     ball.current.moving = true;
-    stepsCountRef.current++;
+    stepsRef.current++;
     setSteps(s => s + 1);
   }
 
@@ -303,11 +268,11 @@ export default function MazeNavigator({ onBack }: { onBack: () => void }) {
     const speed = speedRef.current;
 
     if (ball.current.moving) {
-      const tx = ball.current.targetCol * cs + cs / 2;
-      const ty = ball.current.targetRow * cs + cs / 2;
+      const tx = ball.current.targetCol * cs + cs/2;
+      const ty = ball.current.targetRow * cs + cs/2;
       const dx = tx - ball.current.px;
       const dy = ty - ball.current.py;
-      const dist = Math.sqrt(dx * dx + dy * dy);
+      const dist = Math.sqrt(dx*dx + dy*dy);
 
       if (dist <= speed) {
         ball.current.px = tx;
@@ -317,7 +282,7 @@ export default function MazeNavigator({ onBack }: { onBack: () => void }) {
         ball.current.moving = false;
 
         const maze = mazeRef.current;
-        if (maze && ball.current.row === maze.length - 1 && ball.current.col === maze[0].length - 1) {
+        if (maze && ball.current.row === maze.length-1 && ball.current.col === maze[0].length-1) {
           statusRef.current = "won";
           setStatus("won");
           confetti({ particleCount: 200, spread: 120, origin: { y: 0.5 } });
@@ -326,8 +291,8 @@ export default function MazeNavigator({ onBack }: { onBack: () => void }) {
         }
         tryMove(dirRef.current);
       } else {
-        ball.current.px += (dx / dist) * speed;
-        ball.current.py += (dy / dist) * speed;
+        ball.current.px += (dx/dist) * speed;
+        ball.current.py += (dy/dist) * speed;
       }
     } else {
       tryMove(dirRef.current);
@@ -340,20 +305,15 @@ export default function MazeNavigator({ onBack }: { onBack: () => void }) {
     }
   }, []);
 
-  /* ── Start a level ─────────────────────────── */
-  function startLevel(lv: number) {
-    cancelAnimationFrame(animRef.current);
-    if (timerRef.current) clearInterval(timerRef.current);
-
-    const cfg = getLevelConfig(lv);
-    const maze = generateMaze(cfg.rows, cfg.cols);
-    mazeRef.current = maze;
-    themeRef.current = THEMES[Math.floor(Math.random() * THEMES.length)];
-    speedRef.current = cfg.speed;
+  /* ── CANVAS SETUP (runs after status→"playing" causes canvas to mount) ── */
+  useEffect(() => {
+    if (status !== "playing" || !pendingStart.current) return;
+    pendingStart.current = false;
 
     const canvas = mazeCanvasRef.current;
-    if (!canvas) return;
+    if (!canvas || !mazeRef.current) return;
 
+    const cfg = getLevelConfig(levelRef.current);
     const parent = canvas.parentElement;
     const maxW = parent ? Math.min(parent.clientWidth - 8, 520) : 460;
     const maxH = 460;
@@ -363,22 +323,46 @@ export default function MazeNavigator({ onBack }: { onBack: () => void }) {
     canvas.width  = cfg.cols * cs;
     canvas.height = cfg.rows * cs;
 
-    ball.current = { row: 0, col: 0, px: cs / 2, py: cs / 2, targetRow: 0, targetCol: 0, moving: false };
-    dirRef.current = null;
-    stepsCountRef.current = 0;
-    setSteps(0);
-    setElapsed(0);
+    /* place ball at top-left center */
+    ball.current.px = cs / 2;
+    ball.current.py = cs / 2;
 
-    statusRef.current = "playing";
-    setStatus("playing");
-
+    /* start animation */
+    cancelAnimationFrame(animRef.current);
     animRef.current = requestAnimationFrame(gameLoop);
 
+    /* start timer */
+    if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
       if (statusRef.current === "playing") setElapsed(e => e + 1);
     }, 1000);
+  }, [status]);
+
+  /* ── Start level (only generates maze data; canvas setup happens in useEffect) ── */
+  function startLevel(lv: number, withCamera: boolean) {
+    cancelAnimationFrame(animRef.current);
+    if (timerRef.current) clearInterval(timerRef.current);
+
+    levelRef.current = lv;
+    const cfg = getLevelConfig(lv);
+    mazeRef.current = generateMaze(cfg.rows, cfg.cols);
+    themeRef.current = THEMES[Math.floor(Math.random() * THEMES.length)];
+    speedRef.current = cfg.speed;
+
+    ball.current = { row: 0, col: 0, px: 0, py: 0, targetRow: 0, targetCol: 0, moving: false };
+    dirRef.current = null;
+    stepsRef.current = 0;
+    setSteps(0);
+    setElapsed(0);
+
+    pendingStart.current = true;  // canvas setup fires in useEffect after re-render
+    statusRef.current = "playing";
+    setStatus("playing");         // triggers re-render → canvas mounts → useEffect runs
+
+    if (withCamera && !cameraActive) startGestureDetection();
   }
 
+  /* ── Pause / resume ────────────────────────── */
   function togglePause() {
     if (statusRef.current === "playing") {
       statusRef.current = "paused";
@@ -391,17 +375,19 @@ export default function MazeNavigator({ onBack }: { onBack: () => void }) {
     }
   }
 
-  function handleRestart() {
-    startLevel(level);
+  /* ── Restart current level ─────────────────── */
+  function triggerRestart() {
+    startLevel(levelRef.current, false);
   }
 
+  /* ── Next level ────────────────────────────── */
   function handleNextLevel() {
     const next = level < 3 ? level + 1 : 1;
     setLevel(next);
-    startLevel(next);
+    startLevel(next, false);
   }
 
-  /* ── Cleanup on unmount ─────────────────────── */
+  /* ── Cleanup ───────────────────────────────── */
   useEffect(() => {
     return () => {
       cancelAnimationFrame(animRef.current);
@@ -410,12 +396,10 @@ export default function MazeNavigator({ onBack }: { onBack: () => void }) {
     };
   }, []);
 
-  /* ── Fog mode sync ─────────────────────────── */
   useEffect(() => { fogRef.current = fogMode; }, [fogMode]);
 
-  /* ── Format time ────────────────────────────── */
   function fmt(s: number) {
-    return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+    return `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
   }
 
   const cfg = getLevelConfig(level);
@@ -427,152 +411,153 @@ export default function MazeNavigator({ onBack }: { onBack: () => void }) {
       <div className="flex items-center justify-between flex-wrap gap-2">
         <Button variant="ghost" size="sm" onClick={() => { stopCamera(); onBack(); }}>← Back</Button>
         <h2 className="text-xl font-extrabold flex items-center gap-2">🌀 Maze Navigator</h2>
-        <div className="flex gap-2">
-          {status === "playing" && (
+        <div className="flex gap-2 flex-wrap">
+          {(status === "playing" || status === "paused") && (
             <>
               <Badge variant="outline">⏱ {fmt(elapsed)}</Badge>
               <Badge variant="outline">👣 {steps}</Badge>
             </>
           )}
-          <Badge className="bg-[#0DA2E7] text-white">Lvl {level} · {cfg.label}</Badge>
+          <Badge className="bg-[#0DA2E7] text-white">Lv {level} · {cfg.label}</Badge>
         </div>
       </div>
 
       {/* ── MENU ── */}
-      <AnimatePresence mode="wait">
-        {status === "menu" && (
-          <motion.div
-            key="menu"
-            initial={{ opacity: 0, scale: 0.92 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.92 }}
-            className="text-center py-8 space-y-6"
-          >
-            <div className="text-7xl">🌀</div>
-            <h3 className="text-3xl font-extrabold">Maze Navigator!</h3>
-            <p className="text-muted-foreground max-w-xs mx-auto">
-              Navigate the ball through a freshly-generated maze using hand gestures or arrow keys.
-              Every level is a brand-new maze!
-            </p>
+      {status === "menu" && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.92 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center py-6 space-y-5"
+        >
+          <div className="text-7xl">🌀</div>
+          <h3 className="text-3xl font-extrabold">Maze Navigator!</h3>
+          <p className="text-muted-foreground max-w-sm mx-auto text-sm">
+            Steer the ball through a randomly-generated maze. Every play is brand new!
+            Use hand gestures or arrow keys.
+          </p>
 
-            {/* Gesture tips */}
-            <div className="flex justify-center gap-4 flex-wrap">
-              {GESTURE_TIPS.map(t => (
-                <div key={t.label} className="bg-secondary rounded-2xl px-4 py-3 text-center w-28">
-                  <div className="text-3xl">{t.emoji}</div>
-                  <div className="font-bold text-sm">{t.label}</div>
-                  <div className="text-xs text-muted-foreground">{t.description}</div>
-                </div>
-              ))}
-            </div>
-
-            {/* Level selection */}
-            <div className="space-y-2">
-              <p className="font-semibold text-sm">Choose level:</p>
-              <div className="flex gap-3 justify-center flex-wrap">
-                {([1, 2, 3] as const).map(lv => {
-                  const c = getLevelConfig(lv);
-                  return (
-                    <Button
-                      key={lv}
-                      variant={level === lv ? "default" : "outline"}
-                      className={level === lv ? "kid-gradient text-white" : ""}
-                      onClick={() => setLevel(lv)}
-                    >
-                      {lv === 1 ? "🟢" : lv === 2 ? "🟡" : "🔴"} {c.label} ({c.rows}×{c.cols})
-                    </Button>
-                  );
-                })}
+          {/* Gesture guide */}
+          <div className="flex justify-center gap-3 flex-wrap">
+            {[
+              { emoji: "☝️", label: "Point", desc: "Steer ball" },
+              { emoji: "✊", label: "Fist",  desc: "Pause" },
+              { emoji: "✌️", label: "Peace", desc: "Restart" },
+            ].map(t => (
+              <div key={t.label} className="bg-secondary rounded-2xl px-3 py-2 text-center w-24">
+                <div className="text-2xl">{t.emoji}</div>
+                <div className="font-bold text-xs">{t.label}</div>
+                <div className="text-xs text-muted-foreground">{t.desc}</div>
               </div>
-            </div>
+            ))}
+          </div>
 
-            {/* Options */}
-            <div className="flex justify-center gap-4 text-sm">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={fogMode} onChange={e => setFogMode(e.target.checked)} className="w-4 h-4" />
-                🌫️ Fog of War
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={showCam} onChange={e => setShowCam(e.target.checked)} className="w-4 h-4" />
-                📷 Camera Overlay
-              </label>
-            </div>
+          {/* Level select */}
+          <div className="flex gap-3 justify-center flex-wrap">
+            {([1,2,3] as const).map(lv => {
+              const c = getLevelConfig(lv);
+              return (
+                <Button
+                  key={lv}
+                  size="sm"
+                  variant={level === lv ? "default" : "outline"}
+                  className={level === lv ? "kid-gradient text-white" : ""}
+                  onClick={() => setLevel(lv)}
+                >
+                  {lv===1?"🟢":lv===2?"🟡":"🔴"} {c.label} {c.rows}×{c.cols}
+                </Button>
+              );
+            })}
+          </div>
 
-            <div className="flex gap-3 justify-center">
-              <Button
-                onClick={() => { startGestureDetection(); startLevel(level); }}
-                className="kid-gradient text-white font-bold px-10 text-lg"
-              >
-                🚀 Start with Camera
-              </Button>
-              <Button variant="outline" onClick={() => startLevel(level)}>
-                ⌨️ Keyboard Only
-              </Button>
-            </div>
-          </motion.div>
-        )}
+          {/* Toggles */}
+          <div className="flex justify-center gap-6 text-sm">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked={fogMode} onChange={e=>setFogMode(e.target.checked)} className="w-4 h-4 accent-[#0DA2E7]" />
+              🌫️ Fog of War
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked={showCam} onChange={e=>setShowCam(e.target.checked)} className="w-4 h-4 accent-[#0DA2E7]" />
+              📷 Camera
+            </label>
+          </div>
 
-        {/* ── WON ── */}
-        {status === "won" && (
-          <motion.div
-            key="won"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-center py-8 space-y-5"
-          >
-            <div className="text-7xl">🏆</div>
-            <h3 className="text-3xl font-extrabold text-green-600">Maze Solved!</h3>
-            <div className="flex gap-6 justify-center text-lg font-semibold">
-              <span>⏱ {fmt(elapsed)}</span>
-              <span>👣 {steps} steps</span>
-              <span>⭐ Level {level}</span>
-            </div>
-            <p className="text-muted-foreground">
-              {steps <= cfg.rows * 2 ? "🧠 Perfect path! You're amazing!" : steps <= cfg.rows * 4 ? "🌟 Great navigation!" : "Good job! Try a shorter path!"}
-            </p>
-            <div className="flex gap-3 justify-center flex-wrap">
-              <Button onClick={handleNextLevel} className="kid-gradient text-white font-bold px-8">
-                {level < 3 ? "Next Level →" : "🔁 Play Again (Lv 1)"}
-              </Button>
-              <Button variant="outline" onClick={handleRestart}>🔄 Same Maze</Button>
-              <Button variant="outline" onClick={() => { stopCamera(); setStatus("menu"); statusRef.current = "menu"; }}>
-                🏠 Menu
-              </Button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          <div className="flex gap-3 justify-center flex-wrap">
+            <Button
+              onClick={() => startLevel(level, true)}
+              className="kid-gradient text-white font-bold px-8 text-base"
+            >
+              🚀 Start with Camera
+            </Button>
+            <Button variant="outline" onClick={() => startLevel(level, false)}>
+              ⌨️ Keyboard Only
+            </Button>
+          </div>
+        </motion.div>
+      )}
+
+      {/* ── WIN SCREEN ── */}
+      {status === "won" && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.85 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center py-8 space-y-5"
+        >
+          <div className="text-7xl">🏆</div>
+          <h3 className="text-3xl font-extrabold text-green-600">Maze Solved!</h3>
+          <div className="flex gap-5 justify-center text-lg font-semibold">
+            <span>⏱ {fmt(elapsed)}</span>
+            <span>👣 {steps} steps</span>
+          </div>
+          <p className="text-muted-foreground">
+            {steps <= cfg.rows*2 ? "🧠 Perfect path! You're a maze genius!"
+            : steps <= cfg.rows*4 ? "🌟 Great navigation!"
+            : "Nice work! Try a shorter route!"}
+          </p>
+          <div className="flex gap-3 justify-center flex-wrap">
+            <Button onClick={handleNextLevel} className="kid-gradient text-white font-bold px-8">
+              {level < 3 ? "Next Level →" : "🔁 Play Again"}
+            </Button>
+            <Button variant="outline" onClick={() => startLevel(level, false)}>🔄 Replay</Button>
+            <Button variant="outline" onClick={() => { stopCamera(); statusRef.current="menu"; setStatus("menu"); }}>
+              🏠 Menu
+            </Button>
+          </div>
+        </motion.div>
+      )}
 
       {/* ── PLAYING / PAUSED ── */}
       {(status === "playing" || status === "paused") && (
         <div className="space-y-3">
-          {/* Controls row */}
+          {/* Top controls */}
           <div className="flex items-center gap-2 flex-wrap">
             <Button variant="outline" size="sm" onClick={togglePause}>
               {status === "paused" ? "▶ Resume" : "⏸ Pause"}
             </Button>
-            <Button variant="outline" size="sm" onClick={handleRestart}>🔄 Restart</Button>
+            <Button variant="outline" size="sm" onClick={() => startLevel(levelRef.current, false)}>
+              🔄 Restart
+            </Button>
             <Button variant="outline" size="sm" onClick={() => setFogMode(f => !f)}>
               {fogMode ? "🔆 Clear" : "🌫️ Fog"}
             </Button>
             {cameraActive && (
-              <Badge className="ml-auto bg-green-100 text-green-700 text-xs">
-                📷 {gesture !== "none" ? gesture.replace("_", " ") : "no gesture"}
+              <Badge className="ml-auto bg-green-100 text-green-700 text-xs gap-1">
+                📷 {gesture !== "none" ? gesture.replace("_"," ") : "—"}
               </Badge>
             )}
           </div>
 
-          {/* Main layout: maze + camera */}
+          {/* Maze + Camera layout */}
           <div className="flex gap-3 items-start flex-wrap">
-            {/* Maze canvas wrapper */}
+            {/* Canvas wrapper */}
             <div className="relative flex-1 min-w-0">
               <canvas
                 ref={mazeCanvasRef}
-                className="rounded-2xl shadow-lg border-2 border-border block max-w-full"
-                style={{ imageRendering: "pixelated" }}
+                className="rounded-2xl shadow-lg border-2 border-border block"
+                style={{ maxWidth: "100%", imageRendering: "pixelated" }}
               />
-              {/* D-pad overlay for touch */}
-              <div className="absolute bottom-2 right-2 grid grid-cols-3 gap-1 opacity-60 hover:opacity-90 transition-opacity select-none">
+
+              {/* Touch D-pad */}
+              <div className="absolute bottom-2 right-2 grid grid-cols-3 gap-1 opacity-55 hover:opacity-95 transition-opacity select-none">
                 {([
                   [null,   "up",    null   ],
                   ["left", null,    "right"],
@@ -582,11 +567,11 @@ export default function MazeNavigator({ onBack }: { onBack: () => void }) {
                     dir ? (
                       <button
                         key={`${ri}-${ci}`}
-                        onPointerDown={(e) => { e.currentTarget.setPointerCapture(e.pointerId); dirRef.current = dir; }}
+                        onPointerDown={e => { e.currentTarget.setPointerCapture(e.pointerId); dirRef.current = dir; }}
                         onPointerUp={() => { dirRef.current = null; }}
-                        className="w-9 h-9 rounded-lg bg-black/40 text-white text-lg font-bold flex items-center justify-center hover:bg-black/60 active:bg-black/80"
+                        className="w-9 h-9 rounded-lg bg-black/45 text-white text-base font-bold flex items-center justify-center active:bg-black/75"
                       >
-                        {dir === "up" ? "▲" : dir === "down" ? "▼" : dir === "left" ? "◀" : "▶"}
+                        {dir==="up"?"▲":dir==="down"?"▼":dir==="left"?"◀":"▶"}
                       </button>
                     ) : (
                       <div key={`${ri}-${ci}`} className="w-9 h-9" />
@@ -609,7 +594,7 @@ export default function MazeNavigator({ onBack }: { onBack: () => void }) {
 
             {/* Camera panel */}
             {showCam && (
-              <div className="flex flex-col gap-2 w-40 shrink-0">
+              <div className="flex flex-col gap-2 w-36 shrink-0">
                 <div className="relative rounded-xl overflow-hidden bg-black border-2 border-border aspect-video w-full">
                   <video
                     ref={videoDisplayRef}
@@ -617,41 +602,42 @@ export default function MazeNavigator({ onBack }: { onBack: () => void }) {
                     className="w-full h-full object-cover scale-x-[-1]"
                   />
                   {!cameraActive && (
-                    <div className="absolute inset-0 flex items-center justify-center text-white text-xs text-center p-2">
+                    <div className="absolute inset-0 flex items-center justify-center text-white text-xs text-center p-2 bg-black/60">
                       No camera
                     </div>
                   )}
                   <canvas ref={gestureCanvasRef} className="hidden" />
                   {isLoading && (
                     <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
-                      <div className="text-white text-xs text-center p-1">Loading AI…</div>
+                      <span className="text-white text-xs">Loading AI…</span>
                     </div>
                   )}
                 </div>
-                {/* Gesture indicator */}
-                <div className="text-center space-y-1">
-                  <div className="text-2xl">
-                    {gesture === "pointing"   ? "☝️"
-                   : gesture === "fist"       ? "✊"
-                   : gesture === "peace"      ? "✌️"
-                   : gesture === "thumbs_up"  ? "👍"
-                   : gesture === "open_palm"  ? "✋"
-                   : "🤚"}
+
+                {/* Gesture display */}
+                <div className="text-center space-y-0.5">
+                  <div className="text-3xl">
+                    {gesture==="pointing" ?"☝️"
+                    :gesture==="fist"     ?"✊"
+                    :gesture==="peace"    ?"✌️"
+                    :gesture==="thumbs_up"?"👍"
+                    :gesture==="open_palm"?"✋"
+                    :"🤚"}
                   </div>
                   <p className="text-xs text-muted-foreground font-medium">
-                    {gesture === "pointing"  ? "Steering"
-                   : gesture === "fist"      ? "Pause"
-                   : gesture === "peace"     ? "Restart"
-                   : gesture !== "none"      ? gesture.replace("_", " ")
-                   : "Show hand"}
+                    {gesture==="pointing" ?"Steering"
+                    :gesture==="fist"     ?"Pause"
+                    :gesture==="peace"    ?"Restart"
+                    :gesture!=="none"     ?gesture.replace("_"," ")
+                    :"Show hand"}
                   </p>
                 </div>
-                {/* Quick tip */}
-                <div className="text-xs text-muted-foreground bg-secondary rounded-xl p-2 text-center space-y-1">
-                  <p>☝️ Point to steer</p>
-                  <p>✊ Pause/Resume</p>
-                  <p>✌️ Restart</p>
-                  <p className="pt-1 border-t border-border">⌨️ Arrow keys also work</p>
+
+                <div className="text-xs text-muted-foreground bg-secondary rounded-xl p-2 text-center leading-5">
+                  <p>☝️ Point → steer</p>
+                  <p>✊ Fist → pause</p>
+                  <p>✌️ Peace → restart</p>
+                  <p className="pt-1 border-t border-border mt-1">⌨️ Arrows work too</p>
                 </div>
               </div>
             )}
