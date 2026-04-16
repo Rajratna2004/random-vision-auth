@@ -314,6 +314,10 @@ export default function MazeNavigator({ onBack }: { onBack: () => void }) {
   /* ══════════════ RENDER ════════════════════ */
   return (
     <div className="space-y-3">
+      {/* Hidden video for MediaPipe — must always be mounted so
+          videoRef.current is non-null when startGestureDetection() is called */}
+      <video ref={videoRef} className="hidden" playsInline muted />
+
       {/* ── Header ── */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <Button variant="ghost" size="sm" onClick={() => { stopCamera(); onBack(); }}>← Back</Button>
