@@ -8,7 +8,7 @@ import confetti from "canvas-confetti";
 import AirDraw from "./camera-games/AirDraw";
 import HandPainter from "./camera-games/HandPainter";
 import AirPiano from "./camera-games/AirPiano";
-import MazeNavigator from "./camera-games/MazeNavigator";
+
 
 function fireConfetti() {
   confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
@@ -709,7 +709,7 @@ const CAMERA_GAMES = [
   { id: "air-draw",        title: "Air Draw",        emoji: "✍️", desc: "Draw with your finger in the air! Pinch to lift pen.",                color: "from-[#FF6B6B] to-[#FF8E53]", badge: "📷 Camera" },
   { id: "color-fill",      title: "Hand Painter",    emoji: "🎨", desc: "Use hand gestures to draw, erase, and change colors!",                color: "from-[#4CAF50] to-[#0DA2E7]", badge: "📷 Camera" },
   { id: "air-piano",       title: "Air Piano",       emoji: "🎹", desc: "Play piano in the air! Flick your finger down on a key.",              color: "from-[#9B59B6] to-[#0DA2E7]", badge: "📷 Camera" },
-  { id: "maze-navigator",  title: "Maze Navigator",  emoji: "🌀", desc: "Steer the ball through a random maze with your hand! New maze every time!", color: "from-[#0DA2E7] to-[#1a237e]", badge: "📷 Camera" },
+
 ];
 
 export default function GamesPage() {
@@ -798,7 +798,7 @@ export default function GamesPage() {
                   {activeGame === "air-draw"       && <AirDraw onBack={goBack} />}
                   {activeGame === "color-fill"     && <HandPainter onBack={goBack} />}
                   {activeGame === "air-piano"      && <AirPiano onBack={goBack} />}
-                  {activeGame === "maze-navigator" && <MazeNavigator onBack={goBack} />}
+
                 </motion.div>
               </AnimatePresence>
             </CardContent>
