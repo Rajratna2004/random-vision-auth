@@ -229,10 +229,8 @@ export default function AuthPage() {
         <div className="absolute -bottom-16 -right-16 w-56 h-56 rounded-full bg-white/10 blur-2xl pointer-events-none" />
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-10">
-            <div className="w-12 h-12 rounded-2xl bg-white/25 backdrop-blur-sm flex items-center justify-center text-2xl shadow-lg border border-white/30">
-              🦁
-            </div>
-            <span className="font-heading text-white text-3xl">KidoLearn</span>
+            <img src="/logo.png" alt="Kiddo-Vision" className="w-12 h-12 rounded-2xl object-contain shadow-lg" />
+            <span className="font-heading text-white text-3xl">Kiddo-Vision</span>
           </div>
           <h2 className="font-heading text-5xl text-white leading-tight mb-5"
               style={{ textShadow: "0 2px 8px rgba(0,0,0,0.12)" }}>
@@ -265,10 +263,8 @@ export default function AuthPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center mb-8 lg:hidden"
           >
-            <div className="w-16 h-16 rounded-2xl kid-gradient flex items-center justify-center text-3xl shadow-xl mx-auto mb-3">
-              🦁
-            </div>
-            <h1 className="font-heading text-4xl text-white">KidoLearn</h1>
+            <img src="/logo.png" alt="Kiddo-Vision" className="w-16 h-16 rounded-2xl object-contain shadow-xl mx-auto mb-3" />
+            <h1 className="font-heading text-4xl text-white">Kiddo-Vision</h1>
             <p className="text-white/80 text-sm mt-1">Learn. Play. Grow.</p>
           </motion.div>
 

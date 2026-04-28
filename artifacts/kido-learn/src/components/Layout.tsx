@@ -39,11 +39,9 @@ export default function Layout({ children }: LayoutProps) {
             onClick={() => navigate("/")}
             className="flex items-center gap-2 shrink-0 group"
           >
-            <div className="w-9 h-9 rounded-2xl kid-gradient flex items-center justify-center text-lg shadow-sm group-hover:shadow-md group-hover:scale-105 transition-all duration-200">
-              🦁
-            </div>
+            <img src="/logo.png" alt="Kiddo-Vision" className="w-9 h-9 rounded-2xl shadow-sm group-hover:shadow-md group-hover:scale-105 transition-all duration-200 object-contain" />
             <span className="font-heading text-[#0DA2E7] font-bold text-xl hidden sm:block tracking-wide">
-              KidoLearn
+              Kiddo-Vision
             </span>
           </button>
 
