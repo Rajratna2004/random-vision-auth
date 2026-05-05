@@ -1,8 +1,13 @@
 import { defineConfig } from "drizzle-kit";
 import path from "path";
+import { config } from "dotenv";
+
+config({ path: path.resolve(__dirname, ".env") });
 
 if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL, ensure the database is provisioned");
+  throw new Error(
+    'DATABASE_URL is not set. Edit lib/db/.env and set your database URL:\n  DATABASE_URL=postgresql://postgres:yourpassword@localhost:5432/kiddo_vision'
+  );
 }
 
 export default defineConfig({

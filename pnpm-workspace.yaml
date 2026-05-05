@@ -8,6 +8,7 @@ autoInstallPeers: false
 
 catalog:
   cross-env: ^10.1.0
+  dotenv: ^16.4.7
   '@replit/vite-plugin-cartographer': ^0.5.1
   '@replit/vite-plugin-dev-banner': ^0.1.1
   '@replit/vite-plugin-runtime-error-modal': ^0.0.6

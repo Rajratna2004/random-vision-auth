@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { getStoredUser } from "@/lib/store";
@@ -11,8 +12,13 @@ export default function Layout({ children }: LayoutProps) {
   const { logout } = useAuth();
   const user = getStoredUser();
 
+  useEffect(() => {
+    if (!user) {
+      navigate("/auth");
+    }
+  }, [user]);
+
   if (!user) {
-    navigate("/auth");
     return null;
   }
 
