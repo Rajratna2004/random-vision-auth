@@ -39,6 +39,9 @@ catalogs:
     clsx:
       specifier: ^2.1.1
       version: 2.1.1
+    cross-env:
+      specifier: ^10.1.0
+      version: 10.1.0
     dotenv:
       specifier: ^16.4.7
       version: 16.6.1
@@ -197,9 +200,6 @@ importers:
       cors:
         specifier: ^2
         version: 2.8.6
-      cross-env:
-        specifier: ^10.1.0
-        version: 10.1.0
       drizzle-orm:
         specifier: 'catalog:'
         version: 0.45.1(@types/pg@8.18.0)(pg@8.20.0)
@@ -237,6 +237,9 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
+      cross-env:
+        specifier: 'catalog:'
+        version: 10.1.0
       esbuild:
         specifier: 0.27.3
         version: 0.27.3
