@@ -9,7 +9,7 @@
     "start": "node --enable-source-maps ./dist/index.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "db:push": "pnpm --filter @workspace/db run push",
-    "db:seed": "tsx src/seed.ts"
+    "db:seed": "pnpm --filter @workspace/db run seed"
   },
   "dependencies": {
     "@types/bcryptjs": "^3.0.0",
@@ -29,6 +29,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "cross-env": "^10.1.0",
     "cross-env": "catalog:",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",

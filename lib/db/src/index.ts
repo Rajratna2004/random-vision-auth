@@ -11,7 +11,7 @@ const { Pool } = pg;
 
 if (!process.env.DATABASE_URL) {
   throw new Error(
-    "DATABASE_URL must be set. Add it to lib/db/.env or set it in your environment."
+    "DATABASE_URL must be set. Add it to lib/db/.env or set it in your environment.",
   );
 }
 
