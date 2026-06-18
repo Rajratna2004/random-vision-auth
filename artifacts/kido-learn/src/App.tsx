@@ -24,7 +24,9 @@ function Router() {
       <Route path="/" component={HomePage} />
       <Route path="/courses" component={CoursesPage} />
       <Route path="/courses/:id" component={CourseDetailPage} />
-      <Route path="/courses/:courseId/lessons/:lessonId" component={LessonPage} />
+      <Route path="/courses/:courseId/lessons/:lessonId">
+        {(params) => <LessonPage key={params.lessonId} />}
+      </Route>
       <Route path="/games" component={GamesPage} />
       <Route path="/profile" component={ProfilePage} />
       <Route component={NotFound} />

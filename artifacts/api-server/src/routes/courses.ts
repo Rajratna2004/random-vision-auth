@@ -8,7 +8,10 @@ import { z } from "zod";
 const router: IRouter = Router();
 
 router.get("/courses", async (_req, res) => {
-  const courses = await db.select().from(coursesTable).orderBy(coursesTable.createdAt);
+  const courses = await db
+    .select()
+    .from(coursesTable)
+    .orderBy(coursesTable.createdAt);
 
   res.json(
     courses.map((c) => ({
@@ -22,7 +25,7 @@ router.get("/courses", async (_req, res) => {
       durationMinutes: c.durationMinutes,
       difficulty: c.difficulty,
       createdAt: c.createdAt.toISOString(),
-    }))
+    })),
   );
 });
 
@@ -33,7 +36,11 @@ router.get("/courses/:id", async (req, res) => {
     return;
   }
 
-  const [course] = await db.select().from(coursesTable).where(eq(coursesTable.id, id)).limit(1);
+  const [course] = await db
+    .select()
+    .from(coursesTable)
+    .where(eq(coursesTable.id, id))
+    .limit(1);
   if (!course) {
     res.status(404).json({ error: "NotFound", message: "Course not found" });
     return;
@@ -75,20 +82,31 @@ router.get("/progress", authenticate, async (req: AuthRequest, res) => {
   const progressData = await db
     .select()
     .from(userProgressTable)
-    .where(and(eq(userProgressTable.userId, userId), eq(userProgressTable.completed, true)));
+    .where(
+      and(
+        eq(userProgressTable.userId, userId),
+        eq(userProgressTable.completed, true),
+      ),
+    );
 
   const result = courses.map((course) => {
-    const completed = progressData.filter((p) => p.courseId === course.id).length;
+    const completed = progressData.filter(
+      (p) => p.courseId === course.id,
+    ).length;
     return {
       courseId: String(course.id),
       courseTitle: course.title,
       completedLessons: completed,
       totalLessons: course.totalLessons,
-      percentComplete: course.totalLessons > 0 ? (completed / course.totalLessons) * 100 : 0,
+      percentComplete:
+        course.totalLessons > 0 ? (completed / course.totalLessons) * 100 : 0,
       lastAccessedAt:
         progressData
           .filter((p) => p.courseId === course.id)
-          .sort((a, b) => (b.completedAt?.getTime() ?? 0) - (a.completedAt?.getTime() ?? 0))[0]
+          .sort(
+            (a, b) =>
+              (b.completedAt?.getTime() ?? 0) - (a.completedAt?.getTime() ?? 0),
+          )[0]
           ?.completedAt?.toISOString() ?? null,
     };
   });
@@ -96,68 +114,161 @@ router.get("/progress", authenticate, async (req: AuthRequest, res) => {
   res.json(result);
 });
 
+router.get(
+  "/progress/lesson/:lessonId",
+  authenticate,
+  async (req: AuthRequest, res) => {
+    const userId = req.userId!;
+    const lessonId = parseInt(req.params.lessonId);
+
+    if (isNaN(lessonId)) {
+      res
+        .status(400)
+        .json({ error: "BadRequest", message: "Invalid lesson ID" });
+      return;
+    }
+
+    const [row] = await db
+      .select()
+      .from(userProgressTable)
+      .where(
+        and(
+          eq(userProgressTable.userId, userId),
+          eq(userProgressTable.lessonId, lessonId),
+        ),
+      )
+      .limit(1);
+
+    if (!row) {
+      res.json({
+        lessonId: String(lessonId),
+        completed: false,
+        completedAt: null,
+        quizCompleted: false,
+        quizScore: null,
+        experimentCompleted: false,
+      });
+      return;
+    }
+
+    res.json({
+      lessonId: String(lessonId),
+      completed: row.completed,
+      completedAt: row.completedAt?.toISOString() ?? null,
+      quizCompleted: row.quizCompleted,
+      quizScore: row.quizScore,
+      experimentCompleted: row.experimentCompleted,
+    });
+  },
+);
+
 const updateProgressSchema = z.object({
   lessonId: z.string(),
-  completed: z.boolean(),
+  completed: z.boolean().optional(),
+  quizCompleted: z.boolean().optional(),
+  quizScore: z.number().int().min(0).optional(),
+  experimentCompleted: z.boolean().optional(),
 });
 
-router.post("/progress/:courseId", authenticate, async (req: AuthRequest, res) => {
-  const parsed = updateProgressSchema.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: "ValidationError", message: parsed.error.issues.map(i => i.message).join(", ") });
-    return;
-  }
+router.post(
+  "/progress/:courseId",
+  authenticate,
+  async (req: AuthRequest, res) => {
+    const parsed = updateProgressSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res
+        .status(400)
+        .json({
+          error: "ValidationError",
+          message: parsed.error.issues.map((i) => i.message).join(", "),
+        });
+      return;
+    }
 
-  const userId = req.userId!;
-  const courseId = parseInt(req.params.courseId);
-  const lessonId = parseInt(parsed.data.lessonId);
+    const userId = req.userId!;
+    const courseId = parseInt(req.params.courseId);
+    const lessonId = parseInt(parsed.data.lessonId);
 
-  if (isNaN(courseId) || isNaN(lessonId)) {
-    res.status(400).json({ error: "BadRequest", message: "Invalid IDs" });
-    return;
-  }
+    if (isNaN(courseId) || isNaN(lessonId)) {
+      res.status(400).json({ error: "BadRequest", message: "Invalid IDs" });
+      return;
+    }
 
-  const existing = await db
-    .select()
-    .from(userProgressTable)
-    .where(and(eq(userProgressTable.userId, userId), eq(userProgressTable.lessonId, lessonId)))
-    .limit(1);
+    const { completed, quizCompleted, quizScore, experimentCompleted } =
+      parsed.data;
 
-  if (existing.length > 0) {
-    await db
-      .update(userProgressTable)
-      .set({
-        completed: parsed.data.completed,
-        completedAt: parsed.data.completed ? new Date() : null,
-      })
-      .where(and(eq(userProgressTable.userId, userId), eq(userProgressTable.lessonId, lessonId)));
-  } else {
-    await db.insert(userProgressTable).values({
-      userId,
-      courseId,
-      lessonId,
-      completed: parsed.data.completed,
-      completedAt: parsed.data.completed ? new Date() : null,
+    const existing = await db
+      .select()
+      .from(userProgressTable)
+      .where(
+        and(
+          eq(userProgressTable.userId, userId),
+          eq(userProgressTable.lessonId, lessonId),
+        ),
+      )
+      .limit(1);
+
+    const updateFields: Record<string, unknown> = {};
+    if (completed !== undefined) {
+      updateFields.completed = completed;
+      updateFields.completedAt = completed ? new Date() : null;
+    }
+    if (quizCompleted !== undefined) updateFields.quizCompleted = quizCompleted;
+    if (quizScore !== undefined) updateFields.quizScore = quizScore;
+    if (experimentCompleted !== undefined)
+      updateFields.experimentCompleted = experimentCompleted;
+
+    if (existing.length > 0) {
+      await db
+        .update(userProgressTable)
+        .set(updateFields)
+        .where(
+          and(
+            eq(userProgressTable.userId, userId),
+            eq(userProgressTable.lessonId, lessonId),
+          ),
+        );
+    } else {
+      await db.insert(userProgressTable).values({
+        userId,
+        courseId,
+        lessonId,
+        completed: completed ?? false,
+        completedAt: completed ? new Date() : null,
+        quizCompleted: quizCompleted ?? false,
+        quizScore: quizScore ?? null,
+        experimentCompleted: experimentCompleted ?? false,
+      });
+    }
+
+    const completedCount = await db
+      .select({ count: count() })
+      .from(userProgressTable)
+      .where(
+        and(
+          eq(userProgressTable.userId, userId),
+          eq(userProgressTable.courseId, courseId),
+          eq(userProgressTable.completed, true),
+        ),
+      );
+
+    const [course] = await db
+      .select()
+      .from(coursesTable)
+      .where(eq(coursesTable.id, courseId))
+      .limit(1);
+
+    res.json({
+      courseId: String(courseId),
+      courseTitle: course?.title ?? "",
+      completedLessons: completedCount[0]?.count ?? 0,
+      totalLessons: course?.totalLessons ?? 0,
+      percentComplete:
+        course && course.totalLessons > 0
+          ? ((completedCount[0]?.count ?? 0) / course.totalLessons) * 100
+          : 0,
     });
-  }
-
-  const completedCount = await db
-    .select({ count: count() })
-    .from(userProgressTable)
-    .where(and(eq(userProgressTable.userId, userId), eq(userProgressTable.courseId, courseId), eq(userProgressTable.completed, true)));
-
-  const [course] = await db.select().from(coursesTable).where(eq(coursesTable.id, courseId)).limit(1);
-
-  res.json({
-    courseId: String(courseId),
-    courseTitle: course?.title ?? "",
-    completedLessons: completedCount[0]?.count ?? 0,
-    totalLessons: course?.totalLessons ?? 0,
-    percentComplete:
-      course && course.totalLessons > 0
-        ? ((completedCount[0]?.count ?? 0) / course.totalLessons) * 100
-        : 0,
-  });
-});
+  },
+);
 
 export default router;
