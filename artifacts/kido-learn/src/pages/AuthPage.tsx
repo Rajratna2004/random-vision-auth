@@ -17,7 +17,12 @@ type Mode = "login" | "register" | "face";
 function PasswordStrengthMeter({ password }: { password: string }) {
   if (!password) return null;
   const { score, level, color, checks } = checkPasswordStrength(password);
-  const levelLabel = { weak: "Weak", fair: "Fair", good: "Good", strong: "Strong" }[level];
+  const levelLabel = {
+    weak: "Weak",
+    fair: "Fair",
+    good: "Good",
+    strong: "Strong",
+  }[level];
 
   return (
     <div className="space-y-2 mt-2">
@@ -40,7 +45,11 @@ function PasswordStrengthMeter({ password }: { password: string }) {
             <span className={check.passed ? "text-green-500" : "text-red-400"}>
               {check.passed ? "✓" : "✗"}
             </span>
-            <span className={check.passed ? "text-green-600" : "text-muted-foreground"}>
+            <span
+              className={
+                check.passed ? "text-green-600" : "text-muted-foreground"
+              }
+            >
               {check.label}
             </span>
           </div>
@@ -63,6 +72,9 @@ export default function AuthPage() {
   const [faceDetected, setFaceDetected] = useState(false);
   const [regPassword, setRegPassword] = useState("");
   const [showPasswordChecks, setShowPasswordChecks] = useState(false);
+  const [showLoginPwd, setShowLoginPwd] = useState(false);
+  const [showRegPwd, setShowRegPwd] = useState(false);
+  const [showConfirmPwd, setShowConfirmPwd] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -98,7 +110,11 @@ export default function AuthPage() {
       ]);
       setFaceModelsLoaded(true);
     } catch (e) {
-      toast({ title: "Could not load face models", description: "Check your connection and try again.", variant: "destructive" });
+      toast({
+        title: "Could not load face models",
+        description: "Check your connection and try again.",
+        variant: "destructive",
+      });
     }
     setFaceModelsLoading(false);
   }
@@ -109,7 +125,12 @@ export default function AuthPage() {
       streamRef.current = stream;
       setDetecting(true);
     } catch (e) {
-      toast({ title: "Camera Error", description: "Could not access your camera. Please allow camera access.", variant: "destructive" });
+      toast({
+        title: "Camera Error",
+        description:
+          "Could not access your camera. Please allow camera access.",
+        variant: "destructive",
+      });
       setMode("login");
     }
   }
@@ -132,18 +153,28 @@ export default function AuthPage() {
   async function handleFaceLogin() {
     if (!videoRef.current) return;
     if (!faceModelsLoaded) {
-      toast({ title: "Still loading", description: "Please wait for face models to finish loading." });
+      toast({
+        title: "Still loading",
+        description: "Please wait for face models to finish loading.",
+      });
       return;
     }
     setLoading(true);
     try {
       const detection = await faceapi
-        .detectSingleFace(videoRef.current, new faceapi.TinyFaceDetectorOptions())
+        .detectSingleFace(
+          videoRef.current,
+          new faceapi.TinyFaceDetectorOptions(),
+        )
         .withFaceLandmarks(true)
         .withFaceDescriptor();
 
       if (!detection) {
-        toast({ title: "No face detected", description: "Make sure your face is clearly visible and well-lit.", variant: "destructive" });
+        toast({
+          title: "No face detected",
+          description: "Make sure your face is clearly visible and well-lit.",
+          variant: "destructive",
+        });
         setLoading(false);
         return;
       }
@@ -157,18 +188,34 @@ export default function AuthPage() {
         setStoredUser(res.user);
         updateUser(res.user);
         stopCamera();
-        toast({ title: `Welcome back, ${res.user.firstName}! 😊🎉`, description: "Face login successful!" });
+        toast({
+          title: `Welcome back, ${res.user.firstName}! 😊🎉`,
+          description: "Face login successful!",
+        });
         navigate("/");
       } else if (res.match && res.user) {
-        toast({ title: `Face matched! Hi ${res.user.firstName} 😊`, description: "Please log in with your password this one time.", variant: "default" });
+        toast({
+          title: `Face matched! Hi ${res.user.firstName} 😊`,
+          description: "Please log in with your password this one time.",
+          variant: "default",
+        });
         setMode("login");
         stopCamera();
       } else {
-        toast({ title: "Face not recognized", description: "No matching account found. Please register your face in Profile settings.", variant: "destructive" });
+        toast({
+          title: "Face not recognized",
+          description:
+            "No matching account found. Please register your face in Profile settings.",
+          variant: "destructive",
+        });
         setFaceDetected(false);
       }
     } catch (e: any) {
-      toast({ title: "Error", description: e.message || "Face login failed", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: e.message || "Face login failed",
+        variant: "destructive",
+      });
       setFaceDetected(false);
     }
     setLoading(false);
@@ -179,11 +226,18 @@ export default function AuthPage() {
     const fd = new FormData(e.currentTarget);
     setLoading(true);
     try {
-      const res = await login(fd.get("email") as string, fd.get("password") as string);
+      const res = await login(
+        fd.get("email") as string,
+        fd.get("password") as string,
+      );
       toast({ title: `Welcome back, ${(res as any).user.firstName}! 🎉` });
       navigate("/");
     } catch (err: any) {
-      toast({ title: "Login failed", description: err.message, variant: "destructive" });
+      toast({
+        title: "Login failed",
+        description: err.message,
+        variant: "destructive",
+      });
     }
     setLoading(false);
   }
@@ -198,7 +252,11 @@ export default function AuthPage() {
     }
     if (!isPasswordValid(password)) {
       setShowPasswordChecks(true);
-      toast({ title: "Password too weak", description: "Please meet all the password requirements below.", variant: "destructive" });
+      toast({
+        title: "Password too weak",
+        description: "Please meet all the password requirements below.",
+        variant: "destructive",
+      });
       return;
     }
     setLoading(true);
@@ -211,33 +269,64 @@ export default function AuthPage() {
         lastName: fd.get("lastName"),
         role: "student",
       });
-      toast({ title: `Account created! Welcome, ${(res as any).user.firstName}! 🎉` });
+      toast({
+        title: `Account created! Welcome, ${(res as any).user.firstName}! 🎉`,
+      });
       navigate("/");
     } catch (err: any) {
-      toast({ title: "Registration failed", description: err.message, variant: "destructive" });
+      toast({
+        title: "Registration failed",
+        description: err.message,
+        variant: "destructive",
+      });
     }
     setLoading(false);
   }
 
   return (
-    <div className="min-h-screen flex" style={{ background: "linear-gradient(135deg, #0DA2E7 0%, #0ebaff 55%, #26d0ce 100%)" }}>
+    <div
+      className="min-h-screen flex"
+      style={{
+        background:
+          "linear-gradient(135deg, #0DA2E7 0%, #0ebaff 55%, #26d0ce 100%)",
+      }}
+    >
       {/* Left panel — visible on desktop */}
       <div className="hidden lg:flex flex-col justify-center px-16 w-[52%] relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none"
-             style={{ backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.13) 1.5px, transparent 1.5px)", backgroundSize: "28px 28px" }} />
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle, rgba(255,255,255,0.13) 1.5px, transparent 1.5px)",
+            backgroundSize: "28px 28px",
+          }}
+        />
         <div className="absolute -top-24 -left-24 w-72 h-72 rounded-full bg-white/10 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-16 -right-16 w-56 h-56 rounded-full bg-white/10 blur-2xl pointer-events-none" />
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-10">
-            <img src="/logo.png" alt="Kiddo-Vision" className="w-12 h-12 rounded-2xl object-contain shadow-lg" />
-            <span className="font-heading text-white text-3xl">Kiddo-Vision</span>
+            <img
+              src="/logo.png"
+              alt="Kiddo-Vision"
+              className="w-12 h-12 rounded-2xl object-contain shadow-lg"
+            />
+            <span className="font-heading text-white text-3xl">
+              Kiddo-Vision
+            </span>
           </div>
-          <h2 className="font-heading text-5xl text-white leading-tight mb-5"
-              style={{ textShadow: "0 2px 8px rgba(0,0,0,0.12)" }}>
-            Learn.<br />Play.<br />Grow.
+          <h2
+            className="font-heading text-5xl text-white leading-tight mb-5"
+            style={{ textShadow: "0 2px 8px rgba(0,0,0,0.12)" }}
+          >
+            Learn.
+            <br />
+            Play.
+            <br />
+            Grow.
           </h2>
           <p className="text-white/80 text-lg leading-relaxed max-w-xs">
-            An interactive learning platform with AI-powered quizzes, hand-tracking games, and structured courses for students.
+            An interactive learning platform with AI-powered quizzes,
+            hand-tracking games, and structured courses for students.
           </p>
           <div className="mt-10 grid grid-cols-3 gap-4">
             {[
@@ -245,9 +334,14 @@ export default function AuthPage() {
               { icon: "🤖", label: "AI Quizzes" },
               { icon: "🎮", label: "Hand Tracking" },
             ].map((f) => (
-              <div key={f.label} className="bg-white/15 backdrop-blur-sm rounded-2xl p-3 border border-white/20 text-center">
+              <div
+                key={f.label}
+                className="bg-white/15 backdrop-blur-sm rounded-2xl p-3 border border-white/20 text-center"
+              >
                 <div className="text-2xl mb-1">{f.icon}</div>
-                <div className="text-white/80 text-xs font-semibold leading-tight">{f.label}</div>
+                <div className="text-white/80 text-xs font-semibold leading-tight">
+                  {f.label}
+                </div>
               </div>
             ))}
           </div>
@@ -263,20 +357,31 @@ export default function AuthPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center mb-8 lg:hidden"
           >
-            <img src="/logo.png" alt="Kiddo-Vision" className="w-16 h-16 rounded-2xl object-contain shadow-xl mx-auto mb-3" />
+            <img
+              src="/logo.png"
+              alt="Kiddo-Vision"
+              className="w-16 h-16 rounded-2xl object-contain shadow-xl mx-auto mb-3"
+            />
             <h1 className="font-heading text-4xl text-white">Kiddo-Vision</h1>
             <p className="text-white/80 text-sm mt-1">Learn. Play. Grow.</p>
           </motion.div>
 
-          <Card className="shadow-2xl border-0 overflow-hidden rounded-3xl"
-                style={{ boxShadow: "0 24px 64px rgba(0,0,0,0.18), 0 8px 24px rgba(0,0,0,0.10)" }}>
+          <Card
+            className="shadow-2xl border-0 overflow-hidden rounded-3xl"
+            style={{
+              boxShadow:
+                "0 24px 64px rgba(0,0,0,0.18), 0 8px 24px rgba(0,0,0,0.10)",
+            }}
+          >
             <div className="kid-gradient px-5 pt-5 pb-4">
               <div className="flex gap-2 justify-center">
-                {([
-                  { key: "login", label: "🔑 Login" },
-                  { key: "register", label: "✨ Sign Up" },
-                  { key: "face", label: "😊 Face" },
-                ] as { key: Mode; label: string }[]).map(({ key, label }) => (
+                {(
+                  [
+                    { key: "login", label: "🔑 Login" },
+                    { key: "register", label: "✨ Sign Up" },
+                    { key: "face", label: "😊 Face" },
+                  ] as { key: Mode; label: string }[]
+                ).map(({ key, label }) => (
                   <button
                     key={key}
                     onClick={() => handleModeSwitch(key)}
@@ -305,18 +410,48 @@ export default function AuthPage() {
                   >
                     <div>
                       <Label htmlFor="email">Email</Label>
-                      <Input id="email" name="email" type="email" required placeholder="you@example.com" />
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        required
+                        placeholder="you@example.com"
+                      />
                     </div>
                     <div>
                       <Label htmlFor="password">Password</Label>
-                      <Input id="password" name="password" type="password" required placeholder="Your password" />
+                      <div className="relative">
+                        <Input
+                          id="password"
+                          name="password"
+                          type={showLoginPwd ? "text" : "password"}
+                          required
+                          placeholder="Your password"
+                          className="pr-10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowLoginPwd((v) => !v)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {showLoginPwd ? "🙈" : "👁️"}
+                        </button>
+                      </div>
                     </div>
-                    <Button type="submit" className="w-full kid-gradient text-white font-bold" disabled={loading}>
+                    <Button
+                      type="submit"
+                      className="w-full kid-gradient text-white font-bold"
+                      disabled={loading}
+                    >
                       {loading ? "Logging in..." : "🚀 Let's Go!"}
                     </Button>
                     <p className="text-center text-xs text-muted-foreground">
                       Want to login with your face?{" "}
-                      <button type="button" className="text-primary font-semibold underline" onClick={() => handleModeSwitch("face")}>
+                      <button
+                        type="button"
+                        className="text-primary font-semibold underline"
+                        onClick={() => handleModeSwitch("face")}
+                      >
                         Try Face Login 😊
                       </button>
                     </p>
@@ -335,40 +470,96 @@ export default function AuthPage() {
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <Label htmlFor="firstName">First Name</Label>
-                        <Input id="firstName" name="firstName" required placeholder="Alex" />
+                        <Input
+                          id="firstName"
+                          name="firstName"
+                          required
+                          placeholder="Alex"
+                        />
                       </div>
                       <div>
                         <Label htmlFor="lastName">Last Name</Label>
-                        <Input id="lastName" name="lastName" required placeholder="Smith" />
+                        <Input
+                          id="lastName"
+                          name="lastName"
+                          required
+                          placeholder="Smith"
+                        />
                       </div>
                     </div>
                     <div>
                       <Label htmlFor="username">Username</Label>
-                      <Input id="username" name="username" required placeholder="coolkid123" />
+                      <Input
+                        id="username"
+                        name="username"
+                        required
+                        placeholder="coolkid123"
+                      />
                     </div>
                     <div>
                       <Label htmlFor="email-reg">Email</Label>
-                      <Input id="email-reg" name="email" type="email" required placeholder="you@example.com" />
+                      <Input
+                        id="email-reg"
+                        name="email"
+                        type="email"
+                        required
+                        placeholder="you@example.com"
+                      />
                     </div>
                     <div>
                       <Label htmlFor="password-reg">Password</Label>
-                      <Input
-                        id="password-reg"
-                        name="password"
-                        type="password"
-                        required
-                        placeholder="Min 12 chars, mixed case + numbers"
-                        value={regPassword}
-                        onChange={(e) => { setRegPassword(e.target.value); setShowPasswordChecks(true); }}
-                        onFocus={() => setShowPasswordChecks(true)}
-                      />
-                      {showPasswordChecks && <PasswordStrengthMeter password={regPassword} />}
+                      <div className="relative">
+                        <Input
+                          id="password-reg"
+                          name="password"
+                          type={showRegPwd ? "text" : "password"}
+                          required
+                          placeholder="Min 12 chars, mixed case + numbers"
+                          value={regPassword}
+                          onChange={(e) => {
+                            setRegPassword(e.target.value);
+                            setShowPasswordChecks(true);
+                          }}
+                          onFocus={() => setShowPasswordChecks(true)}
+                          className="pr-10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowRegPwd((v) => !v)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {showRegPwd ? "🙈" : "👁️"}
+                        </button>
+                      </div>
+                      {showPasswordChecks && (
+                        <PasswordStrengthMeter password={regPassword} />
+                      )}
                     </div>
                     <div>
                       <Label htmlFor="confirmPassword">Confirm Password</Label>
-                      <Input id="confirmPassword" name="confirmPassword" type="password" required placeholder="Same as above" />
+                      <div className="relative">
+                        <Input
+                          id="confirmPassword"
+                          name="confirmPassword"
+                          type={showConfirmPwd ? "text" : "password"}
+                          required
+                          placeholder="Same as above"
+                          className="pr-10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPwd((v) => !v)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {showConfirmPwd ? "🙈" : "👁️"}
+                        </button>
+                      </div>
                     </div>
-                    <Button type="submit" className="w-full kid-gradient text-white font-bold" disabled={loading}>
+                    <Button
+                      type="submit"
+                      className="w-full kid-gradient text-white font-bold"
+                      disabled={loading}
+                    >
                       {loading ? "Creating account..." : "✨ Create Account!"}
                     </Button>
                   </motion.form>
@@ -395,16 +586,24 @@ export default function AuthPage() {
                       )}
                       {(!faceModelsLoaded || !detecting) && (
                         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 text-white text-sm gap-2">
-                          <span className="text-3xl">{faceModelsLoading ? "⏳" : "😊"}</span>
-                          <span className="font-semibold">
-                            {faceModelsLoading ? "Loading face recognition..." : "Starting camera..."}
+                          <span className="text-3xl">
+                            {faceModelsLoading ? "⏳" : "😊"}
                           </span>
-                          <span className="text-white/70 text-xs">This may take a few seconds</span>
+                          <span className="font-semibold">
+                            {faceModelsLoading
+                              ? "Loading face recognition..."
+                              : "Starting camera..."}
+                          </span>
+                          <span className="text-white/70 text-xs">
+                            This may take a few seconds
+                          </span>
                         </div>
                       )}
                     </div>
                     <div className="bg-blue-50 rounded-xl px-4 py-3 text-left">
-                      <p className="text-sm font-semibold text-blue-800 mb-1">📋 How it works:</p>
+                      <p className="text-sm font-semibold text-blue-800 mb-1">
+                        📋 How it works:
+                      </p>
                       <ol className="text-xs text-blue-700 space-y-0.5 list-decimal list-inside">
                         <li>Look directly at the camera</li>
                         <li>Make sure your face is well-lit</li>
@@ -416,11 +615,20 @@ export default function AuthPage() {
                       className="w-full kid-gradient text-white font-bold"
                       disabled={loading || !faceModelsLoaded || !detecting}
                     >
-                      {loading ? "Scanning..." : faceModelsLoading ? "Loading models..." : !detecting ? "Starting camera..." : "😊 Recognize Me!"}
+                      {loading
+                        ? "Scanning..."
+                        : faceModelsLoading
+                          ? "Loading models..."
+                          : !detecting
+                            ? "Starting camera..."
+                            : "😊 Recognize Me!"}
                     </Button>
                     <p className="text-xs text-muted-foreground">
                       First time? Register your face in{" "}
-                      <span className="font-semibold text-primary">Profile Settings</span> after logging in.
+                      <span className="font-semibold text-primary">
+                        Profile Settings
+                      </span>{" "}
+                      after logging in.
                     </p>
                   </motion.div>
                 )}
